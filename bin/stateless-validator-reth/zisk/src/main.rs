@@ -3,11 +3,11 @@
 #![no_main]
 
 use ere_platform_zisk::{ZiskPlatform, ziskos};
-use reth_guest::guest::{Guest, RethStatelessValidatorGuest};
+use stateless_validator_reth::guest::{Guest, StatelessValidatorRethGuest};
 
 ziskos::entrypoint!(main);
 
 /// Entry point.
 pub fn main() {
-    RethStatelessValidatorGuest::run_output_sha256::<ZiskPlatform>();
+    StatelessValidatorRethGuest::run_output_sha256::<ZiskPlatform>();
 }

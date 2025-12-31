@@ -8,11 +8,11 @@
 #![feature(generic_const_exprs)]
 
 use ere_platform_airbender::AirbenderPlatform;
-use reth_guest::guest::{Guest, RethStatelessValidatorGuest};
+use stateless_validator_reth::guest::{Guest, StatelessValidatorRethGuest};
 
 mod airbender_rt;
 
 /// Entry point.
 pub fn main() {
-    RethStatelessValidatorGuest::run_output_sha256::<AirbenderPlatform>();
+    StatelessValidatorRethGuest::run_output_sha256::<AirbenderPlatform>();
 }

@@ -1,30 +1,26 @@
+[workspace]
+
 [package]
-name = "reth-airbender-stateless-validator"
-version.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-license.workspace = true
+name = "stateless-validator-reth-airbender"
+version = "0.1.0"
+edition = "2024"
 
 [dependencies]
-ere-platform-airbender = { workspace = true, features = ["custom_allocator"] }
-reth-guest.workspace = true
-guest-libs.workspace = true
+# enable features
+alloy-primitives = { version = "1.4.1", default-features = false, features = ["map-foldhash", "sha3-keccak"] }
+revm = { version = "33.1.0", default-features = false, features = ["bn"] }
+reth-stateless = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false, features = ["k256"] }
 
-reth-stateless = { workspace = true, features = ["k256"] }
-reth-ethereum-primitives = { workspace = true, features = [
-    "serde",
-    "serde-bincode-compat",
-] }
-reth-primitives-traits = { workspace = true, features = [
-    "serde",
-    "serde-bincode-compat",
-] }
+# ere
+ere-platform-airbender = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac", features = ["custom_allocator"] }
 
-revm = { workspace = true, default-features = false, features = ["bn"] }
-alloy-primitives = { workspace = true, default-features = false, features = [
-    "map-foldhash",
-    "serde",
-    "sha3-keccak",
-] }
-k256.workspace = true
-sha2.workspace = true
+# local
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", default-features = false }
+
+[patch.crates-io]
+radium = { git = "https://github.com/han0110/radium", branch = "feature/riscv32ima" }
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = "s"

@@ -1,42 +1,55 @@
+[workspace]
+
 [package]
-name = "reth-openvm-stateless-validator"
+name = "stateless-validator-reth-openvm"
 version = "0.1.0"
-edition = "2021"
-rust-version = "1.86"
-license = "MIT OR Apache-2.0"
+edition = "2024"
 
 [dependencies]
-ere-platform-openvm = { workspace = true, features = ["std"] }
-openvm = { workspace = true, features = ["std"] }
-openvm-algebra-guest = { workspace = true }
-openvm-ecc-guest = { workspace = true }
-openvm-k256 = { workspace = true }
-openvm-keccak256 = { workspace = true }
-openvm-kzg = { workspace = true, features = ["use-intrinsics"] }
-openvm-p256 = { workspace = true }
-openvm-pairing = { workspace = true, features = ["bn254", "bls12_381"] }
-openvm-sha2 = { workspace = true }
+# enable features
+alloy-consensus = { version = "1.1.2", default-features = false, features = ["crypto-backend"] }
+alloy-primitives = { version = "1.4.1", default-features = false, features = ["map-hashbrown", "native-keccak"] }
 
-guest-libs.workspace = true
-reth-guest = { workspace = true, default-features = true }
+# revm
+revm = { version = "33.1.0", default-features = false }
 
-alloy-consensus = { workspace = true, features = ["crypto-backend"] }
-alloy-primitives = { workspace = true, features = ["native-keccak", "map-foldhash"] }
+# openvm
+openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", features = ["std"] }
+openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2" }
+openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2" }
+openvm-k256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", package = "k256" }
+openvm-keccak256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2" }
+openvm-p256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", package = "p256" }
+openvm-pairing = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", features = ["bn254", "bls12_381"] }
+openvm-sha2 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2" }
+openvm-kzg = { git = "https://github.com/axiom-crypto/openvm-kzg.git", rev = "530a6ed413def5296b7e4967650ba4fc8fd92ea1", default-features = false, features = ["use-intrinsics"] }
 
-revm.workspace = true
-revm-primitives = { workspace = true, features = ["hashbrown"] }
+# ere
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac", features = ["std"] }
 
-reth-stateless.workspace = true
-reth-ethereum-primitives = { workspace = true, features = [
-    "serde",
-    "serde-bincode-compat",
-] }
-reth-primitives-traits = { workspace = true, features = [
-    "serde",
-    "serde-bincode-compat",
-] }
+# local
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
 
+[patch."https://github.com/openvm-org/openvm.git"]
+openvm = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-algebra-complex-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-algebra-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-algebra-moduli-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-custom-insn = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-ecc-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-ecc-sw-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-k256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2", package = "k256" }
+openvm-keccak256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-keccak256-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-macros-common = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-p256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2", package = "p256" }
+openvm-pairing = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-pairing-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-platform = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-rv32im-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-sha2 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm-sha256-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
 
-sha2.workspace = true
-k256.workspace = true
-bincode.workspace = true
+[profile.release]
+codegen-units = 1
+lto = "fat"

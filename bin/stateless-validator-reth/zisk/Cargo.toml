@@ -1,31 +1,34 @@
+[workspace]
+
 [package]
-name = "reth-zisk-stateless-validator"
-version.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-license.workspace = true
+name = "stateless-validator-reth-zisk"
+version = "0.1.0"
+edition = "2024"
 
 [dependencies]
-ere-platform-zisk.workspace = true
-reth-guest = { workspace = true, default-features = true }
-guest-libs.workspace = true
+# enable features
+alloy-primitives = { version = "1.4.1", default-features = false, features = ["map-foldhash", "sha3-keccak"] }
+revm = { version = "33.1.0", default-features = false, features = ["bn"] }
 
-reth-stateless.workspace = true
-reth-ethereum-primitives = { workspace = true, features = [
-    "serde",
-    "serde-bincode-compat",
-] }
-reth-primitives-traits = { workspace = true, features = [
-    "serde",
-    "serde-bincode-compat",
-] }
+# ere
+ere-platform-zisk = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }
 
-revm = { workspace = true, default-features = false, features = ["bn"] }
-alloy-primitives = { workspace = true, default-features = false, features = [
-    "map-foldhash",
-    "serde",
-    "sha3-keccak",
-] }
-k256.workspace = true
-bincode.workspace = true
-sha2.workspace = true
+# local
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", default-features = true }
+
+# Copied from https://github.com/0xPolygonHermez/zisk-eth-client/blob/main/bin/client/rsp/Cargo.toml
+[patch.crates-io]
+sha2 = { git = "https://github.com/0xPolygonHermez/zisk-patch-hashes.git", tag = "patch-sha2-0.10.9-zisk-0.15.0" }
+sha3 = { git = "https://github.com/0xPolygonHermez/zisk-patch-hashes.git", tag = "patch-sha3-0.10.8-zisk-0.15.0" }
+k256 = { git = "https://github.com/0xPolygonHermez/zisk-patch-elliptic-curves.git", tag = "patch-k256-0.13.4-zisk-0.15.0" }
+substrate-bn = { git = "https://github.com/0xPolygonHermez/zisk-patch-bn.git", tag = "patch-0.6.0-zisk-0.15.0" }
+ark-bls12-381 = { git = "https://github.com/0xPolygonHermez/zisk-patch-ark-algebra.git", tag = "patch-0.5.0-zisk-0.15.0" }
+ark-ec = { git = "https://github.com/0xPolygonHermez/zisk-patch-ark-algebra.git", tag = "patch-0.5.0-zisk-0.15.0" }
+ark-ff = { git = "https://github.com/0xPolygonHermez/zisk-patch-ark-algebra.git", tag = "patch-0.5.0-zisk-0.15.0" }
+ark-bn254 = { git = "https://github.com/0xPolygonHermez/zisk-patch-ark-algebra.git", tag = "patch-0.5.0-zisk-0.15.0" }
+ark-serialize = { git = "https://github.com/0xPolygonHermez/zisk-patch-ark-algebra.git", tag = "patch-0.5.0-zisk-0.15.0" }
+aurora-engine-modexp = { git = "https://github.com/0xPolygonHermez/zisk-patch-modexp.git", tag = "patch-1.2.0-zisk-0.15.0" }
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
