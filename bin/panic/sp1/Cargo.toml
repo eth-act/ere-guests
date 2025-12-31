@@ -1,9 +1,9 @@
+[workspace]
+
 [package]
-name = "succinct-panic-guest"
+name = "panic-sp1"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.85"
-license = "MIT OR Apache-2.0"
 
 [dependencies]
-ere-platform-sp1.workspace = true
+ere-platform-sp1 = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }

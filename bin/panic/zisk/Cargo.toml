@@ -1,12 +1,9 @@
+[workspace]
+
 [package]
-name = "zisk-panic-guest"
-version.workspace = true
-edition.workspace = true
-rust-version.workspace = true
-license.workspace = true
+name = "panic-zisk"
+version = "0.1.0"
+edition = "2024"
 
 [dependencies]
-ere-platform-zisk.workspace = true
-
-[lints]
-workspace = true
+ere-platform-zisk = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }

@@ -1,11 +1,9 @@
+[workspace]
+
 [package]
-name = "openvm-panic-guest"
+name = "panic-openvm"
 version = "0.1.0"
-edition = "2021"
-rust-version = "1.86"
-license = "MIT OR Apache-2.0"
+edition = "2024"
 
 [dependencies]
-openvm = { workspace = true, features = ["std"] }
-openvm-algebra-guest.workspace = true
-openvm-ecc-guest.workspace = true
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac", features = ["std"] }
