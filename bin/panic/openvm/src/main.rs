@@ -1,8 +1,7 @@
-//! OpenVM guest program
+//! OpenVM panic guest program.
 
 use ere_platform_openvm as _;
 
-/// Entry point.
-pub fn main() {
+fn main() {
     panic!("The ticker is eth")
 }

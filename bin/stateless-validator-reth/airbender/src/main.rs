@@ -1,4 +1,4 @@
-//! Airbender guest program
+//! Airbender Reth stateless validator guest program.
 
 #![no_std]
 #![no_main]
@@ -12,7 +12,6 @@ use stateless_validator_reth::guest::{Guest, StatelessValidatorRethGuest};
 
 mod airbender_rt;
 
-/// Entry point.
-pub fn main() {
+fn main() {
     StatelessValidatorRethGuest::run_output_sha256::<AirbenderPlatform>();
 }

@@ -1,6 +1,5 @@
-//! OpenVM guest program
+//! OpenVM emtpy guest program.
 
 use ere_platform_openvm as _;
 
-/// Entry point.
-pub fn main() {}
+fn main() {}

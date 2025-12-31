@@ -1,4 +1,4 @@
-//! ZisK guest program
+//! ZisK Reth stateless validator guest program.
 
 #![no_main]
 
@@ -7,7 +7,6 @@ use stateless_validator_reth::guest::{Guest, StatelessValidatorRethGuest};
 
 ziskos::entrypoint!(main);
 
-/// Entry point.
-pub fn main() {
+fn main() {
     StatelessValidatorRethGuest::run_output_sha256::<ZiskPlatform>();
 }
