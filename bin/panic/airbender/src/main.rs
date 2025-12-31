@@ -1,0 +1,13 @@
+//! Airbender panic guest program.
+
+#![no_std]
+#![no_main]
+#![no_builtins]
+
+use ere_platform_airbender as _;
+
+mod airbender_rt;
+
+fn main() {
+    panic!("The ticker is eth")
+}

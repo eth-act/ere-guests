@@ -1,0 +1,9 @@
+[workspace]
+
+[package]
+name = "panic-airbender"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ere-platform-airbender = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }

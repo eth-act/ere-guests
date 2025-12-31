@@ -1,0 +1,18 @@
+[workspace]
+
+[package]
+name = "block-encoding-length-airbender"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# ere
+ere-platform-airbender = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac", features = ["custom_allocator"] }
+
+# local
+block-encoding-length = { path = "../../../crates/block-encoding-length", default-features = false }
+
+[patch.crates-io]
+radium = { git = "https://github.com/han0110/radium", branch = "feature/riscv32ima" }
+ethereum_ssz_derive = { git = "https://github.com/han0110/ethereum_ssz", branch = "feature/no-std" }
+ethereum_ssz = { git = "https://github.com/han0110/ethereum_ssz", branch = "feature/no-std" }

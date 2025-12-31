@@ -1,0 +1,13 @@
+[workspace]
+
+[package]
+name = "block-encoding-length-openvm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# ere
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac", features = ["std"] }
+
+# local
+block-encoding-length = { path = "../../../crates/block-encoding-length" }
