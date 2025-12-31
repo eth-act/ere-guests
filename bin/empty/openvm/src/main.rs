@@ -1,6 +1,6 @@
 //! OpenVM guest program
 
-openvm::init!();
+use ere_platform_openvm as _;
 
 /// Entry point.
 pub fn main() {}
