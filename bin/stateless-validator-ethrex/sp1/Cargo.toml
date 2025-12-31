@@ -1,19 +1,16 @@
-[package]
-version = "0.1.0"
-name = "ethrex-sp1-stateless-validator"
-edition = "2024"
-
 [workspace]
 
-[dependencies]
-ere-platform-sp1 = { git = "https://github.com/eth-applied-research-group/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac", default-features = false }
-ethrex-guest = { path = "../guest", features = ["std"] }
+[package]
+name = "stateless-validator-ethrex-sp1"
+edition = "2024"
+version = "0.1.0"
 
-k256 = "0.13"
-guest_program = { git = "https://github.com/lambdaclass/ethrex.git", rev = "e6d70854d0fe3b0f29ed8961e5cbfc5de7bdd7d1" }
-ethrex-vm = { git = "https://github.com/lambdaclass/ethrex.git", rev = "e6d70854d0fe3b0f29ed8961e5cbfc5de7bdd7d1", default-features = false, features = [
-    "sp1",
-] }
+[dependencies]
+# ere
+ere-platform-sp1 = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }
+
+# local
+stateless-validator-ethrex = { path = "../../../crates/stateless-validator-ethrex", features = ["std", "sp1"] }
 
 [patch.crates-io]
 sha2-v0-10-9 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", tag = "patch-sha2-0.10.9-sp1-4.0.0" }
@@ -30,4 +27,8 @@ substrate-bn = { git = "https://github.com/sp1-patches/bn", tag = "patch-0.6.0-s
 bls12_381 = { git = "https://github.com/lambdaclass/bls12_381-patch/", branch = "expose-fp-struct" }
 
 [features]
-l2 = ["guest_program/l2", "ere-platform-sp1/embedded"]
+l2 = ["stateless-validator-ethrex/l2", "ere-platform-sp1/embedded"]
+
+[profile.release]
+codegen-units = 1
+lto = "fat"

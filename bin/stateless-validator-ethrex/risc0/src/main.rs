@@ -1,6 +1,6 @@
 use ere_platform_risc0::Risc0Platform;
-use ethrex_guest::guest::{EthrexStatelessValidatorGuest, Guest};
+use stateless_validator_ethrex::guest::{Guest, StatelessValidatorEthrexGuest};
 
 pub fn main() {
-    EthrexStatelessValidatorGuest::run_output_sha256::<Risc0Platform>();
+    StatelessValidatorEthrexGuest::run_output_sha256::<Risc0Platform>();
 }

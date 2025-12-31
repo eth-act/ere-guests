@@ -1,10 +1,10 @@
 #![no_main]
 
-use ere_platform_zisk::{ziskos, ZiskPlatform};
-use ethrex_guest::guest::{EthrexStatelessValidatorGuest, Guest};
+use ere_platform_zisk::{ZiskPlatform, ziskos};
+use stateless_validator_ethrex::guest::{Guest, StatelessValidatorEthrexGuest};
 
 ziskos::entrypoint!(main);
 
 pub fn main() {
-    EthrexStatelessValidatorGuest::run_output_sha256::<ZiskPlatform>();
+    StatelessValidatorEthrexGuest::run_output_sha256::<ZiskPlatform>();
 }

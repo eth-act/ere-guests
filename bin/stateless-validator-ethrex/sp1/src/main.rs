@@ -1,10 +1,10 @@
 #![no_main]
 
-use ere_platform_sp1::{sp1_zkvm, SP1Platform};
-use ethrex_guest::guest::{EthrexStatelessValidatorGuest, Guest};
+use ere_platform_sp1::{SP1Platform, sp1_zkvm};
+use stateless_validator_ethrex::guest::{Guest, StatelessValidatorEthrexGuest};
 
 sp1_zkvm::entrypoint!(main);
 
 pub fn main() {
-    EthrexStatelessValidatorGuest::run_output_sha256::<SP1Platform>();
+    StatelessValidatorEthrexGuest::run_output_sha256::<SP1Platform>();
 }
