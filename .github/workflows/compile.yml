@@ -1,0 +1,148 @@
+name: Compile and Release Compiled Guests
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write
+
+jobs:
+  compile:
+    name: Compile ${{ matrix.guest }}-${{ matrix.zkvm }}
+    runs-on: ubuntu-latest
+    outputs:
+      ere_tag: ${{ steps.get_ere_tag.outputs.ere_tag }}
+    strategy:
+      fail-fast: false
+      matrix:
+        guest:
+          - block-encoding-length
+          - empty
+          - panic
+          - stateless-validator-ethrex
+          - stateless-validator-reth
+        zkvm:
+          - airbender
+          - openvm
+          - pico
+          - risc0
+          - sp1
+          - zisk
+        exclude:
+          - guest: stateless-validator-ethrex
+            zkvm: airbender
+          - guest: stateless-validator-ethrex
+            zkvm: openvm
+          - guest: stateless-validator-ethrex
+            zkvm: pico
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Get Ere tag
+        id: get_ere_tag
+        run: |
+          ERE_TAG=$(cargo tree -p ere-platform-trait | head -n 1 | sed -E 's/ere-platform-trait v([0-9.]+) \(.*#([a-f0-9]{7}).*/\1-\2/')
+          echo "ere_tag=${ERE_TAG}" >> $GITHUB_OUTPUT
+          echo "Ere tag: ${ERE_TAG}"
+
+      - name: Pull compiler image
+        run: |
+          docker pull ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
+
+      - name: Check for unused [patch] entries
+        shell: bash
+        run: |
+          set -euo pipefail
+          WARNING=$(cargo tree --manifest-path ./bin/${{ matrix.guest }}/${{ matrix.zkvm }}/Cargo.toml 2>&1 | grep -F "was not used in the crate graph" || true)
+          if [ -n "$WARNING" ]; then
+            echo "$WARNING"
+            exit 1
+          fi
+
+      - name: Compile guest
+        run: |
+          docker run \
+            -v $PWD:/ere-guests \
+            -v $PWD/output:/output \
+            ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
+            --compiler-kind rust-customized \
+            --guest-path /ere-guests/bin/${{ matrix.guest }}/${{ matrix.zkvm }} \
+            --output-path /output/${{ matrix.guest }}-${{ matrix.zkvm }}
+
+      - name: Upload artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.guest }}-${{ matrix.zkvm }}
+          path: output/${{ matrix.guest }}-${{ matrix.zkvm }}
+          if-no-files-found: error
+
+  create-release:
+    name: Create release
+    needs: compile
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Generate release notes
+        run: |
+          echo "This release contains compiled guest programs for various zkVMs." > release-body.md
+          echo "" >> release-body.md
+          echo "Built with Ere compiler version: \`${{ needs.compile.outputs.ere_tag }}\`." >> release-body.md
+          echo "" >> release-body.md
+          echo "## Compiled guest programs" >> release-body.md
+          echo "" >> release-body.md
+
+          # Get unique guest names
+          declare -A guests
+          for file in artifacts/*; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              guest=$(echo "$filename" | sed 's/-[^-]*$//')
+              guests["$guest"]=1
+            fi
+          done
+
+          # Sort and group by guest
+          for guest in $(echo "${!guests[@]}" | tr ' ' '\n' | sort); do
+            echo "### $guest" >> release-body.md
+            echo "" >> release-body.md
+            for file in artifacts/$guest-*; do
+              if [ -f "$file" ]; then
+                filename=$(basename "$file")
+                echo "- [\`$filename\`](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$filename)" >> release-body.md
+              fi
+            done
+            echo "" >> release-body.md
+          done
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Compiled Guests (${{ github.ref_name }})
+          files: artifacts/*
+          body_path: release-body.md
