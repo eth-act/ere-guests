@@ -14,7 +14,7 @@ revm = { version = "33.1.0", default-features = false, features = ["bn"] }
 ere-platform-sp1 = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }
 
 # local
-stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", default-features = true }
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
 
 [patch.crates-io]
 sha2-v0-10-9 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", tag = "patch-sha2-0.10.9-sp1-4.0.0" }

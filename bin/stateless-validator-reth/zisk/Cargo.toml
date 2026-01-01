@@ -14,7 +14,7 @@ revm = { version = "33.1.0", default-features = false, features = ["bn"] }
 ere-platform-zisk = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }
 
 # local
-stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", default-features = true }
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
 
 # Copied from https://github.com/0xPolygonHermez/zisk-eth-client/blob/main/bin/client/rsp/Cargo.toml
 [patch.crates-io]

@@ -4794,6 +4794,7 @@ dependencies = [
  "reth-revm",
  "reth-trie-common",
  "reth-trie-sparse",
+ "secp256k1",
  "serde",
  "serde_with",
  "thiserror 2.0.16",

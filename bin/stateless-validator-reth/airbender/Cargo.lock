@@ -3399,7 +3399,6 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "ere-platform-airbender",
- "reth-stateless",
  "revm",
  "stateless-validator-reth",
 ]

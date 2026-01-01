@@ -24,9 +24,9 @@ reth-stateless = { workspace = true, optional = true }
 # ethrex
 ethrex-common.workspace = true
 ethrex-guest-program.workspace = true
-ethrex-vm.workspace = true
 ethrex-rlp = { workspace = true, optional = true }
 ethrex-rpc = { workspace = true, optional = true }
+ethrex-vm.workspace = true
 
 # ere
 ere-io = { workspace = true, features = ["rkyv"] }
@@ -36,8 +36,15 @@ ere-zkvm-interface = { workspace = true, optional = true }
 guest.workspace = true
 
 [features]
+# guest
 default = ["std"]
 std = []
+l2 = ["ethrex-guest-program/l2"]
+risc0 = ["ethrex-vm/risc0"]
+sp1 = ["ethrex-vm/sp1"]
+zisk = ["ethrex-vm/zisk"]
+
+# host
 host = [
     "std",
     "dep:anyhow",
@@ -50,7 +57,3 @@ host = [
     "dep:ethrex-rpc",
     "dep:ere-zkvm-interface",
 ]
-l2 = ["ethrex-guest-program/l2"]
-risc0 = ["ethrex-vm/risc0"]
-sp1 = ["ethrex-vm/sp1"]
-zisk = ["ethrex-vm/zisk"]

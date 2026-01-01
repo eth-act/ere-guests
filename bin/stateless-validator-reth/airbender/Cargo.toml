@@ -9,13 +9,12 @@ edition = "2024"
 # enable features
 alloy-primitives = { version = "1.4.1", default-features = false, features = ["map-foldhash", "sha3-keccak"] }
 revm = { version = "33.1.0", default-features = false, features = ["bn"] }
-reth-stateless = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false, features = ["k256"] }
 
 # ere
 ere-platform-airbender = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac", features = ["custom_allocator"] }
 
 # local
-stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", default-features = false }
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", default-features = false, features = ["k256"] }
 
 [patch.crates-io]
 radium = { git = "https://github.com/han0110/radium", branch = "feature/riscv32ima" }

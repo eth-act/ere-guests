@@ -37,6 +37,9 @@ guest.workspace = true
 serde_json.workspace = true
 
 [features]
+# guest
 default = ["std"]
 std = []
+
+# host
 host = ["std", "dep:anyhow", "dep:ere-zkvm-interface"]
