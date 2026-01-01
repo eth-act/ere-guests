@@ -9,17 +9,27 @@ version.workspace = true
 workspace = true
 
 [dependencies]
-ere-zkvm-interface.workspace = true
+sha2.workspace = true
+
+# ere
 ere-dockerized.workspace = true
+ere-io.workspace = true
+ere-zkvm-interface.workspace = true
+
+# local
+guest.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true
+
+# reth
+reth-stateless.workspace = true
 
 # ere
 ere-zkvm-interface.workspace = true
 ere-dockerized.workspace = true
 
 # local
-block-encoding-length = { workspace = true, features = ["std", "host"] }
-stateless-validator-ethrex = { workspace = true, features = ["std", "host"] }
-stateless-validator-reth = { workspace = true, features = ["std", "host"] }
+block-encoding-length = { workspace = true, default-features = true, features = ["host"] }
+stateless-validator-ethrex = { workspace = true, default-features = true, features = ["host"] }
+stateless-validator-reth = { workspace = true, default-features = true, features = ["host"] }

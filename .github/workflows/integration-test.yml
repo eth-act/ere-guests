@@ -60,6 +60,7 @@ jobs:
       - name: Pull compiler image
         run: |
           docker pull ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
+          docker pull ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
 
       - name: Test
         env:

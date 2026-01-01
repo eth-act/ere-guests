@@ -3148,8 +3148,12 @@ version = "0.1.0"
 dependencies = [
  "block-encoding-length",
  "ere-dockerized",
+ "ere-io",
  "ere-zkvm-interface",
+ "guest",
+ "reth-stateless",
  "serde_json",
+ "sha2",
  "stateless-validator-ethrex",
  "stateless-validator-reth",
 ]

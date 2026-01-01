@@ -1,36 +1,41 @@
 //! Execution tests for `panic` guest program
 
 use ere_dockerized::zkVMKind;
-use integration_tests::test_execution;
+use ere_zkvm_interface::{Input, zkVM};
+use integration_tests::compile_and_init_zkvm;
 
-const GUEST: &str = "panic";
+fn test_execution(zkvm_kind: zkVMKind) {
+    let zkvm = compile_and_init_zkvm("panic", zkvm_kind);
+
+    assert!(zkvm.execute(&Input::new()).is_err());
+}
 
 #[test]
 fn test_execution_airbender() {
-    test_execution(GUEST, zkVMKind::Airbender);
+    test_execution(zkVMKind::Airbender);
 }
 
 #[test]
 fn test_execution_openvm() {
-    test_execution(GUEST, zkVMKind::OpenVM);
+    test_execution(zkVMKind::OpenVM);
 }
 
 #[test]
 fn test_execution_pico() {
-    test_execution(GUEST, zkVMKind::Pico);
+    test_execution(zkVMKind::Pico);
 }
 
 #[test]
 fn test_execution_risc0() {
-    test_execution(GUEST, zkVMKind::Risc0);
+    test_execution(zkVMKind::Risc0);
 }
 
 #[test]
 fn test_execution_sp1() {
-    test_execution(GUEST, zkVMKind::SP1);
+    test_execution(zkVMKind::SP1);
 }
 
 #[test]
 fn test_execution_zisk() {
-    test_execution(GUEST, zkVMKind::Zisk);
+    test_execution(zkVMKind::Zisk);
 }
