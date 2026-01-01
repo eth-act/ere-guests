@@ -1,0 +1,25 @@
+[package]
+name = "integration-tests"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ere-zkvm-interface.workspace = true
+ere-dockerized.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+# ere
+ere-zkvm-interface.workspace = true
+ere-dockerized.workspace = true
+
+# local
+block-encoding-length.workspace = true
+stateless-validator-ethrex.workspace = true
+stateless-validator-reth.workspace = true

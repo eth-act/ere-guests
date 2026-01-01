@@ -24,7 +24,7 @@ reth-primitives-traits.workspace = true
 
 # ssz
 ethereum_ssz.workspace = true
-ethereum_ssz_derive = { workspace = true }
+ethereum_ssz_derive.workspace = true
 
 # ere
 ere-io = { workspace = true, features = ["bincode"] }

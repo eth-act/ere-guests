@@ -1,12 +1,15 @@
 [workspace]
 members = [
-    # # Guest utils
+    # Guest utils
     "crates/guest",
 
     # Guest libs
     "crates/block-encoding-length",
     "crates/stateless-validator-ethrex",
     "crates/stateless-validator-reth",
+
+    # Integration tests
+    "crates/integration-tests",
 ]
 resolver = "2"
 
@@ -70,6 +73,7 @@ ethereum_ssz_derive = "0.9"
 sparsestate = { git = "https://github.com/eth-act/zkvm-ethereum-mpt.git", tag = "v0.4.0" }
 
 # ere
+ere-dockerized = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }
 ere-io = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }
 ere-platform-trait = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }
 ere-zkvm-interface = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }
@@ -77,5 +81,5 @@ ere-zkvm-interface = { git = "https://github.com/eth-act/ere", rev = "73a760aa63
 # local
 guest = { path = "crates/guest", default-features = false }
 block-encoding-length = { path = "crates/block-encoding-length", default-features = false }
-stateless-validator-ethrex = { path = "crates/stateless-validator/ethrex", default-features = false }
-stateless-validator-reth = { path = "crates/stateless-validator/reth", default-features = false }
+stateless-validator-ethrex = { path = "crates/stateless-validator-ethrex", default-features = false }
+stateless-validator-reth = { path = "crates/stateless-validator-reth", default-features = false }
