@@ -7,8 +7,6 @@ on:
     tags:
       - 'v*'
   pull_request:
-    branches:
-      - main
 
 env:
   CARGO_TERM_COLOR: always
@@ -65,13 +63,15 @@ jobs:
 
       - name: Check for unused [patch] entries
         shell: bash
+        run: .github/scripts/check-unused-patch.sh ./bin/${{ matrix.guest }}/${{ matrix.zkvm }}/Cargo.toml
+
+      - name: Check for duplicate packages
+        shell: bash
         run: |
-          set -euo pipefail
-          WARNING=$(cargo tree --manifest-path ./bin/${{ matrix.guest }}/${{ matrix.zkvm }}/Cargo.toml 2>&1 | grep -F "was not used in the crate graph" || true)
-          if [ -n "$WARNING" ]; then
-            echo "$WARNING"
-            exit 1
-          fi
+          .github/scripts/check-duplicate-pkg.sh \
+            ./bin/${{ matrix.guest }}/${{ matrix.zkvm }}/Cargo.lock \
+            '^(alloy|ethrex|ere|reth|revm)' \
+            '^alloy-trie$' # Ignore alloy-trie, crate `mpt` depends on an older version but it's okay.
 
       - name: Compile guest
         run: |
