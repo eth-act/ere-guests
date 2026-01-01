@@ -66,4 +66,6 @@ jobs:
 
       - name: Compile to target riscv32imac-unknown-none-elf
         if: matrix.skip_compile_to_riscv32imac != true
-        run: cargo build --package ${{ matrix.crate }} --no-default-features --target riscv32imac-unknown-none-elf
+        run: |
+          rustup target add riscv32imac-unknown-none-elf
+          cargo build --package ${{ matrix.crate }} --no-default-features --target riscv32imac-unknown-none-elf
