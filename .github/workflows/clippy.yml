@@ -36,7 +36,7 @@ jobs:
           - block-encoding-length
           - stateless-validator-ethrex
           - stateless-validator-reth
-        exclude:
+        include:
           # ethereum_ssz is not no_std compatible
           - crate: block-encoding-length
             skip_compile_to_riscv32imac: true

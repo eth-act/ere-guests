@@ -21,11 +21,11 @@ else
 fi
 
 if [ -z "$MATCHING_PACKAGES" ]; then
-    echo "No packages matching pattern '$REGEX_PATTERN' found"
+    echo "No packages matching pattern found"
     exit 0
 fi
 
-echo "Checking packages matching pattern '$REGEX_PATTERN':"
+echo "Checking packages matching pattern:"
 echo "$MATCHING_PACKAGES" | tr '\n' ' '
 echo
 echo
