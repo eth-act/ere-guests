@@ -20,6 +20,6 @@ ere-zkvm-interface.workspace = true
 ere-dockerized.workspace = true
 
 # local
-block-encoding-length.workspace = true
-stateless-validator-ethrex.workspace = true
-stateless-validator-reth.workspace = true
+block-encoding-length = { workspace = true, features = ["std", "host"] }
+stateless-validator-ethrex = { workspace = true, features = ["std", "host"] }
+stateless-validator-reth = { workspace = true, features = ["std", "host"] }

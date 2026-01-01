@@ -50,16 +50,23 @@ jobs:
       fail-fast: false
       matrix:
         crate:
+          # Guest utils
           - guest
+          # Guest libs
           - block-encoding-length
           - stateless-validator-ethrex
           - stateless-validator-reth
+          # Integration tests
+          - integration-tests
         include:
           # ethereum_ssz is not no_std compatible
           - crate: block-encoding-length
             skip_compile_to_riscv32imac: true
           # ethrex is not no_std compatible
           - crate: stateless-validator-ethrex
+            skip_compile_to_riscv32imac: true
+          # integration-tests doesn't need to be compiled to riscv32imac
+          - crate: integration-tests
             skip_compile_to_riscv32imac: true
     steps:
       - name: Checkout code
@@ -69,6 +76,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+          targets: riscv32imac-unknown-none-elf
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
@@ -84,6 +92,4 @@ jobs:
 
       - name: Compile to target riscv32imac-unknown-none-elf
         if: matrix.skip_compile_to_riscv32imac != true
-        run: |
-          rustup target add riscv32imac-unknown-none-elf
-          cargo build --package ${{ matrix.crate }} --no-default-features --target riscv32imac-unknown-none-elf
+        run: cargo build --package ${{ matrix.crate }} --no-default-features --target riscv32imac-unknown-none-elf
