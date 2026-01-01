@@ -1,7 +1,7 @@
 //! Crypto Implementation
 
 use kzg_rs::{Bytes32, Bytes48};
-use revm::precompile::{interface::install_crypto, Crypto, PrecompileError};
+use revm::precompile::{Crypto, PrecompileError, interface::install_crypto};
 
 pub fn install_crypto_provider() {
     install_crypto(CryptoProvider);

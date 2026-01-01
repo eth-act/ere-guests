@@ -3,7 +3,7 @@
 #![no_main]
 
 use block_encoding_length::guest::{BlockEncodingLengthGuest, Guest};
-use ere_platform_zisk::{ziskos, ZiskPlatform};
+use ere_platform_zisk::{ZiskPlatform, ziskos};
 
 ziskos::entrypoint!(main);
 

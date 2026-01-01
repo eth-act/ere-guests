@@ -2,7 +2,7 @@
 
 #![no_main]
 
-use ere_platform_pico::{pico_sdk, PicoPlatform};
+use ere_platform_pico::{PicoPlatform, pico_sdk};
 use stateless_validator_reth::guest::{Guest, StatelessValidatorRethGuest};
 
 mod crypto;

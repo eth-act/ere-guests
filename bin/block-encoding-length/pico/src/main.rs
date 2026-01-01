@@ -3,7 +3,7 @@
 #![no_main]
 
 use block_encoding_length::guest::{BlockEncodingLengthGuest, Guest};
-use ere_platform_pico::{pico_sdk, PicoPlatform};
+use ere_platform_pico::{PicoPlatform, pico_sdk};
 
 pico_sdk::entrypoint!(main);
 
