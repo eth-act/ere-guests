@@ -11,11 +11,17 @@ env:
 
 jobs:
   test:
-    name: Test execution of guest program on ${{ matrix.zkvm }}
+    name: Test execution of ${{ matrix.guest }} on ${{ matrix.zkvm }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        guest:
+          - block-encoding-length
+          - empty
+          - panic
+          - stateless-validator-ethrex
+          - stateless-validator-reth
         zkvm:
           - airbender
           - openvm
@@ -23,6 +29,13 @@ jobs:
           - risc0
           - sp1
           - zisk
+        exclude:
+          - guest: stateless-validator-ethrex
+            zkvm: airbender
+          - guest: stateless-validator-ethrex
+            zkvm: openvm
+          - guest: stateless-validator-ethrex
+            zkvm: pico
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,6 +45,10 @@ jobs:
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            . -> target
+            bin/${{ matrix.guest }}/${{ matrix.zkvm }} -> target
 
       - name: Get Ere tag
         id: get_ere_tag
@@ -47,4 +64,7 @@ jobs:
       - name: Test
         env:
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
-        run: cargo test --tests -- ${{ matrix.zkvm }} --test-threads=1
+        run: |
+          cargo test --test ${{ matrix.guest }} -- ${{ matrix.zkvm }}
+
+          sudo chown -R $(id -u):$(id -g) bin/${{ matrix.guest }}/${{ matrix.zkvm }}/target || true
