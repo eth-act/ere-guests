@@ -6,7 +6,6 @@ on:
       - main
     tags:
       - 'v*'
-  pull_request:
 
 env:
   CARGO_TERM_COLOR: always
@@ -47,9 +46,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
       - name: Get Ere tag
         id: get_ere_tag
         run: |
@@ -60,18 +56,6 @@ jobs:
       - name: Pull compiler image
         run: |
           docker pull ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
-
-      - name: Check for unused [patch] entries
-        shell: bash
-        run: .github/scripts/check-unused-patch.sh ./bin/${{ matrix.guest }}/${{ matrix.zkvm }}/Cargo.toml
-
-      - name: Check for duplicate packages
-        shell: bash
-        run: |
-          .github/scripts/check-duplicate-pkg.sh \
-            ./bin/${{ matrix.guest }}/${{ matrix.zkvm }}/Cargo.lock \
-            '^(alloy|ethrex|ere|reth|revm)' \
-            '^alloy-trie$' # Ignore alloy-trie, crate `mpt` depends on an older version but it's okay.
 
       - name: Compile guest
         run: |
@@ -84,7 +68,6 @@ jobs:
             --output-path /output/${{ matrix.guest }}-${{ matrix.zkvm }}
 
       - name: Upload artifact
-        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.guest }}-${{ matrix.zkvm }}

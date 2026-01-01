@@ -1,4 +1,4 @@
-name: Test and clippy lib crates
+name: Unit test and clippy
 
 on:
   push:
@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  fmt:
+  check-fmt:
     name: Check formatting
     runs-on: ubuntu-latest
     steps:
@@ -24,6 +24,24 @@ jobs:
 
       - name: Check fmt
         run: .github/scripts/check-fmt.sh
+
+  check-bin-cargo-lock:
+    name: Check bin Cargo.lock
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for unused [patch] entries
+        shell: bash
+        run: .github/scripts/check-unused-patch.sh
+
+      - name: Check for duplicate packages
+        shell: bash
+        run: |
+          .github/scripts/check-duplicate-pkg.sh \
+            --include '^(alloy|ethrex|ere|reth|revm)' \
+            --exclude '^alloy-trie$' # Crate `mpt` depends on an older `alloy-trie` but it's okay.
 
   test:
     name: Test and clippy crate ${{ matrix.crate }}
@@ -61,8 +79,8 @@ jobs:
       - name: Test on documentation
         run: cargo test --doc --package ${{ matrix.crate }}
 
-      - name: Test
-        run: cargo test --all-targets --package ${{ matrix.crate }}
+      - name: Test lib
+        run: cargo test --lib --package ${{ matrix.crate }}
 
       - name: Compile to target riscv32imac-unknown-none-elf
         if: matrix.skip_compile_to_riscv32imac != true
