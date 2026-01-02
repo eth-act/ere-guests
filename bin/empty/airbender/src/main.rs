@@ -4,8 +4,10 @@
 #![no_main]
 #![no_builtins]
 
-use ere_platform_airbender as _;
+use ere_platform_airbender::riscv_common::zksync_os_finish_success;
 
 mod airbender_rt;
 
-fn main() {}
+fn main() {
+    zksync_os_finish_success(&[0; 8]);
+}
