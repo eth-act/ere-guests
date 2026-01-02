@@ -54,18 +54,6 @@ jobs:
             . -> target
             bin/${{ matrix.guest }}/${{ matrix.zkvm }} -> target
 
-      - name: Get Ere tag
-        id: get_ere_tag
-        run: |
-          ERE_TAG=$(cargo tree -p ere-platform-trait | head -n 1 | sed -E 's/ere-platform-trait v([0-9.]+) \(.*#([a-f0-9]{7}).*/\1-\2/')
-          echo "ere_tag=${ERE_TAG}" >> $GITHUB_OUTPUT
-          echo "Ere tag: ${ERE_TAG}"
-
-      - name: Pull compiler image
-        run: |
-          docker pull ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
-          docker pull ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
-
       - name: Test
         env:
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
