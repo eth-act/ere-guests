@@ -23,7 +23,7 @@ jobs:
           components: rustfmt
 
       - name: Check fmt
-        run: .github/scripts/check-fmt.sh
+        run: .github/scripts/cargo-fmt-all.sh --check
 
   check-bin-cargo-lock:
     name: Check bin Cargo.lock
@@ -31,6 +31,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: Check Cargo.lock is synced with Cargo.toml
+        shell: bash
+        run: .github/scripts/cargo-fetch-all.sh --locked
 
       - name: Check for unused [patch] entries
         shell: bash
