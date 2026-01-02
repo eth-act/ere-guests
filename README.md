@@ -48,10 +48,10 @@ Located in `bin/`, these are executable guest programs for various zkVMs:
 
 ### Formatting
 
-Check formatting of the workspace and all guest programs:
+Formatting of the workspace and all guest programs:
 
 ```bash
-.github/scripts/check-fmt.sh
+.github/scripts/cargo-fmt-all.sh
 ```
 
 ## License
