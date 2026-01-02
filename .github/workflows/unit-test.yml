@@ -25,8 +25,8 @@ jobs:
       - name: Check fmt
         run: .github/scripts/cargo-fmt-all.sh --check
 
-  check-bin-cargo-lock:
-    name: Check bin Cargo.lock
+  check-cargo-lock:
+    name: Check Cargo.lock
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -34,6 +34,9 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@nightly
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
 
       - name: Check Cargo.lock is synced with Cargo.toml
         shell: bash

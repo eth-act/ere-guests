@@ -40,6 +40,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Free up disk space
+        if: matrix.zkvm == 'zisk'
+        run: bash .github/scripts/free-up-disk-space.sh
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
