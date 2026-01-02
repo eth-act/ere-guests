@@ -62,7 +62,7 @@ dependencies = [
 [[package]]
 name = "ere-platform-trait"
 version = "0.0.16"
-source = "git+https://github.com/eth-act/ere?rev=73a760aa635d355e5cc581777cc7703fdf60a3ac#73a760aa635d355e5cc581777cc7703fdf60a3ac"
+source = "git+https://github.com/eth-act/ere?rev=ec75f8a26657ddbf7efc44cdb3167fff4f55fe27#ec75f8a26657ddbf7efc44cdb3167fff4f55fe27"
 dependencies = [
  "digest",
 ]
@@ -70,7 +70,7 @@ dependencies = [
 [[package]]
 name = "ere-platform-zisk"
 version = "0.0.16"
-source = "git+https://github.com/eth-act/ere?rev=73a760aa635d355e5cc581777cc7703fdf60a3ac#73a760aa635d355e5cc581777cc7703fdf60a3ac"
+source = "git+https://github.com/eth-act/ere?rev=ec75f8a26657ddbf7efc44cdb3167fff4f55fe27#ec75f8a26657ddbf7efc44cdb3167fff4f55fe27"
 dependencies = [
  "ere-platform-trait",
  "ziskos",

@@ -14,7 +14,7 @@ revm = { version = "33.1.0", default-features = false, features = ["bn"] }
 kzg-rs = { git = "https://github.com/brevis-network/kzg-rs", rev = "b93499a67494bc6d34e108032fd11d375fb886e0" }
 
 # ere
-ere-platform-pico = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac" }
+ere-platform-pico = { git = "https://github.com/eth-act/ere", rev = "ec75f8a26657ddbf7efc44cdb3167fff4f55fe27" }
 
 # local
 stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }

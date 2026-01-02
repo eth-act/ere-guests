@@ -10,7 +10,7 @@ version = "0.1.0"
 c-kzg = { version = "2.1.1", features = ["eip-7594"] }
 
 # ere
-ere-platform-risc0 = { git = "https://github.com/eth-act/ere", rev = "73a760aa635d355e5cc581777cc7703fdf60a3ac", features = [
+ere-platform-risc0 = { git = "https://github.com/eth-act/ere", rev = "ec75f8a26657ddbf7efc44cdb3167fff4f55fe27", features = [
     "std",
     "unstable",
     "getrandom",
