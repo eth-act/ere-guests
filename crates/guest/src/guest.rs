@@ -1,4 +1,4 @@
-//! This module provides trait for guest program abstraction, that can also be
+//! This mod provides trait for guest program abstraction, that can also be
 //! shared between Rust guest and host.
 
 use ere_io::Io;
@@ -14,7 +14,7 @@ pub trait Guest: Clone {
     ///
     /// This method takes the deserialized input and produces the output for the guest program.
     /// It is called by [`Guest::run`] after reading and deserializing the input.
-    fn compute<P: Platform>(input: <Self::Io as Io>::Input) -> <Self::Io as Io>::Output;
+    fn compute<P: Platform>(input: GuestInput<Self>) -> GuestOutput<Self>;
 
     /// Runs the complete guest program workflow: reads input, computes output, and writes output.
     ///
@@ -51,6 +51,3 @@ pub type GuestInput<G> = <GuestIo<G> as Io>::Input;
 
 /// Associated type `Output` of [`Guest::Io`].
 pub type GuestOutput<G> = <GuestIo<G> as Io>::Output;
-
-/// Associated type `Error` of [`Guest::Io`].
-pub type GuestError<G> = <GuestIo<G> as Io>::Error;

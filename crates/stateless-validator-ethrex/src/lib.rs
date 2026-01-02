@@ -1,0 +1,10 @@
+//! Stateless Ethrex guest
+
+#![cfg_attr(not(feature = "std"), no_std)]
+
+extern crate alloc;
+
+pub mod guest;
+
+#[cfg(feature = "host")]
+pub mod host;

@@ -2,6 +2,7 @@
 
 use alloc::format;
 use core::fmt::Debug;
+
 use ere_io::{
     Io,
     rkyv::{
@@ -9,28 +10,33 @@ use ere_io::{
         rkyv::{Archive, Deserialize, Serialize},
     },
 };
-use ere_platform_trait::Platform;
 use ethrex_common::types::block_execution_witness::ExecutionWitness;
 use ethrex_guest_program::{execution::execution_program, input::ProgramInput};
+use guest::Platform;
 
-pub use guest_libs::guest::Guest;
+#[rustfmt::skip]
+pub use guest::Guest;
 
 /// Input for the Ethrex stateless validator guest program.
 #[derive(Serialize, Deserialize, Archive)]
-pub struct EthrexStatelessValidatorInput(pub ProgramInput);
+pub struct StatelessValidatorEthrexInput(pub ProgramInput);
 
-impl Clone for EthrexStatelessValidatorInput {
+impl Clone for StatelessValidatorEthrexInput {
     fn clone(&self) -> Self {
         Self(ProgramInput {
             blocks: self.0.blocks.clone(),
             execution_witness: self.0.execution_witness.clone(),
             elasticity_multiplier: self.0.elasticity_multiplier,
             fee_configs: self.0.fee_configs.clone(),
+            #[cfg(feature = "l2")]
+            blob_commitment: self.0.blob_commitment,
+            #[cfg(feature = "l2")]
+            blob_proof: self.0.blob_proof,
         })
     }
 }
 
-impl Debug for EthrexStatelessValidatorInput {
+impl Debug for StatelessValidatorEthrexInput {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         struct DebugExecutionWitness<'a>(&'a ExecutionWitness);
 
@@ -48,7 +54,7 @@ impl Debug for EthrexStatelessValidatorInput {
             }
         }
 
-        f.debug_struct("EthrexStatelessValidatorInput")
+        f.debug_struct("StatelessValidatorEthrexInput")
             .field("blocks", &self.0.blocks)
             .field(
                 "execution_witness",
@@ -61,20 +67,20 @@ impl Debug for EthrexStatelessValidatorInput {
 }
 
 /// The public inputs are:
-/// - block_hash : [u8;32]
-/// - parent_hash : [u8;32]
-/// - successful_block_validation : bool
-pub type EthrexStatelessValidatorOutput = ([u8; 32], [u8; 32], bool);
+/// - `block_hash` - `[u8; 32]`
+/// - `parent_hash` - `[u8; 32]`
+/// - `successful_block_validation` - `bool`
+pub type StatelessValidatorEthrexOutput = ([u8; 32], [u8; 32], bool);
 
 /// [`Guest`] implementation for Ethrex stateless validator.
 #[derive(Debug, Clone)]
-pub struct EthrexStatelessValidatorGuest;
+pub struct StatelessValidatorEthrexGuest;
 
-impl Guest for EthrexStatelessValidatorGuest {
-    type Io = IoRkyv<EthrexStatelessValidatorInput, EthrexStatelessValidatorOutput>;
+impl Guest for StatelessValidatorEthrexGuest {
+    type Io = IoRkyv<StatelessValidatorEthrexInput, StatelessValidatorEthrexOutput>;
 
     fn compute<P: Platform>(
-        EthrexStatelessValidatorInput(input): <Self::Io as Io>::Input,
+        StatelessValidatorEthrexInput(input): <Self::Io as Io>::Input,
     ) -> <Self::Io as Io>::Output {
         let (header, parent_hash) = P::cycle_scope("public_inputs_preparation", || {
             (

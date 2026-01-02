@@ -1,0 +1,15 @@
+[package]
+name = "guest"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+sha2.workspace = true
+
+ere-io.workspace = true
+ere-platform-trait.workspace = true

@@ -1,16 +1,21 @@
 //! [`Guest`] implementation for the block encoding length calculation.
 
+use core::ops::Deref;
+
 use ere_io::{
     Io,
     serde::{IoSerde, bincode::BincodeLegacy},
 };
-use ere_platform_trait::Platform;
-use guest_libs::{BincodeBlock, block_ssz};
+use guest::Platform;
 use reth_ethereum_primitives::Block;
 use serde::{Deserialize, Serialize};
+use serde_with::serde_as;
 use ssz::Encode;
 
-pub use guest_libs::guest::Guest;
+#[rustfmt::skip]
+pub use guest::Guest;
+
+mod block_ssz;
 
 /// The encoding format used for the block encoding length calculation.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -20,6 +25,24 @@ pub enum BlockEncodingFormat {
     Rlp,
     /// SSZ encoding format
     Ssz,
+}
+
+/// Block wrapper that supports bincode serialization
+#[serde_as]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct BincodeBlock(
+    #[serde_as(
+        as = "reth_primitives_traits::serde_bincode_compat::Block<reth_ethereum_primitives::TransactionSigned, alloy_consensus::Header>"
+    )]
+    pub reth_ethereum_primitives::Block,
+);
+
+impl Deref for BincodeBlock {
+    type Target = reth_ethereum_primitives::Block;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Input for the block encoding length calculation guest program.

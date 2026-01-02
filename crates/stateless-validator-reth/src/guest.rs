@@ -1,11 +1,12 @@
 //! [`Guest`] implementation for Reth stateless validator.
 
 use alloc::{format, sync::Arc, vec::Vec};
+
 use ere_io::{
     Io,
     serde::{IoSerde, bincode::BincodeLegacy},
 };
-use ere_platform_trait::Platform;
+use guest::Platform;
 use reth_chainspec::ChainSpec;
 use reth_evm_ethereum::EthEvmConfig;
 use reth_primitives_traits::Block;
@@ -15,11 +16,12 @@ use reth_stateless::{
 use serde::{Deserialize, Serialize};
 use sparsestate::SparseState;
 
-pub use guest_libs::guest::Guest;
+#[rustfmt::skip]
+pub use guest::Guest;
 
 /// Input for the stateless validator guest program.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RethStatelessValidatorInput {
+pub struct StatelessValidatorRethInput {
     /// The stateless input for the stateless validation function.
     pub stateless_input: StatelessInput,
     /// The recovered signers for the transactions in the block.
@@ -27,17 +29,17 @@ pub struct RethStatelessValidatorInput {
 }
 
 /// The public inputs are:
-/// - block_hash : [u8;32]
-/// - parent_hash : [u8;32]
-/// - successful_block_validation : bool
-pub type RethStatelessValidatorOutput = ([u8; 32], [u8; 32], bool);
+/// - `block_hash` - `[u8; 32]`
+/// - `parent_hash` - `[u8; 32]`
+/// - `successful_block_validation` - `bool`
+pub type StatelessValidatorRethOutput = ([u8; 32], [u8; 32], bool);
 
 /// [`Guest`] implementation for Reth stateless validator.
 #[derive(Debug, Clone)]
-pub struct RethStatelessValidatorGuest;
+pub struct StatelessValidatorRethGuest;
 
-impl Guest for RethStatelessValidatorGuest {
-    type Io = IoSerde<RethStatelessValidatorInput, RethStatelessValidatorOutput, BincodeLegacy>;
+impl Guest for StatelessValidatorRethGuest {
+    type Io = IoSerde<StatelessValidatorRethInput, StatelessValidatorRethOutput, BincodeLegacy>;
 
     fn compute<P: Platform>(input: <Self::Io as Io>::Input) -> <Self::Io as Io>::Output {
         let genesis = Genesis {

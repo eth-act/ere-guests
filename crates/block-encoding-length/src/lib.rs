@@ -5,3 +5,6 @@
 extern crate alloc;
 
 pub mod guest;
+
+#[cfg(feature = "host")]
+pub mod host;

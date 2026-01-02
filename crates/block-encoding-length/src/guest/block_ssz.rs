@@ -7,12 +7,13 @@
 //! we can consider removing this module and using the native types directly.
 
 use alloc::vec::Vec;
+
 use alloy_eips::eip4895;
 use alloy_primitives::{Address, B64, B256, BlockNumber, Bloom, Bytes, U256};
 
 /// SSZ-serializable representation of an Ethereum block.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct Block {
+pub(crate) struct Block {
     header: Header,
     body: BlockBody,
 }
@@ -40,7 +41,7 @@ impl
 
 /// SSZ-serializable representation of a block body.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct BlockBody {
+pub(crate) struct BlockBody {
     transactions: Vec<EthereumTxEnvelope>,
     ommers: Vec<Header>,
     withdrawals: Option<Vec<Withdrawal>>,
@@ -72,7 +73,7 @@ impl
 
 /// SSZ-serializable representation of an Ethereum block header.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct Header {
+pub(crate) struct Header {
     parent_hash: B256,
     ommers_hash: B256,
     beneficiary: Address,
@@ -126,7 +127,7 @@ impl From<alloy_consensus::Header> for Header {
 
 /// SSZ-serializable representation of a validator withdrawal.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct Withdrawal {
+pub(crate) struct Withdrawal {
     index: u64,
     validator_index: u64,
     address: Address,
@@ -147,7 +148,7 @@ impl From<eip4895::Withdrawal> for Withdrawal {
 /// SSZ-serializable transaction envelope supporting a subset of Ethereum transaction types.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
 #[ssz(enum_behaviour = "union")]
-pub enum EthereumTxEnvelope {
+pub(crate) enum EthereumTxEnvelope {
     /// Legacy transaction type.
     Legacy(SignedTx<TxLegacy>),
     /// EIP-1559 transaction type.
@@ -174,7 +175,7 @@ impl From<alloy_consensus::EthereumTxEnvelope<alloy_consensus::TxEip4844>> for E
 
 /// SSZ-serializable representation of a signed legacy Ethereum transaction.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct SignedTx<Tx: ssz::Encode + ssz::Decode> {
+pub(crate) struct SignedTx<Tx: ssz::Encode + ssz::Decode> {
     tx: Tx,
     signature: Signature,
 }
@@ -226,7 +227,7 @@ impl From<alloy_consensus::Signed<alloy_consensus::TxEip7702>> for SignedTx<TxEi
 
 /// SSZ-serializable representation of an ECDSA signature.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct Signature {
+pub(crate) struct Signature {
     y_parity: bool,
     r: U256,
     s: U256,
@@ -244,7 +245,7 @@ impl From<alloy_primitives::Signature> for Signature {
 
 /// SSZ-serializable representation of a legacy Ethereum transaction.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct TxLegacy {
+pub(crate) struct TxLegacy {
     chain_id: Option<ChainId>,
     nonce: u64,
     gas_price: u128,
@@ -273,7 +274,7 @@ impl From<alloy_consensus::TxLegacy> for TxLegacy {
 
 /// SSZ-serializable representation of an EIP-1559 transaction.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct TxEip1559 {
+pub(crate) struct TxEip1559 {
     chain_id: ChainId,
     nonce: u64,
     gas_limit: u64,
@@ -313,14 +314,14 @@ impl From<alloy_consensus::transaction::TxEip1559> for TxEip1559 {
 
 /// SSZ-serializable representation of an access list.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct AccessListItem {
+pub(crate) struct AccessListItem {
     address: Address,
     storage_keys: Vec<B256>,
 }
 
 /// SSZ-serializable representation of an EIP-4844 transaction.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct TxEip4844 {
+pub(crate) struct TxEip4844 {
     chain_id: ChainId,
     nonce: u64,
     gas_limit: u64,
@@ -361,7 +362,7 @@ impl From<alloy_consensus::transaction::TxEip4844> for TxEip4844 {
 
 /// SSZ-serializable representation of an EIP-2930 transaction.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct TxEip2930 {
+pub(crate) struct TxEip2930 {
     chain_id: ChainId,
     nonce: u64,
     gas_price: u128,
@@ -399,7 +400,7 @@ impl From<alloy_consensus::transaction::TxEip2930> for TxEip2930 {
 
 /// SSZ-serializable representation of an EIP-7702 transaction.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct TxEip7702 {
+pub(crate) struct TxEip7702 {
     chain_id: ChainId,
     nonce: u64,
     gas_limit: u64,
@@ -442,7 +443,7 @@ impl From<alloy_consensus::transaction::TxEip7702> for TxEip7702 {
 
 /// SSZ-serializable representation of an authorization for an EIP-7702 transaction.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct SignedAuthorization {
+pub(crate) struct SignedAuthorization {
     inner: Authorization,
     y_parity: bool,
     r: U256,
@@ -462,7 +463,7 @@ impl From<alloy_eips::eip7702::SignedAuthorization> for SignedAuthorization {
 
 /// SSZ-serializable representation of an authorization.
 #[derive(Debug, PartialEq, Eq, ssz_derive::Encode, ssz_derive::Decode)]
-pub struct Authorization {
+pub(crate) struct Authorization {
     chain_id: U256,
     address: Address,
     nonce: u64,
@@ -479,13 +480,13 @@ impl From<alloy_eips::eip7702::Authorization> for Authorization {
 }
 
 /// Type alias for Ethereum chain identifiers.
-pub type ChainId = u64;
+pub(crate) type ChainId = u64;
 
 #[cfg(test)]
 mod tests {
     use ssz::{Decode, Encode};
 
-    use crate::{BincodeBlock, block_ssz::Block};
+    use crate::guest::{BincodeBlock, block_ssz::Block};
 
     #[test]
     fn test_block_ssz_encode_decode() {
