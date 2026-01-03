@@ -13,6 +13,8 @@ use guest::{Guest, GuestInput, GuestOutput};
 use rayon::prelude::*;
 use sha2::{Digest, Sha256};
 use tar::Archive;
+use tracing::info;
+use tracing_subscriber::EnvFilter;
 
 pub mod stateless_validator;
 
@@ -64,37 +66,48 @@ pub fn test_execution(
     zkvm_kind: zkVMKind,
     test_cases: impl IntoIterator<Item = TestCase>,
 ) {
+    let _ = tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .try_init();
+
     let test_cases = test_cases.into_iter().collect::<Vec<_>>();
     assert!(!test_cases.is_empty());
 
     let zkvm = compile_and_init_zkvm(guest, zkvm_kind);
 
-    test_cases
-        .into_par_iter()
-        .enumerate()
-        .for_each(|(idx, test_case)| {
-            let (public_values, _) = zkvm.execute(&test_case.input).unwrap();
+    test_cases.into_par_iter().for_each(|test_case| {
+        info!("Running execution of test case {}", test_case.name);
 
-            let mut expected_public_values = test_case.expected_public_values;
+        let (public_values, report) = zkvm.execute(&test_case.input).unwrap();
 
-            // Add padding for those zkVMs that have fixed size public values.
-            if matches!(zkvm_kind, zkVMKind::Airbender | zkVMKind::OpenVM)
-                && expected_public_values.len() < 32
-            {
-                expected_public_values.resize(32, 0);
-            }
+        info!(
+            "Execution of test case {} took {:?}",
+            test_case.name, report.execution_duration
+        );
 
-            assert_eq!(
-                public_values, expected_public_values,
-                "Expected public values of `test_cases[{idx}]` to be \
+        let mut expected_public_values = test_case.expected_public_values;
+
+        // Add padding for those zkVMs that have fixed size public values.
+        if matches!(zkvm_kind, zkVMKind::Airbender | zkVMKind::OpenVM)
+            && expected_public_values.len() < 32
+        {
+            expected_public_values.resize(32, 0);
+        }
+
+        assert_eq!(
+            public_values, expected_public_values,
+            "Expected public values of test case {} to be \
                 {expected_public_values:?}, but got {public_values:?}",
-            );
-        });
+            test_case.name
+        );
+    });
 }
 
 /// Guest program test case.
 #[derive(Debug, Default)]
 pub struct TestCase {
+    /// Identifier of the test case.
+    name: String,
     /// [`Input`] of the guest program.
     input: Input,
     /// The expected public values of guest program.
@@ -103,8 +116,13 @@ pub struct TestCase {
 
 impl TestCase {
     /// Constructs a new [`TestCase`].
-    pub fn new<G: Guest>(input: GuestInput<G>, output: GuestOutput<G>) -> Self {
+    pub fn new<G: Guest>(
+        name: impl AsRef<str>,
+        input: GuestInput<G>,
+        output: GuestOutput<G>,
+    ) -> Self {
         Self {
+            name: name.as_ref().to_string(),
             input: Input::new().with_prefixed_stdin(G::Io::serialize_input(&input).unwrap()),
             expected_public_values: G::Io::serialize_output(&output).unwrap(),
         }

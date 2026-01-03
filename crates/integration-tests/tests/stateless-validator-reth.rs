@@ -21,7 +21,8 @@ fn test_execution(zkvm_kind: zkVMKind) {
                 fixture.stateless_input.block.parent_hash.0,
                 fixture.success,
             );
-            TestCase::new::<StatelessValidatorRethGuest>(input, output).output_sha256()
+            TestCase::new::<StatelessValidatorRethGuest>(fixture.name, input, output)
+                .output_sha256()
         });
     integration_tests::test_execution("stateless-validator-reth", zkvm_kind, inputs);
 }

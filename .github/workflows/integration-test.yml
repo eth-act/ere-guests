@@ -60,18 +60,43 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
+      - name: Setup sccache
+        uses: mozilla/sccache-action@v0.0.9
+
+      - name: Configure sccache
+        run: |
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
         with:
-          workspaces: |
-            . -> target
-            bin/${{ matrix.guest }}/${{ matrix.zkvm }} -> target
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache bin target
+        uses: actions/cache@v4
+        with:
+          path: bin/${{ matrix.guest }}/${{ matrix.zkvm }}/target
+          key: ${{ runner.os }}-bin-${{ matrix.guest }}-${{ matrix.zkvm }}-${{ hashFiles('bin/${{ matrix.guest }}/${{ matrix.zkvm }}/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bin-${{ matrix.guest }}-${{ matrix.zkvm }}-
 
       - name: Test
         env:
-          ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
+          RUST_LOG: info,pico_vm=warn
           RAYON_NUM_THREADS: ${{ matrix.threads }}
+          ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
         run: |
           cargo test --release --test ${{ matrix.guest }} -- ${{ matrix.zkvm }}
 
           sudo chown -R $(id -u):$(id -g) bin/${{ matrix.guest }}/${{ matrix.zkvm }}/target || true
+
+      - name: Run sccache stat for check
+        shell: bash
+        run: ${SCCACHE_PATH} --show-stats

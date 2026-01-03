@@ -23,7 +23,8 @@ fn test_execution(zkvm_kind: zkVMKind) {
                 fixture.stateless_input.block.parent_hash.0,
                 fixture.success,
             );
-            TestCase::new::<StatelessValidatorEthrexGuest>(input, output).output_sha256()
+            TestCase::new::<StatelessValidatorEthrexGuest>(fixture.name, input, output)
+                .output_sha256()
         });
     integration_tests::test_execution("stateless-validator-ethrex", zkvm_kind, inputs);
 }

@@ -19,7 +19,7 @@ fn test_execution(zkvm_kind: zkVMKind) {
     let loop_count = 10;
     let test_cases = [BlockEncodingFormat::Rlp, BlockEncodingFormat::Ssz].map(|format| {
         let input = BlockEncodingLengthInput::new(&block, loop_count, format).unwrap();
-        TestCase::new::<BlockEncodingLengthGuest>(input, ())
+        TestCase::new::<BlockEncodingLengthGuest>(format!("{format:?}"), input, ())
     });
     integration_tests::test_execution("block-encoding-length", zkvm_kind, test_cases);
 }
