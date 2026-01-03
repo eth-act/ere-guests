@@ -40,7 +40,7 @@ jobs:
           - zkvm: airbender
             threads: 12
           - zkvm: openvm
-            threads: 2
+            threads: 1
           - zkvm: pico
             threads: 12
           - zkvm: risc0
