@@ -2,11 +2,8 @@
 
 use core::ops::Deref;
 
-use ere_io::{
-    Io,
-    serde::{IoSerde, bincode::BincodeLegacy},
-};
-use guest::Platform;
+use ere_io::serde::{IoSerde, bincode::BincodeLegacy};
+use guest::{GuestInput, GuestOutput, Platform};
 use reth_ethereum_primitives::Block;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
@@ -63,7 +60,7 @@ pub struct BlockEncodingLengthGuest;
 impl Guest for BlockEncodingLengthGuest {
     type Io = IoSerde<BlockEncodingLengthInput, (), BincodeLegacy>;
 
-    fn compute<P: Platform>(input: <Self::Io as Io>::Input) -> <Self::Io as Io>::Output {
+    fn compute<P: Platform>(input: GuestInput<Self>) -> GuestOutput<Self> {
         match input.format {
             BlockEncodingFormat::Rlp => {
                 P::cycle_scope("block_encoding_length_calculation", || {

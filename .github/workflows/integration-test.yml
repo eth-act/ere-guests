@@ -36,6 +36,19 @@ jobs:
             zkvm: openvm
           - guest: stateless-validator-ethrex
             zkvm: pico
+        include:
+          - zkvm: airbender
+            threads: 12
+          - zkvm: openvm
+            threads: 2
+          - zkvm: pico
+            threads: 12
+          - zkvm: risc0
+            threads: 12
+          - zkvm: sp1
+            threads: 12
+          - zkvm: zisk
+            threads: 1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,7 +70,8 @@ jobs:
       - name: Test
         env:
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
+          RAYON_NUM_THREADS: ${{ matrix.threads }}
         run: |
-          cargo test --test ${{ matrix.guest }} -- ${{ matrix.zkvm }}
+          cargo test --release --test ${{ matrix.guest }} -- ${{ matrix.zkvm }}
 
           sudo chown -R $(id -u):$(id -g) bin/${{ matrix.guest }}/${{ matrix.zkvm }}/target || true

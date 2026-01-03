@@ -1,20 +1,10 @@
 //! Execution tests for `empty` guest program
 
 use ere_dockerized::zkVMKind;
-use ere_io::serde::{IoSerde, bincode::BincodeLegacy};
-use guest::{Guest, GuestInput, GuestOutput, Platform};
+use integration_tests::TestCase;
 
 fn test_execution(zkvm_kind: zkVMKind) {
-    #[derive(Clone)]
-    struct EmptyGuest;
-
-    impl Guest for EmptyGuest {
-        type Io = IoSerde<(), (), BincodeLegacy>;
-
-        fn compute<P: Platform>(_: GuestInput<Self>) -> GuestOutput<Self> {}
-    }
-
-    integration_tests::test_execution::<EmptyGuest>("empty", zkvm_kind, [()], false);
+    integration_tests::test_execution("empty", zkvm_kind, [TestCase::default()]);
 }
 
 #[test]

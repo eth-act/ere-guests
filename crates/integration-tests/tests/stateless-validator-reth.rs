@@ -3,23 +3,27 @@
 use std::fs;
 
 use ere_dockerized::zkVMKind;
-use integration_tests::workspace;
+use integration_tests::{
+    TestCase, fixtures_dir, stateless_validator::StatelessValidatorFixture, untar_fixtures,
+};
 use stateless_validator_reth::guest::{StatelessValidatorRethGuest, StatelessValidatorRethInput};
 
 fn test_execution(zkvm_kind: zkVMKind) {
-    let inputs = fs::read_dir(workspace().join("crates/integration-tests/assets/block"))
+    untar_fixtures().unwrap();
+    let inputs = fs::read_dir(fixtures_dir().join("block"))
         .unwrap()
         .map(|file| {
             let bytes = fs::read(file.unwrap().path()).unwrap();
-            let stateless_input = serde_json::from_slice(&bytes).unwrap();
-            StatelessValidatorRethInput::new(&stateless_input).unwrap()
+            let fixture: StatelessValidatorFixture = serde_json::from_slice(&bytes).unwrap();
+            let input = StatelessValidatorRethInput::new(&fixture.stateless_input).unwrap();
+            let output = (
+                fixture.stateless_input.block.hash_slow().0,
+                fixture.stateless_input.block.parent_hash.0,
+                fixture.success,
+            );
+            TestCase::new::<StatelessValidatorRethGuest>(input, output).output_sha256()
         });
-    integration_tests::test_execution::<StatelessValidatorRethGuest>(
-        "stateless-validator-reth",
-        zkvm_kind,
-        inputs,
-        true,
-    );
+    integration_tests::test_execution("stateless-validator-reth", zkvm_kind, inputs);
 }
 
 #[test]

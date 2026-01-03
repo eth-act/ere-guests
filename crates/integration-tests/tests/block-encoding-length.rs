@@ -6,20 +6,22 @@ use block_encoding_length::guest::{
     BlockEncodingFormat, BlockEncodingLengthGuest, BlockEncodingLengthInput,
 };
 use ere_dockerized::zkVMKind;
-use integration_tests::workspace;
-use reth_stateless::StatelessInput;
+use integration_tests::{
+    TestCase, fixtures_dir, stateless_validator::StatelessValidatorFixture, untar_fixtures,
+};
 
 fn test_execution(zkvm_kind: zkVMKind) {
-    let path = workspace().join("crates/integration-tests/assets/block/mainnet-22974575.json");
-    let stateless_input: StatelessInput = serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
-    for format in [BlockEncodingFormat::Rlp, BlockEncodingFormat::Ssz] {
-        integration_tests::test_execution::<BlockEncodingLengthGuest>(
-            "block-encoding-length",
-            zkvm_kind,
-            [BlockEncodingLengthInput::new(&stateless_input.block, 10, format).unwrap()],
-            false,
-        );
-    }
+    untar_fixtures().unwrap();
+    let path = fixtures_dir().join("block/rpc_block_22974575.json");
+    let fixture: StatelessValidatorFixture =
+        serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
+    let block = fixture.stateless_input.block;
+    let loop_count = 10;
+    let test_cases = [BlockEncodingFormat::Rlp, BlockEncodingFormat::Ssz].map(|format| {
+        let input = BlockEncodingLengthInput::new(&block, loop_count, format).unwrap();
+        TestCase::new::<BlockEncodingLengthGuest>(input, ())
+    });
+    integration_tests::test_execution("block-encoding-length", zkvm_kind, test_cases);
 }
 
 #[test]

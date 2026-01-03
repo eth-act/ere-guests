@@ -9,7 +9,14 @@ version.workspace = true
 workspace = true
 
 [dependencies]
+flate2.workspace = true
+rayon.workspace = true
 sha2.workspace = true
+serde = { workspace = true, features = ["derive"] }
+tar.workspace = true
+
+# reth
+reth-stateless.workspace = true
 
 # ere
 ere-dockerized.workspace = true
@@ -21,9 +28,6 @@ guest.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true
-
-# reth
-reth-stateless.workspace = true
 
 # ere
 ere-zkvm-interface.workspace = true
