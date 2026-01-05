@@ -2,11 +2,7 @@
 
 use alloc::{format, sync::Arc, vec::Vec};
 
-use ere_io::{
-    Io,
-    serde::{IoSerde, bincode::BincodeLegacy},
-};
-use guest::Platform;
+use ere_io::serde::{IoSerde, bincode::BincodeLegacy};
 use reth_chainspec::ChainSpec;
 use reth_evm_ethereum::EthEvmConfig;
 use reth_primitives_traits::Block;
@@ -17,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use sparsestate::SparseState;
 
 #[rustfmt::skip]
-pub use guest::Guest;
+pub use guest::*;
 
 /// Input for the stateless validator guest program.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -41,7 +37,7 @@ pub struct StatelessValidatorRethGuest;
 impl Guest for StatelessValidatorRethGuest {
     type Io = IoSerde<StatelessValidatorRethInput, StatelessValidatorRethOutput, BincodeLegacy>;
 
-    fn compute<P: Platform>(input: <Self::Io as Io>::Input) -> <Self::Io as Io>::Output {
+    fn compute<P: Platform>(input: GuestInput<Self>) -> GuestOutput<Self> {
         let genesis = Genesis {
             config: input.stateless_input.chain_config.clone(),
             ..Default::default()

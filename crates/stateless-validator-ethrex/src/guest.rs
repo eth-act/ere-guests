@@ -3,19 +3,15 @@
 use alloc::format;
 use core::fmt::Debug;
 
-use ere_io::{
-    Io,
-    rkyv::{
-        IoRkyv,
-        rkyv::{Archive, Deserialize, Serialize},
-    },
+use ere_io::rkyv::{
+    IoRkyv,
+    rkyv::{Archive, Deserialize, Serialize},
 };
 use ethrex_common::types::block_execution_witness::ExecutionWitness;
 use ethrex_guest_program::{execution::execution_program, input::ProgramInput};
-use guest::Platform;
 
 #[rustfmt::skip]
-pub use guest::Guest;
+pub use guest::*;
 
 /// Input for the Ethrex stateless validator guest program.
 #[derive(Serialize, Deserialize, Archive)]
@@ -80,8 +76,8 @@ impl Guest for StatelessValidatorEthrexGuest {
     type Io = IoRkyv<StatelessValidatorEthrexInput, StatelessValidatorEthrexOutput>;
 
     fn compute<P: Platform>(
-        StatelessValidatorEthrexInput(input): <Self::Io as Io>::Input,
-    ) -> <Self::Io as Io>::Output {
+        StatelessValidatorEthrexInput(input): GuestInput<Self>,
+    ) -> GuestOutput<Self> {
         let (header, parent_hash) = P::cycle_scope("public_inputs_preparation", || {
             (
                 input.blocks[0].header.clone(),

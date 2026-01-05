@@ -3,14 +3,13 @@
 use core::ops::Deref;
 
 use ere_io::serde::{IoSerde, bincode::BincodeLegacy};
-use guest::{GuestInput, GuestOutput, Platform};
 use reth_ethereum_primitives::Block;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use ssz::Encode;
 
 #[rustfmt::skip]
-pub use guest::Guest;
+pub use guest::*;
 
 mod block_ssz;
 
