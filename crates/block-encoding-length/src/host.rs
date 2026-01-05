@@ -1,8 +1,7 @@
 //! Implementations for host environment.
 
-use ere_io::Io;
 use ere_zkvm_interface::Input;
-use guest::Guest;
+use guest::{GuestIo, Io};
 use reth_ethereum_primitives::Block;
 
 use crate::guest::{
@@ -28,7 +27,7 @@ impl BlockEncodingLengthInput {
     ///
     /// [`zkVM`]: ere_zkvm_interface::zkVM
     pub fn to_zkvm_input(&self) -> anyhow::Result<Input> {
-        let stdin = <BlockEncodingLengthGuest as Guest>::Io::serialize_input(self)?;
+        let stdin = GuestIo::<BlockEncodingLengthGuest>::serialize_input(self)?;
         Ok(Input::new().with_prefixed_stdin(stdin))
     }
 }

@@ -6,7 +6,9 @@ use ere_dockerized::zkVMKind;
 use integration_tests::{
     TestCase, fixtures_dir, stateless_validator::StatelessValidatorFixture, untar_fixtures,
 };
-use stateless_validator_reth::guest::{StatelessValidatorRethGuest, StatelessValidatorRethInput};
+use stateless_validator_reth::guest::{
+    StatelessValidatorOutput, StatelessValidatorRethGuest, StatelessValidatorRethInput,
+};
 
 fn test_execution(zkvm_kind: zkVMKind) {
     untar_fixtures().unwrap();
@@ -16,9 +18,9 @@ fn test_execution(zkvm_kind: zkVMKind) {
             let bytes = fs::read(file.unwrap().path()).unwrap();
             let fixture: StatelessValidatorFixture = serde_json::from_slice(&bytes).unwrap();
             let input = StatelessValidatorRethInput::new(&fixture.stateless_input).unwrap();
-            let output = (
-                fixture.stateless_input.block.hash_slow().0,
-                fixture.stateless_input.block.parent_hash.0,
+            let output = StatelessValidatorOutput::new(
+                fixture.stateless_input.block.hash_slow(),
+                fixture.stateless_input.block.parent_hash,
                 fixture.success,
             );
             TestCase::new::<StatelessValidatorRethGuest>(fixture.name, input, output)

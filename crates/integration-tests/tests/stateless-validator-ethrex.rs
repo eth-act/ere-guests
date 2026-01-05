@@ -7,7 +7,7 @@ use integration_tests::{
     TestCase, fixtures_dir, stateless_validator::StatelessValidatorFixture, untar_fixtures,
 };
 use stateless_validator_ethrex::guest::{
-    StatelessValidatorEthrexGuest, StatelessValidatorEthrexInput,
+    StatelessValidatorEthrexGuest, StatelessValidatorEthrexInput, StatelessValidatorOutput,
 };
 
 fn test_execution(zkvm_kind: zkVMKind) {
@@ -18,9 +18,9 @@ fn test_execution(zkvm_kind: zkVMKind) {
             let bytes = fs::read(file.unwrap().path()).unwrap();
             let fixture: StatelessValidatorFixture = serde_json::from_slice(&bytes).unwrap();
             let input = StatelessValidatorEthrexInput::new(&fixture.stateless_input).unwrap();
-            let output = (
-                fixture.stateless_input.block.hash_slow().0,
-                fixture.stateless_input.block.parent_hash.0,
+            let output = StatelessValidatorOutput::new(
+                fixture.stateless_input.block.hash_slow(),
+                fixture.stateless_input.block.parent_hash,
                 fixture.success,
             );
             TestCase::new::<StatelessValidatorEthrexGuest>(fixture.name, input, output)

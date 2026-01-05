@@ -18,9 +18,6 @@ alloy-eips = { workspace = true, optional = true }
 alloy-genesis = { workspace = true, optional = true }
 alloy-rlp = { workspace = true, optional = true }
 
-# reth
-reth-stateless = { workspace = true, optional = true }
-
 # ethrex
 ethrex-common.workspace = true
 ethrex-guest-program.workspace = true
@@ -34,11 +31,12 @@ ere-zkvm-interface = { workspace = true, optional = true }
 
 # local
 guest.workspace = true
+stateless-validator-common = { workspace = true, features = ["rkyv"] }
 
 [features]
 # guest
 default = ["std"]
-std = []
+std = ["stateless-validator-common/std"]
 l2 = ["ethrex-guest-program/l2"]
 risc0 = ["ethrex-vm/risc0"]
 sp1 = ["ethrex-vm/sp1"]
@@ -47,12 +45,12 @@ zisk = ["ethrex-vm/zisk"]
 # host
 host = [
     "std",
+    "stateless-validator-common/host",
     "dep:anyhow",
     "dep:alloy-consensus",
     "dep:alloy-eips",
     "dep:alloy-rlp",
     "dep:alloy-genesis",
-    "dep:reth-stateless",
     "dep:ethrex-rlp",
     "dep:ethrex-rpc",
     "dep:ere-zkvm-interface",

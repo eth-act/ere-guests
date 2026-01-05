@@ -1,0 +1,27 @@
+[package]
+name = "stateless-validator-common"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+rkyv = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"], optional = true }
+sha2 = { workspace = true, optional = true }
+
+# reth
+reth-stateless = { workspace = true, optional = true }
+
+[features]
+# guest
+default = ["std"]
+std = []
+serde = ["dep:serde"]
+rkyv = ["dep:rkyv"]
+
+# host
+host = ["std", "dep:sha2", "dep:reth-stateless"]

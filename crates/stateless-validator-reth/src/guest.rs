@@ -13,7 +13,10 @@ use serde::{Deserialize, Serialize};
 use sparsestate::SparseState;
 
 #[rustfmt::skip]
-pub use guest::*;
+pub use {
+    guest::*,
+    stateless_validator_common::guest::StatelessValidatorOutput,
+};
 
 /// Input for the stateless validator guest program.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -24,18 +27,16 @@ pub struct StatelessValidatorRethInput {
     pub public_keys: Vec<UncompressedPublicKey>,
 }
 
-/// The public inputs are:
-/// - `block_hash` - `[u8; 32]`
-/// - `parent_hash` - `[u8; 32]`
-/// - `successful_block_validation` - `bool`
-pub type StatelessValidatorRethOutput = ([u8; 32], [u8; 32], bool);
+/// [`Io`] implementation of Reth stateless validator.
+pub type StatelessValidatorRethIo =
+    IoSerde<StatelessValidatorRethInput, StatelessValidatorOutput, BincodeLegacy>;
 
 /// [`Guest`] implementation for Reth stateless validator.
 #[derive(Debug, Clone)]
 pub struct StatelessValidatorRethGuest;
 
 impl Guest for StatelessValidatorRethGuest {
-    type Io = IoSerde<StatelessValidatorRethInput, StatelessValidatorRethOutput, BincodeLegacy>;
+    type Io = StatelessValidatorRethIo;
 
     fn compute<P: Platform>(input: GuestInput<Self>) -> GuestOutput<Self> {
         let genesis = Genesis {
@@ -64,10 +65,10 @@ impl Guest for StatelessValidatorRethGuest {
         });
 
         match res {
-            Ok(block_hash) => (block_hash.0, parent_hash.0, true),
+            Ok(block_hash) => StatelessValidatorOutput::new(block_hash, parent_hash, true),
             Err(err) => {
                 P::print(&format!("Block validation failed: {err}\n"));
-                (header.hash_slow().0, parent_hash.0, false)
+                StatelessValidatorOutput::new(header.hash_slow(), parent_hash, false)
             }
         }
     }

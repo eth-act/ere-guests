@@ -5,6 +5,7 @@ members = [
 
     # Guest libs
     "crates/block-encoding-length",
+    "crates/stateless-validator-common",
     "crates/stateless-validator-ethrex",
     "crates/stateless-validator-reth",
 
@@ -36,6 +37,7 @@ result_large_err = "allow"
 
 [workspace.dependencies]
 anyhow = { version = "1.0", default-features = false }
+digest = { version = "0.10.7", default-features = false }
 once_cell = { version = "1.21", default-features = false }
 rkyv = { version = "0.8.10", default-features = false }
 serde = { version = "1.0", default-features = false }
@@ -88,5 +90,6 @@ ere-zkvm-interface = { git = "https://github.com/eth-act/ere", rev = "ec75f8a266
 # local
 guest = { path = "crates/guest", default-features = false }
 block-encoding-length = { path = "crates/block-encoding-length", default-features = false }
+stateless-validator-common = { path = "crates/stateless-validator-common", default-features = false }
 stateless-validator-ethrex = { path = "crates/stateless-validator-ethrex", default-features = false }
 stateless-validator-reth = { path = "crates/stateless-validator-reth", default-features = false }

@@ -29,13 +29,14 @@ ere-zkvm-interface = { workspace = true, optional = true }
 
 # local
 guest.workspace = true
+stateless-validator-common = { workspace = true, features = ["serde"] }
 
 [features]
 # guest
 default = ["std", "k256"]
-std = ["once_cell/std"]
+std = ["once_cell/std", "stateless-validator-common/std"]
 k256 = ["reth-stateless/k256"]
 secp256k1 = ["reth-stateless/secp256k1"]
 
 # host
-host = ["std", "dep:anyhow", "dep:ere-zkvm-interface"]
+host = ["std", "stateless-validator-common/host", "dep:anyhow", "dep:ere-zkvm-interface"]

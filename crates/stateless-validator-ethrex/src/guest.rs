@@ -11,7 +11,10 @@ use ethrex_common::types::block_execution_witness::ExecutionWitness;
 use ethrex_guest_program::{execution::execution_program, input::ProgramInput};
 
 #[rustfmt::skip]
-pub use guest::*;
+pub use {
+    guest::*,
+    stateless_validator_common::guest::StatelessValidatorOutput,
+};
 
 /// Input for the Ethrex stateless validator guest program.
 #[derive(Serialize, Deserialize, Archive)]
@@ -62,18 +65,16 @@ impl Debug for StatelessValidatorEthrexInput {
     }
 }
 
-/// The public inputs are:
-/// - `block_hash` - `[u8; 32]`
-/// - `parent_hash` - `[u8; 32]`
-/// - `successful_block_validation` - `bool`
-pub type StatelessValidatorEthrexOutput = ([u8; 32], [u8; 32], bool);
+/// [`Io`] implementation of Ethrex stateless validator.
+pub type StatelessValidatorEthrexIo =
+    IoRkyv<StatelessValidatorEthrexInput, StatelessValidatorOutput>;
 
 /// [`Guest`] implementation for Ethrex stateless validator.
 #[derive(Debug, Clone)]
 pub struct StatelessValidatorEthrexGuest;
 
 impl Guest for StatelessValidatorEthrexGuest {
-    type Io = IoRkyv<StatelessValidatorEthrexInput, StatelessValidatorEthrexOutput>;
+    type Io = StatelessValidatorEthrexIo;
 
     fn compute<P: Platform>(
         StatelessValidatorEthrexInput(input): GuestInput<Self>,
@@ -86,20 +87,38 @@ impl Guest for StatelessValidatorEthrexGuest {
         });
 
         if input.blocks.len() != 1 {
-            return (header.compute_block_hash().0, parent_hash.0, false);
+            return StatelessValidatorOutput::new(header.compute_block_hash(), parent_hash, false);
         }
 
         let res = P::cycle_scope("validation", || execution_program(input));
 
         match res {
-            Ok(out) => (out.last_block_hash.0, parent_hash.0, true),
+            Ok(out) => StatelessValidatorOutput::new(out.last_block_hash, parent_hash, true),
             Err(err) => {
                 P::print(&format!(
                     "Block {} validation failed: {err}\n",
                     header.number
                 ));
-                (header.compute_block_hash().0, parent_hash.0, false)
+                StatelessValidatorOutput::new(header.compute_block_hash(), parent_hash, false)
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::guest::{Io, StatelessValidatorEthrexIo, StatelessValidatorOutput};
+
+    #[test]
+    fn serialize_output() {
+        for output in [
+            StatelessValidatorOutput::new([0x00; 32], [0x00; 32], false),
+            StatelessValidatorOutput::new([0xff; 32], [0xff; 32], true),
+        ] {
+            assert_eq!(
+                StatelessValidatorEthrexIo::serialize_output(&output).unwrap(),
+                output.serialize()
+            );
         }
     }
 }

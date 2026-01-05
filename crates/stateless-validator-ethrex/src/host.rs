@@ -4,21 +4,24 @@ use alloc::vec;
 
 use alloy_eips::eip6110::MAINNET_DEPOSIT_CONTRACT_ADDRESS;
 use alloy_rlp::Encodable;
-use ere_io::Io;
 use ere_zkvm_interface::Input;
 use ethrex_common::{
     H160,
     types::{BlobSchedule, Block, ChainConfig, ForkBlobSchedule, block_execution_witness},
 };
-use ethrex_guest_program::input::ProgramInput;
 use ethrex_rlp::decode::RLPDecode;
 use ethrex_rpc::debug::execution_witness::{
     RpcExecutionWitness, execution_witness_from_rpc_chain_config,
 };
-use guest::Guest;
-use reth_stateless::StatelessInput;
+use guest::{GuestIo, Io};
 
 use crate::guest::{StatelessValidatorEthrexGuest, StatelessValidatorEthrexInput};
+
+#[rustfmt::skip]
+pub use {
+    ethrex_guest_program::input::ProgramInput,
+    stateless_validator_common::host::StatelessInput,
+};
 
 impl StatelessValidatorEthrexInput {
     /// Construct [`StatelessValidatorEthrexInput`] given [`StatelessInput`].
@@ -46,7 +49,7 @@ impl StatelessValidatorEthrexInput {
     ///
     /// [`zkVM`]: ere_zkvm_interface::zkVM
     pub fn to_zkvm_input(&self) -> anyhow::Result<Input> {
-        let stdin = <StatelessValidatorEthrexGuest as Guest>::Io::serialize_input(self)?;
+        let stdin = GuestIo::<StatelessValidatorEthrexGuest>::serialize_input(self)?;
         Ok(Input::new().with_prefixed_stdin(stdin))
     }
 }
