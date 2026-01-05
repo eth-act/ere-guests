@@ -2,6 +2,8 @@
 
 #![no_std]
 
+extern crate alloc;
+
 mod guest;
 
 pub use ere_io::Io;
