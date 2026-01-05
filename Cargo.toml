@@ -37,7 +37,6 @@ result_large_err = "allow"
 
 [workspace.dependencies]
 anyhow = { version = "1.0", default-features = false }
-digest = { version = "0.10.7", default-features = false }
 once_cell = { version = "1.21", default-features = false }
 rkyv = { version = "0.8.10", default-features = false }
 serde = { version = "1.0", default-features = false }
