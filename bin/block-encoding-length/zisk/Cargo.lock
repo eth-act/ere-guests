@@ -628,7 +628,7 @@ dependencies = [
 
 [[package]]
 name = "block-encoding-length"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -1318,7 +1318,7 @@ dependencies = [
 
 [[package]]
 name = "guest"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ere-io",
  "ere-platform-trait",
