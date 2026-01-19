@@ -128,6 +128,7 @@ jobs:
         env:
           MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
           MINISIGN_PUBLIC_KEY: ${{ secrets.MINISIGN_PUBLIC_KEY }}
+          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
         run: |
           # Create key files from secrets
           echo "$MINISIGN_SECRET_KEY" > minisign.key
@@ -143,7 +144,7 @@ jobs:
               
               # -S: Sign, -m: file, -s: secret key, -x: output signature, -t: trusted comment
               # We output the .minisig directly into the artifacts folder so it gets released
-              minisign -Sm "$file" -s minisign.key -x "$file.minisig" -t "$filename"
+              echo "$MINISIGN_PASSWORD" | minisign -Sm "$file" -s minisign.key -x "$file.minisig" -t "$filename"
             fi
           done
           
