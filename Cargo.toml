@@ -18,7 +18,7 @@ resolver = "2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 rust-version = "1.88"
-version = "0.2.0"
+version = "0.3.0"
 
 [workspace.lints.rust]
 missing_debug_implementations = "warn"
