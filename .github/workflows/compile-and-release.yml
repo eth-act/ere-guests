@@ -38,6 +38,8 @@ jobs:
         exclude:
           - guest: stateless-validator-ethrex
             zkvm: airbender
+          - guest: stateless-validator-reth
+            zkvm: airbender
           - guest: stateless-validator-ethrex
             zkvm: openvm
           - guest: stateless-validator-ethrex
