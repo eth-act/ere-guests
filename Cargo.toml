@@ -54,22 +54,22 @@ tracing = "0.1.44"
 tracing-subscriber = "0.3.22"
 
 # alloy
-alloy-consensus = { version = "1.1.2", default-features = false }
-alloy-eips = { version = "1.1.2", default-features = false }
-alloy-genesis = { version = "1.1.2", default-features = false }
-alloy-rpc-types-engine = { version = "1.1.2", default-features = false }
-alloy-primitives = { version = "1.4.1", default-features = false }
+alloy-consensus = { version = "1.4.3", default-features = false }
+alloy-eips = { version = "1.4.3", default-features = false }
+alloy-genesis = { version = "1.4.3", default-features = false }
+alloy-rpc-types-engine = { version = "1.4.3", default-features = false }
+alloy-primitives = { version = "1.5.0", default-features = false }
 alloy-rlp = { version = "0.3.10", default-features = false }
 alloy-trie = { version = "0.9.1", default-features = false }
 
 # reth
-reth-chainspec = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
-reth-ethereum-payload-builder = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
-reth-ethereum-primitives = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
-reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
-reth-primitives-traits = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
-reth-stateless = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
-reth-payload-validator = { git = "https://github.com/paradigmxyz/reth", rev = "cfde951976bfa9100a6d9f806e06fb539ae25241", default-features = false }
+reth-chainspec = { git = "https://github.com/paradigmxyz/reth", tag = "v1.10.2", default-features = false }
+reth-ethereum-payload-builder = { git = "https://github.com/paradigmxyz/reth", tag = "v1.10.2", default-features = false }
+reth-ethereum-primitives = { git = "https://github.com/paradigmxyz/reth", tag = "v1.10.2", default-features = false }
+reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", tag = "v1.10.2", default-features = false }
+reth-primitives-traits = { git = "https://github.com/paradigmxyz/reth", tag = "v1.10.2", default-features = false }
+reth-stateless = { git = "https://github.com/paradigmxyz/reth", tag = "v1.10.2", default-features = false }
+reth-payload-validator = { git = "https://github.com/paradigmxyz/reth", tag = "v1.10.2", default-features = false }
 
 # ethrex
 ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", rev = "e6d70854d0fe3b0f29ed8961e5cbfc5de7bdd7d1", default-features = false }
@@ -89,7 +89,7 @@ ethereum_ssz = "0.9"
 ethereum_ssz_derive = "0.9"
 
 # mpt
-sparsestate = { git = "https://github.com/eth-act/zkvm-ethereum-mpt.git", tag = "v0.4.0" }
+sparsestate = { git = "https://github.com/eth-act/zkvm-ethereum-mpt.git", rev = "a1e44638c49c4e16751a0b915593fce98ab6bdef" }
 
 # ere
 ere-dockerized = { git = "https://github.com/eth-act/ere", rev = "ec75f8a26657ddbf7efc44cdb3167fff4f55fe27" }

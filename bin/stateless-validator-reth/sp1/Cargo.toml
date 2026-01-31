@@ -7,11 +7,11 @@ edition = "2024"
 
 [dependencies]
 # enable features
-alloy-primitives = { version = "1.4.1", default-features = false, features = [
+alloy-primitives = { version = "1.5.0", default-features = false, features = [
     "map-foldhash",
     "sha3-keccak",
 ] }
-revm = { version = "33.1.0", default-features = false, features = ["bn"] }
+revm = { version = "34.0.0", default-features = false, features = ["bn"] }
 
 # ere
 ere-platform-sp1 = { git = "https://github.com/eth-act/ere", rev = "ec75f8a26657ddbf7efc44cdb3167fff4f55fe27" }
