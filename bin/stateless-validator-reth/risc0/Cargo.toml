@@ -7,11 +7,11 @@ edition = "2024"
 
 [dependencies]
 # enable features
-alloy-primitives = { version = "1.4.1", default-features = false, features = [
+alloy-primitives = { version = "1.5.0", default-features = false, features = [
     "map-foldhash",
     "tiny-keccak",
 ] }
-revm = { version = "33.1.0", default-features = false, features = [
+revm = { version = "34.0.0", default-features = false, features = [
     "std",
     "c-kzg",
     "blst",

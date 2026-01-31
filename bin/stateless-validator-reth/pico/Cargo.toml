@@ -7,11 +7,11 @@ edition = "2024"
 
 [dependencies]
 # enable features
-alloy-primitives = { version = "1.4.1", default-features = false, features = [
+alloy-primitives = { version = "1.5.0", default-features = false, features = [
     "map-foldhash",
     "sha3-keccak",
 ] }
-revm = { version = "33.1.0", default-features = false, features = ["bn"] }
+revm = { version = "34.0.0", default-features = false, features = ["bn"] }
 
 # crypto provider
 kzg-rs = { git = "https://github.com/brevis-network/kzg-rs", rev = "b93499a67494bc6d34e108032fd11d375fb886e0" }

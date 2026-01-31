@@ -7,16 +7,16 @@ edition = "2024"
 
 [dependencies]
 # enable features
-alloy-consensus = { version = "1.1.2", default-features = false, features = [
+alloy-consensus = { version = "1.4.3", default-features = false, features = [
     "crypto-backend",
 ] }
-alloy-primitives = { version = "1.4.1", default-features = false, features = [
+alloy-primitives = { version = "1.5.0", default-features = false, features = [
     "map-hashbrown",
     "native-keccak",
 ] }
 
 # revm
-revm = { version = "33.1.0", default-features = false }
+revm = { version = "34.0.0", default-features = false }
 
 # openvm
 openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", features = [
