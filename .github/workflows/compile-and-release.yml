@@ -51,7 +51,7 @@ jobs:
       - name: Get Ere tag
         id: get_ere_tag
         run: |
-          ERE_TAG=$(cargo tree -p ere-platform-trait | head -n 1 | sed -E 's/ere-platform-trait v([0-9.]+) \(.*#([a-f0-9]{7}).*/\1-\2/')
+          ERE_TAG=$(cargo tree -p ere-platform-trait | head -n 1 | sed -E 's/ere-platform-trait v([0-9.]+) .*/\1/')
           echo "ere_tag=${ERE_TAG}" >> $GITHUB_OUTPUT
           echo "Ere tag: ${ERE_TAG}"
 
@@ -66,14 +66,18 @@ jobs:
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
             --compiler-kind rust-customized \
-            --guest-path /ere-guests/bin/${{ matrix.guest }}/${{ matrix.zkvm }} \
-            --output-path /output/${{ matrix.guest }}-${{ matrix.zkvm }}
+            --guest-dir /ere-guests/bin/${{ matrix.guest }}/${{ matrix.zkvm }} \
+            --output-dir /output \
+            --elf-name ${{ matrix.guest }}-${{ matrix.zkvm }}.elf \
+            --program-name ${{ matrix.guest }}-${{ matrix.zkvm }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.guest }}-${{ matrix.zkvm }}
-          path: output/${{ matrix.guest }}-${{ matrix.zkvm }}
+          path: |
+            output/${{ matrix.guest }}-${{ matrix.zkvm }}.elf
+            output/${{ matrix.guest }}-${{ matrix.zkvm }}
           if-no-files-found: error
 
   create-release:
@@ -100,12 +104,15 @@ jobs:
           echo "## Compiled guest programs" >> release-body.md
           echo "" >> release-body.md
 
-          # Get unique guest names
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}"
+
+          # Get unique guest names from .elf files
           declare -A guests
-          for file in artifacts/*; do
+          for file in artifacts/*.elf; do
             if [ -f "$file" ]; then
               filename=$(basename "$file")
-              guest=$(echo "$filename" | sed 's/-[^-]*$//')
+              # Strip the last -zkvm.elf segment to get the guest name
+              guest=$(echo "$filename" | sed 's/-[^-]*\.elf$//')
               guests["$guest"]=1
             fi
           done
@@ -114,10 +121,11 @@ jobs:
           for guest in $(echo "${!guests[@]}" | tr ' ' '\n' | sort); do
             echo "### $guest" >> release-body.md
             echo "" >> release-body.md
-            for file in artifacts/$guest-*; do
-              if [ -f "$file" ]; then
-                filename=$(basename "$file")
-                echo "- [\`$filename\`](https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$filename)" >> release-body.md
+            for elf_file in artifacts/$guest-*.elf; do
+              if [ -f "$elf_file" ]; then
+                elf_name=$(basename "$elf_file")
+                program_name="${elf_name%.elf}"
+                echo "- [\`$elf_name\`]($RELEASE_URL/$elf_name) | [\`$program_name\`]($RELEASE_URL/$program_name)" >> release-body.md
               fi
             done
             echo "" >> release-body.md
