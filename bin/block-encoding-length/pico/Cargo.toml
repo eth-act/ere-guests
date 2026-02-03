@@ -7,7 +7,7 @@ edition = "2024"
 
 [dependencies]
 # ere
-ere-platform-pico = { git = "https://github.com/eth-act/ere", rev = "ec75f8a26657ddbf7efc44cdb3167fff4f55fe27" }
+ere-platform-pico = { git = "https://github.com/eth-act/ere", tag = "v0.2.0" }
 
 # local
 block-encoding-length = { path = "../../../crates/block-encoding-length" }

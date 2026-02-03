@@ -92,10 +92,10 @@ ethereum_ssz_derive = "0.9"
 sparsestate = { git = "https://github.com/eth-act/zkvm-ethereum-mpt.git", rev = "a1e44638c49c4e16751a0b915593fce98ab6bdef" }
 
 # ere
-ere-dockerized = { git = "https://github.com/eth-act/ere", rev = "ec75f8a26657ddbf7efc44cdb3167fff4f55fe27" }
-ere-io = { git = "https://github.com/eth-act/ere", rev = "ec75f8a26657ddbf7efc44cdb3167fff4f55fe27" }
-ere-platform-trait = { git = "https://github.com/eth-act/ere", rev = "ec75f8a26657ddbf7efc44cdb3167fff4f55fe27" }
-ere-zkvm-interface = { git = "https://github.com/eth-act/ere", rev = "ec75f8a26657ddbf7efc44cdb3167fff4f55fe27" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.2.0" }
+ere-io = { git = "https://github.com/eth-act/ere", tag = "v0.2.0" }
+ere-platform-trait = { git = "https://github.com/eth-act/ere", tag = "v0.2.0" }
+ere-zkvm-interface = { git = "https://github.com/eth-act/ere", tag = "v0.2.0" }
 
 # local
 guest = { path = "crates/guest", default-features = false }
