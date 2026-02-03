@@ -1680,7 +1680,7 @@ dependencies = [
 
 [[package]]
 name = "guest"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "ere-io",
  "ere-platform-trait",
@@ -3352,7 +3352,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
 name = "stateless-validator-common"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "ethereum_ssz",
@@ -3369,7 +3369,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-ethrex"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "bytes",
