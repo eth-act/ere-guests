@@ -45,7 +45,6 @@ stateless-validator-reth = { workspace = true, default-features = true, optional
 # guest
 default = ["std"]
 std = ["stateless-validator-common/std"]
-l2 = ["ethrex-guest-program/l2"]
 risc0 = ["ethrex-vm/risc0"]
 sp1 = ["ethrex-vm/sp1"]
 zisk = ["ethrex-vm/zisk"]

@@ -38,9 +38,6 @@ ethereum_hashing = { git = "https://github.com/jsign/ethereum_hashing", rev = "0
 # [patch."https://github.com/lambdaclass/bls12_381"]
 # bls12_381 = { git = "https://github.com/lambdaclass/zkcrypto-bls12_381", branch = "expose-fp-struct" }
 
-[features]
-l2 = ["stateless-validator-ethrex/l2"]
-
 [profile.release]
 codegen-units = 1
 lto = "fat"
