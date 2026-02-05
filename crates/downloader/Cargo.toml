@@ -1,0 +1,16 @@
+[package]
+name = "downloader"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow.workspace = true
+reqwest = { workspace = true, features = ["json"] }
+serde = { workspace = true, features = ["derive"] }
+tempfile.workspace = true
+tokio = { workspace = true, features = ["fs", "process", "rt-multi-thread", "macros"] }
