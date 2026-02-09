@@ -9,7 +9,9 @@ mod openvm_revm_crypto;
 openvm::init!();
 
 fn main() {
-    openvm_revm_crypto::install_openvm_crypto()
-        .expect("failed to install OpenVM revm crypto provider");
+    assert!(
+        openvm_revm_crypto::install_openvm_crypto()
+            .expect("failed to install OpenVM revm crypto provider")
+    );
     StatelessValidatorRethGuest::run_output_sha256::<OpenVMPlatform>();
 }

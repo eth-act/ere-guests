@@ -32,7 +32,7 @@ openvm-pairing = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4
     "bls12_381",
 ] }
 openvm-sha2 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2" }
-openvm-kzg = { git = "https://github.com/axiom-crypto/openvm-kzg.git", rev = "530a6ed413def5296b7e4967650ba4fc8fd92ea1", default-features = false, features = [
+openvm-kzg = { git = "https://github.com/axiom-crypto/openvm-kzg.git", branch = "openvm-main", default-features = false, features = [
     "use-intrinsics",
 ] }
 
@@ -66,6 +66,7 @@ openvm-sha256-guest = { git = "https://github.com/openvm-org//openvm.git", tag =
 
 [patch.crates-io]
 ethereum_hashing = { git = "https://github.com/jsign/ethereum_hashing", rev = "08c88633b700d7447ef840d19ce7b369c44311de" }
+k256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
 
 [profile.release]
 codegen-units = 1
