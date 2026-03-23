@@ -30,6 +30,7 @@ rust_2018_idioms = { level = "deny", priority = -1 }
 unnameable_types = "warn"
 unreachable_pub = "warn"
 unused_must_use = "deny"
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(zisk_hints)', 'cfg(zisk_hints_debug)', 'cfg(target_vendor, values("zisk"))'] }
 
 [workspace.lints.rustdoc]
 all = "warn"

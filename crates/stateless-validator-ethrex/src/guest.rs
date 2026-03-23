@@ -17,6 +17,10 @@ pub use {
     stateless_validator_common::guest::StatelessValidatorOutput,
 };
 
+#[cfg(feature = "zisk")]
+#[rustfmt::skip]
+mod zisk;
+
 /// Input for the Ethrex stateless validator guest program.
 #[derive(rkyv::Serialize, rkyv::Deserialize, rkyv::Archive)]
 pub struct StatelessValidatorEthrexInput {
@@ -145,7 +149,7 @@ fn crypto() -> Arc<dyn Crypto> {
     #[cfg(feature = "sp1")]
     return Arc::new(ethrex_guest_program::crypto::sp1::Sp1Crypto);
     #[cfg(feature = "zisk")]
-    return Arc::new(ethrex_guest_program::crypto::zisk::ZiskCrypto);
+    return Arc::new(zisk::ZiskCrypto::default());
     #[cfg(not(any(feature = "risc0", feature = "sp1", feature = "zisk")))]
     return Arc::new(ethrex_guest_program::crypto::NativeCrypto);
 }
