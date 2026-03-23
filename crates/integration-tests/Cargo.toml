@@ -15,7 +15,7 @@ sha2.workspace = true
 serde = { workspace = true, features = ["derive"] }
 tar.workspace = true
 tracing.workspace = true
-tracing-subscriber.workspace = true
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tempfile.workspace = true
 serde_json.workspace = true
 

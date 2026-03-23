@@ -111,6 +111,10 @@ pub fn test_execution(
             expected_public_values.resize(32, 0);
         }
 
+        if matches!(zkvm_kind, zkVMKind::Zisk) && expected_public_values.len() < 256 {
+            expected_public_values.resize(256, 0);
+        }
+
         assert_eq!(
             public_values, expected_public_values,
             "Expected public values of test case {} to be \
