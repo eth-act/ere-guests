@@ -19,25 +19,26 @@ alloy-primitives = { version = "1.5.0", default-features = false, features = [
 revm = { version = "34.0.0", default-features = false }
 
 # openvm
-openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", features = [
+openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.3", features = [
     "std",
 ] }
-openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2" }
-openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2" }
-openvm-k256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", package = "k256" }
-openvm-keccak256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2" }
-openvm-p256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", package = "p256" }
-openvm-pairing = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2", features = [
+openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.3" }
+openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.3" }
+openvm-sha2 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.3" }
+openvm-pairing = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.3", features = [
     "bn254",
     "bls12_381",
 ] }
-openvm-sha2 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.2" }
+openvm-k256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.3", package = "k256" }
+openvm-p256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.3", package = "p256" }
 openvm-kzg = { git = "https://github.com/axiom-crypto/openvm-kzg.git", rev = "530a6ed413def5296b7e4967650ba4fc8fd92ea1", default-features = false, features = [
     "use-intrinsics",
 ] }
+openvm-keccak256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1.4.3" }
+aurora-engine-modexp = { version = "1.2.0", default-features = false }
 
 # ere
-ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.3.0", features = [
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.5.0", features = [
     "std",
 ] }
 
@@ -45,24 +46,24 @@ ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.3.0", 
 stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
 
 [patch."https://github.com/openvm-org/openvm.git"]
-openvm = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-algebra-complex-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-algebra-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-algebra-moduli-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-custom-insn = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-ecc-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-ecc-sw-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-k256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2", package = "k256" }
-openvm-keccak256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-keccak256-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-macros-common = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-p256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2", package = "p256" }
-openvm-pairing = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-pairing-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-platform = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-rv32im-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-sha2 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
-openvm-sha256-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.2" }
+openvm = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-algebra-complex-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-algebra-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-algebra-moduli-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-custom-insn = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-ecc-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-ecc-sw-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-k256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3", package = "k256" }
+openvm-keccak256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-keccak256-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-macros-common = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-p256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3", package = "p256" }
+openvm-pairing = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-pairing-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-platform = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-rv32im-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-sha2 = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
+openvm-sha256-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
 
 [profile.release]
 codegen-units = 1
