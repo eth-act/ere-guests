@@ -78,11 +78,13 @@ stateless = { git = "https://github.com/paradigmxyz/stateless", rev = "ed189a519
 tries = { git = "https://github.com/paradigmxyz/stateless", rev = "ed189a51931e8589102f3139d48fdbb3bbe4c1f7", default-features = false }
 
 # ethrex
-ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v9.0.0", default-features = false }
-ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v9.0.0", default-features = false, package = "guest_program" }
-ethrex-rlp = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v9.0.0", default-features = false }
-ethrex-rpc = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v9.0.0", default-features = false }
-ethrex-vm = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v9.0.0", default-features = false }
+# FIXME: Update to upstream when https://github.com/lambdaclass/ethrex/pull/6392 is resolved.
+ethrex-common = { git = "https://github.com/han0110/ethrex.git", rev = "b9d3ef6924633ade5cc5e8f41b83f8ff7b3ec192", default-features = false }
+ethrex-crypto = { git = "https://github.com/han0110/ethrex.git", rev = "b9d3ef6924633ade5cc5e8f41b83f8ff7b3ec192", default-features = false }
+ethrex-guest-program = { git = "https://github.com/han0110/ethrex.git", rev = "b9d3ef6924633ade5cc5e8f41b83f8ff7b3ec192", default-features = false }
+ethrex-rlp = { git = "https://github.com/han0110/ethrex.git", rev = "b9d3ef6924633ade5cc5e8f41b83f8ff7b3ec192", default-features = false }
+ethrex-rpc = { git = "https://github.com/han0110/ethrex.git", rev = "b9d3ef6924633ade5cc5e8f41b83f8ff7b3ec192", default-features = false }
+ethrex-vm = { git = "https://github.com/han0110/ethrex.git", rev = "b9d3ef6924633ade5cc5e8f41b83f8ff7b3ec192", default-features = false }
 
 # ssz
 libssz = { git = "https://github.com/lambdaclass/libssz", rev = "31786524708d853f5ac8da5bdfd8090a9b99103d", default-features = false, features = ["alloc"] }

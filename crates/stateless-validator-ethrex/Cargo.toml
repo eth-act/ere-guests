@@ -21,6 +21,7 @@ alloy-rlp = { workspace = true, optional = true }
 
 # ethrex
 ethrex-common.workspace = true
+ethrex-crypto.workspace = true
 ethrex-guest-program.workspace = true
 ethrex-rlp.workspace = true
 ethrex-rpc = { workspace = true, optional = true }
@@ -45,13 +46,15 @@ stateless-validator-reth = { workspace = true, default-features = true, optional
 # guest
 default = ["std"]
 std = ["stateless-validator-common/std"]
-risc0 = ["ethrex-vm/risc0"]
-sp1 = ["ethrex-vm/sp1"]
-zisk = ["ethrex-vm/zisk"]
+# NOTE: Need additional `ethrex-crypto/risc0` to make `KZG_PRECOMPUTE = 0`
+risc0 = ["ethrex-guest-program/risc0", "ethrex-guest-program/c-kzg", "ethrex-crypto/risc0"]
+sp1 = ["ethrex-guest-program/sp1"]
+zisk = ["ethrex-guest-program/zisk"]
 
 # host
 host = [
     "std",
+    "ethrex-crypto/secp256k1",
     "stateless-validator-common/host",
     "dep:alloy-consensus",
     "dep:alloy-eips",

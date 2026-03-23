@@ -4,11 +4,12 @@ use alloy_eips::eip6110::MAINNET_DEPOSIT_CONTRACT_ADDRESS;
 use ere_zkvm_interface::Input;
 use ethrex_common::{
     H160,
-    types::{BlobSchedule, ChainConfig, ForkBlobSchedule, block_execution_witness},
+    types::{
+        BlobSchedule, ChainConfig, ForkBlobSchedule,
+        block_execution_witness::{self, RpcExecutionWitness},
+    },
 };
-use ethrex_rpc::debug::execution_witness::{
-    RpcExecutionWitness, execution_witness_from_rpc_chain_config,
-};
+use ethrex_rpc::debug::execution_witness::execution_witness_from_rpc_chain_config;
 use guest::{GuestIo, Io};
 use stateless_validator_reth::guest::StatelessValidatorRethInput;
 
@@ -32,8 +33,6 @@ impl StatelessValidatorEthrexInput {
                 stateless_input.block.number,
                 stateless_input,
             )?,
-            elasticity_multiplier: 2u64, // NOTE: Ethrex doesn't derive this value from chain config.
-            fee_configs: Default::default(),
         })
     }
 
@@ -107,6 +106,7 @@ fn from_reth_witness_to_ethrex_witness(
             bpo3: get_blob_schedule(&stateless_input.chain_config, "bpo3"),
             bpo4: get_blob_schedule(&stateless_input.chain_config, "bpo4"),
             bpo5: get_blob_schedule(&stateless_input.chain_config, "bpo5"),
+            amsterdam: get_blob_schedule(&stateless_input.chain_config, "amsterdam"),
         },
         deposit_contract_address: stateless_input
             .chain_config
@@ -118,6 +118,7 @@ fn from_reth_witness_to_ethrex_witness(
         bpo3_time: stateless_input.chain_config.bpo3_time,
         bpo4_time: stateless_input.chain_config.bpo4_time,
         bpo5_time: stateless_input.chain_config.bpo5_time,
+        amsterdam_time: None,
         enable_verkle_at_genesis: false,
     };
 
