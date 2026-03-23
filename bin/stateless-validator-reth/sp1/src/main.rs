@@ -5,8 +5,11 @@
 use ere_platform_sp1::{SP1Platform, sp1_zkvm};
 use stateless_validator_reth::guest::{Guest, StatelessValidatorRethGuest};
 
+mod crypto;
+
 sp1_zkvm::entrypoint!(main);
 
 fn main() {
+    crypto::install_crypto();
     StatelessValidatorRethGuest::run_output_sha256::<SP1Platform>();
 }

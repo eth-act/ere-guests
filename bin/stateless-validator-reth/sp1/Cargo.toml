@@ -13,20 +13,22 @@ alloy-primitives = { version = "1.5.0", default-features = false, features = [
 ] }
 revm = { version = "34.0.0", default-features = false, features = ["bn"] }
 
+# crypto backend
+kzg-rs = "0.2.8"
+
 # ere
-ere-platform-sp1 = { git = "https://github.com/eth-act/ere", tag = "v0.3.0" }
+ere-platform-sp1 = { git = "https://github.com/eth-act/ere", tag = "v0.5.0" }
 
 # local
 stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
 
 [patch.crates-io]
-sha2-v0-10-9 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", tag = "patch-sha2-0.10.9-sp1-4.0.0" }
-sha3-v0-10-8 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha3", tag = "patch-sha3-0.10.8-sp1-4.0.0" }
-crypto-bigint = { git = "https://github.com/sp1-patches/RustCrypto-bigint", tag = "patch-0.5.5-sp1-4.0.0" }
-k256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-k256-13.4-sp1-5.0.0" }
-p256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-p256-13.2-sp1-5.0.0" }
-substrate-bn = { git = "https://github.com/sp1-patches/bn", tag = "patch-0.6.0-sp1-5.0.0" }
-ecdsa = { git = "https://github.com/sp1-patches/signatures", tag = "patch-16.9-sp1-4.1.0" }
+# Copied from https://github.com/succinctlabs/rsp/blob/6275f93/bin/client/Cargo.toml#L20-L26.
+sha2 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", tag = "patch-sha2-0.10.9-sp1-6.0.0", package = "sha2" }
+sha3 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", tag = "patch-sha3-0.10.8-sp1-6.0.0" }
+bn = { git = "https://github.com/sp1-patches/bn", tag = "patch-0.6.0-sp1-6.0.0-substrate-bn", package = "substrate-bn" }
+k256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-k256-13.4-sp1-6.0.0" }
+p256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-p256-13.2-sp1-6.0.0" }
 
 [profile.release]
 codegen-units = 1
