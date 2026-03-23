@@ -7,7 +7,7 @@ edition = "2024"
 
 [dependencies]
 # ere
-ere-platform-airbender = { git = "https://github.com/eth-act/ere", tag = "v0.3.0", features = [
+ere-platform-airbender = { git = "https://github.com/eth-act/ere", tag = "v0.5.0", features = [
     "custom_allocator",
 ] }
 

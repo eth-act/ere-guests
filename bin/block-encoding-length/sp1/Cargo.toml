@@ -7,7 +7,7 @@ edition = "2024"
 
 [dependencies]
 # ere
-ere-platform-sp1 = { git = "https://github.com/eth-act/ere", tag = "v0.3.0" }
+ere-platform-sp1 = { git = "https://github.com/eth-act/ere", tag = "v0.5.0" }
 
 # local
 block-encoding-length = { path = "../../../crates/block-encoding-length" }
