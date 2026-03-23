@@ -46,7 +46,7 @@ jobs:
           - zkvm: risc0
             threads: 12
           - zkvm: sp1
-            threads: 12
+            threads: 2
           - zkvm: zisk
             threads: 1
     steps:
