@@ -1,4 +1,4 @@
-// Copied from https://github.com/0xPolygonHermez/zisk-eth-client/blob/v0.7.0/crates/guest-reth/src/crypto/impls.rs.
+// Copied and modified from https://github.com/0xPolygonHermez/zisk-eth-client/blob/v0.7.0/crates/guest-reth/src/crypto/impls.rs.
 
 #[cfg(not(all(target_os = "zkvm", target_vendor = "zisk")))]
 use k256::ecdsa::{signature::hazmat::PrehashVerifier, RecoveryId, Signature, VerifyingKey};
@@ -447,7 +447,9 @@ impl Crypto for CustomEvmCrypto {
 
                 match ret_code {
                     0 | 1 => Ok(result),
-                    _ => Err(PrecompileError::Bls12381G1NotOnCurve),
+                    2 => Err(PrecompileError::other("bls12_381_g1_add inputs not in field")),
+                    3 => Err(PrecompileError::Bls12381G1NotOnCurve),
+                    _ => Err(PrecompileError::other("bls12_381_g1_add failed")),
                 }
             }
         }
@@ -505,8 +507,9 @@ impl Crypto for CustomEvmCrypto {
 
                 match ret_code {
                     0 | 1 => Ok(result),
-                    2 => Err(PrecompileError::Bls12381G1NotOnCurve),
-                    3 => Err(PrecompileError::Bls12381G1NotInSubgroup),
+                    2 => Err(PrecompileError::other("bls12_381_g1_msm inputs not in field")),
+                    3 => Err(PrecompileError::Bls12381G1NotOnCurve),
+                    4 => Err(PrecompileError::Bls12381G1NotInSubgroup),
                     _ => Err(PrecompileError::other("bls12_381_g1_msm failed")),
                 }
             }
@@ -555,7 +558,9 @@ impl Crypto for CustomEvmCrypto {
                 };
                 match ret_code {
                     0 | 1 => Ok(result),
-                    _ => Err(PrecompileError::Bls12381G2NotOnCurve),
+                    2 => Err(PrecompileError::other("bls12_381_g2_add inputs not in field")),
+                    3 => Err(PrecompileError::Bls12381G2NotOnCurve),
+                    _ => Err(PrecompileError::other("bls12_381_g2_add failed")),
                 }
             }
         }
@@ -613,8 +618,9 @@ impl Crypto for CustomEvmCrypto {
                 };
                 match ret_code {
                     0 | 1 => Ok(result),
-                    2 => Err(PrecompileError::Bls12381G2NotOnCurve),
-                    3 => Err(PrecompileError::Bls12381G2NotInSubgroup),
+                    2 => Err(PrecompileError::other("bls12_381_g2_msm inputs not in field")),
+                    3 => Err(PrecompileError::Bls12381G2NotOnCurve),
+                    4 => Err(PrecompileError::Bls12381G2NotInSubgroup),
                     _ => Err(PrecompileError::other("bls12_381_g2_msm failed")),
                 }
             }
@@ -666,10 +672,12 @@ impl Crypto for CustomEvmCrypto {
                 match ret_code {
                     0 => Ok(true),
                     1 => Ok(false),
-                    2 => Err(PrecompileError::Bls12381G1NotOnCurve),
-                    3 => Err(PrecompileError::Bls12381G1NotInSubgroup),
-                    4 => Err(PrecompileError::Bls12381G2NotOnCurve),
-                    5 => Err(PrecompileError::Bls12381G2NotInSubgroup),
+                    2 => Err(PrecompileError::other("bls12_381_pairing_check G1 inputs not in field")),
+                    3 => Err(PrecompileError::Bls12381G1NotOnCurve),
+                    4 => Err(PrecompileError::Bls12381G1NotInSubgroup),
+                    5 => Err(PrecompileError::other("bls12_381_pairing_check G2 inputs not in field")),
+                    6 => Err(PrecompileError::Bls12381G2NotOnCurve),
+                    7 => Err(PrecompileError::Bls12381G2NotInSubgroup),
                     _ => Err(PrecompileError::other("bls12_381_pairing_check failed")),
                 }
             }
@@ -699,6 +707,7 @@ impl Crypto for CustomEvmCrypto {
                 let ret_code = unsafe { bls12_381_fp_to_g1_c(result.as_mut_ptr(), fp.as_ptr()) };
                 match ret_code {
                     0 => Ok(result),
+                    1 => Err(PrecompileError::other("bls12_381_fp_to_g1 input not in field")),
                     _ => Err(PrecompileError::other("bls12_381_fp_to_g1 failed")),
                 }
             }
@@ -733,6 +742,7 @@ impl Crypto for CustomEvmCrypto {
                     unsafe { bls12_381_fp2_to_g2_c(result.as_mut_ptr(), fp2_bytes.as_ptr()) };
                 match ret_code {
                     0 => Ok(result),
+                    1 => Err(PrecompileError::other("bls12_381_fp2_to_g2 input not in field")),
                     _ => Err(PrecompileError::other("bls12_381_fp2_to_g2 failed")),
                 }
             }
