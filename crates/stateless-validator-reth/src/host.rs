@@ -309,7 +309,9 @@ fn get_requests(
 
 #[cfg(test)]
 mod test {
-    use stateless_validator_common::new_payload_request::{ExecutionPayloadV1, NewPayloadRequest};
+    use stateless_validator_common::new_payload_request::{
+        ExecutionPayloadV1, NativeSha256Hasher, NewPayloadRequest,
+    };
 
     use crate::guest::{Io, StatelessValidatorOutput, StatelessValidatorRethIo};
 
@@ -331,7 +333,7 @@ mod test {
             block_hash: [7; 32],
             transactions: Default::default(),
         })
-        .tree_hash_root();
+        .tree_hash_root(&NativeSha256Hasher);
         for output in [
             StatelessValidatorOutput::new(dummy_new_payload_request_root, false),
             StatelessValidatorOutput::new(dummy_new_payload_request_root, true),

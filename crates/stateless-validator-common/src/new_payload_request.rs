@@ -5,10 +5,11 @@
 use alloc::{vec, vec::Vec};
 
 use libssz_derive::{HashTreeRoot, SszDecode, SszEncode};
-use libssz_merkle::HashTreeRoot;
+use libssz_merkle::{HashTreeRoot, Sha256Hasher};
 use libssz_types::SszList;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 /// Primitive types
 pub type Hash32 = [u8; 32];
@@ -18,6 +19,16 @@ pub type Address20 = [u8; 20];
 pub type Uint256Bytes = [u8; 32];
 pub type LogsBloom = [u8; 256];
 pub type ExtraData = SszList<u8, 32>;
+
+/// Native SHA-256 provider for SSZ tree hashing.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct NativeSha256Hasher;
+
+impl Sha256Hasher for NativeSha256Hasher {
+    fn hash(&self, data: &[u8]) -> [u8; 32] {
+        Sha256::digest(data).into()
+    }
+}
 
 /// Limits
 pub const MAX_WITHDRAWALS_PER_PAYLOAD: usize = 16;
@@ -285,22 +296,20 @@ pub enum NewPayloadRequest {
 }
 
 impl NewPayloadRequest {
-    pub fn tree_hash_root(&self) -> [u8; 32] {
+    pub fn tree_hash_root(&self, hasher: &impl Sha256Hasher) -> [u8; 32] {
         match self {
-            NewPayloadRequest::Bellatrix(req) => req.hash_tree_root(),
-            NewPayloadRequest::Capella(req) => req.hash_tree_root(),
-            NewPayloadRequest::Deneb(req) => req.hash_tree_root(),
-            NewPayloadRequest::ElectraFulu(req) => req.hash_tree_root(),
+            NewPayloadRequest::Bellatrix(req) => req.hash_tree_root(hasher),
+            NewPayloadRequest::Capella(req) => req.hash_tree_root(hasher),
+            NewPayloadRequest::Deneb(req) => req.hash_tree_root(hasher),
+            NewPayloadRequest::ElectraFulu(req) => req.hash_tree_root(hasher),
         }
     }
 }
 
 /// Computes the requests hash for EL block construction.
-pub fn compute_requests_hash(requests: &ExecutionRequests) -> [u8; 32] {
+pub fn compute_requests_hash(requests: &ExecutionRequests, hasher: &impl Sha256Hasher) -> [u8; 32] {
     use libssz::SszEncode;
-    use sha2::{Digest, Sha256};
-
-    let mut outer_hasher = Sha256::new();
+    let mut outer_bytes = Vec::new();
 
     // Deposit requests (type 0x00)
     let mut deposits_bytes = vec![0x00u8];
@@ -308,7 +317,7 @@ pub fn compute_requests_hash(requests: &ExecutionRequests) -> [u8; 32] {
         deposits_bytes.extend(deposit.to_ssz());
     }
     if deposits_bytes.len() > 1 {
-        outer_hasher.update(Sha256::digest(&deposits_bytes));
+        outer_bytes.extend_from_slice(&hasher.hash(&deposits_bytes));
     }
 
     // Withdrawal requests (type 0x01)
@@ -317,7 +326,7 @@ pub fn compute_requests_hash(requests: &ExecutionRequests) -> [u8; 32] {
         withdrawals_bytes.extend(withdrawal.to_ssz());
     }
     if withdrawals_bytes.len() > 1 {
-        outer_hasher.update(Sha256::digest(&withdrawals_bytes));
+        outer_bytes.extend_from_slice(&hasher.hash(&withdrawals_bytes));
     }
 
     // Consolidation requests (type 0x02)
@@ -326,8 +335,8 @@ pub fn compute_requests_hash(requests: &ExecutionRequests) -> [u8; 32] {
         consolidations_bytes.extend(consolidation.to_ssz());
     }
     if consolidations_bytes.len() > 1 {
-        outer_hasher.update(Sha256::digest(&consolidations_bytes));
+        outer_bytes.extend_from_slice(&hasher.hash(&consolidations_bytes));
     }
 
-    outer_hasher.finalize().into()
+    hasher.hash(&outer_bytes)
 }

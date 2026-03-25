@@ -2,6 +2,7 @@
 
 use anyhow::{Context, Result};
 use ethrex_common::{Address, Bloom, Bytes, H256, types::Block};
+use libssz_merkle::Sha256Hasher;
 use stateless_validator_common::new_payload_request::{
     ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, NewPayloadRequest, Withdrawal,
     compute_requests_hash,
@@ -13,7 +14,10 @@ use crate::execution_payload::{
 };
 
 /// Converts a [`NewPayloadRequest`] into an ethrex [`Block`].
-pub fn get_block_from_new_payload_request(req: NewPayloadRequest) -> Result<Block> {
+pub fn get_block_from_new_payload_request(
+    req: NewPayloadRequest,
+    hasher: &impl Sha256Hasher,
+) -> Result<Block> {
     match req {
         NewPayloadRequest::Bellatrix(b) => {
             let payload: ExecutionPayload = b.execution_payload.into();
@@ -51,7 +55,10 @@ pub fn get_block_from_new_payload_request(req: NewPayloadRequest) -> Result<Bloc
         }
         NewPayloadRequest::ElectraFulu(e) => {
             let parent_beacon_block_root = Some(H256::from(e.parent_beacon_block_root));
-            let requests_hash = Some(H256::from(compute_requests_hash(&e.execution_requests)));
+            let requests_hash = Some(H256::from(compute_requests_hash(
+                &e.execution_requests,
+                hasher,
+            )));
             let payload: ExecutionPayload = e.execution_payload.into();
             validate_execution_payload_v3(&payload).context("V3 payload validation failed")?;
             let block = payload

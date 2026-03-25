@@ -16,8 +16,8 @@ use reth_chainspec::{ChainSpec, EthereumHardforks};
 use reth_payload_validator::{cancun, prague, shanghai};
 use reth_primitives_traits::{Block as _, SealedBlock, SignedTransaction};
 use stateless_validator_common::new_payload_request::{
-    ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, NewPayloadRequest, Withdrawal,
-    compute_requests_hash,
+    ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, NativeSha256Hasher,
+    NewPayloadRequest, Withdrawal, compute_requests_hash,
 };
 
 /// Converts a [`NewPayloadRequest`] into a validated reth [`Block`].
@@ -142,7 +142,10 @@ fn new_payload_request_to_execution_data(req: NewPayloadRequest) -> ExecutionDat
             let cancun_fields =
                 CancunPayloadFields::new(parent_beacon_block_root, versioned_hashes);
 
-            let requests_hash = B256::from(compute_requests_hash(&e.execution_requests));
+            let requests_hash = B256::from(compute_requests_hash(
+                &e.execution_requests,
+                &NativeSha256Hasher,
+            ));
             let prague_fields = alloy_rpc_types_engine::PraguePayloadFields::new(requests_hash);
             let sidecar = ExecutionPayloadSidecar::v4(cancun_fields, prague_fields);
 

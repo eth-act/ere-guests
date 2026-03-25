@@ -9,7 +9,7 @@ use reth_evm_ethereum::EthEvmConfig;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use stateless::{ExecutionWitness, Genesis, UncompressedPublicKey, stateless_validation_with_trie};
-use stateless_validator_common::new_payload_request::NewPayloadRequest;
+use stateless_validator_common::new_payload_request::{NativeSha256Hasher, NewPayloadRequest};
 use tries::zeth::SparseState;
 
 use crate::new_payload_request::new_payload_request_to_block;
@@ -49,7 +49,9 @@ impl Guest for StatelessValidatorRethGuest {
     fn compute<P: Platform>(input: GuestInput<Self>) -> GuestOutput<Self> {
         let new_payload_request_root =
             P::cycle_scope("new_payload_request_root_calculation", || {
-                input.new_payload_request.tree_hash_root()
+                input
+                    .new_payload_request
+                    .tree_hash_root(&NativeSha256Hasher)
             });
 
         #[cfg(feature = "std")]

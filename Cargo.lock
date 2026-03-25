@@ -361,7 +361,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-serde",
  "alloy-sol-types",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "serde",
  "serde_json",
  "serde_with",
@@ -2069,7 +2069,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3585,16 +3585,18 @@ dependencies = [
 
 [[package]]
 name = "libssz"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54193e6560611847aceb81ae53c75aa7031b50304bead95ec935f97af79378f2"
 dependencies = [
  "smallvec",
 ]
 
 [[package]]
 name = "libssz-derive"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bb6393ec2e9b660bbcb0d9d74aac7b3c351c7b4440dcc24e9d344e62cf4bf10"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3603,8 +3605,9 @@ dependencies = [
 
 [[package]]
 name = "libssz-merkle"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37acd26ea2fbecfd8af8121780a385284cfb6d6f4c2f77648a9798b5d95a87d8"
 dependencies = [
  "libssz",
  "sha2",
@@ -3612,8 +3615,9 @@ dependencies = [
 
 [[package]]
 name = "libssz-types"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93fc4f9486929bd568731a599e9b4914aa44a0b4ecbd38c702151fe97210c323"
 dependencies = [
  "libssz",
  "libssz-merkle",
@@ -3864,7 +3868,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4666,7 +4670,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "27c6023962132f4b30eb4c172c91ce92d933da334c59c23cddee82358ddafb0b"
 dependencies = [
  "anyhow",
- "itertools 0.10.5",
+ "itertools 0.14.0",
  "proc-macro2",
  "quote",
  "syn 2.0.116",
@@ -5662,7 +5666,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.11.0",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -6363,6 +6367,7 @@ dependencies = [
  "ethrex-rpc",
  "ethrex-vm",
  "guest",
+ "libssz-merkle",
  "rkyv",
  "stateless",
  "stateless-validator-common",
@@ -6551,7 +6556,7 @@ dependencies = [
  "getrandom 0.4.1",
  "once_cell",
  "rustix 1.1.3",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -7284,7 +7289,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

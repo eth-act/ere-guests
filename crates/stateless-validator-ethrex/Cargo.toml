@@ -27,6 +27,9 @@ ethrex-rlp.workspace = true
 ethrex-rpc = { workspace = true, optional = true }
 ethrex-vm.workspace = true
 
+# ssz
+libssz_merkle.workspace = true
+
 # reth
 stateless = { workspace = true, optional = true }
 
