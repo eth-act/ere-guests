@@ -149,7 +149,7 @@ fn crypto() -> Arc<dyn Crypto> {
     #[cfg(feature = "sp1")]
     return Arc::new(ethrex_guest_program::crypto::sp1::Sp1Crypto);
     #[cfg(feature = "zisk")]
-    return Arc::new(zisk::ZiskCrypto::default());
+    return Arc::new(zisk::ZiskCrypto);
     #[cfg(not(any(feature = "risc0", feature = "sp1", feature = "zisk")))]
     return Arc::new(ethrex_guest_program::crypto::NativeCrypto);
 }
