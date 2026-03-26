@@ -31,7 +31,6 @@ jobs:
         zkvm:
           - airbender
           - openvm
-          - pico
           - risc0
           - sp1
           - zisk
@@ -40,8 +39,6 @@ jobs:
             zkvm: airbender
           - guest: stateless-validator-ethrex
             zkvm: openvm
-          - guest: stateless-validator-ethrex
-            zkvm: pico
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

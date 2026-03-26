@@ -32,11 +32,6 @@ fn test_execution_openvm() {
 }
 
 #[test]
-fn test_execution_pico() {
-    test_execution(zkVMKind::Pico);
-}
-
-#[test]
 fn test_execution_risc0() {
     test_execution(zkVMKind::Risc0);
 }

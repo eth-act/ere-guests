@@ -25,7 +25,6 @@ jobs:
         zkvm:
           - airbender
           - openvm
-          - pico
           - risc0
           - sp1
           - zisk
@@ -34,15 +33,11 @@ jobs:
             zkvm: airbender
           - guest: stateless-validator-ethrex
             zkvm: openvm
-          - guest: stateless-validator-ethrex
-            zkvm: pico
         include:
           - zkvm: airbender
             threads: 12
           - zkvm: openvm
             threads: 1
-          - zkvm: pico
-            threads: 12
           - zkvm: risc0
             threads: 12
           - zkvm: sp1
@@ -89,7 +84,7 @@ jobs:
 
       - name: Test
         env:
-          RUST_LOG: info,pico_vm=warn
+          RUST_LOG: info
           RAYON_NUM_THREADS: ${{ matrix.threads }}
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
         run: |
