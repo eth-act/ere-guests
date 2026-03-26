@@ -43,7 +43,7 @@ ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.5.0", 
 ] }
 
 # local
-stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", features = ["openvm"] }
 
 [patch."https://github.com/openvm-org/openvm.git"]
 openvm = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }

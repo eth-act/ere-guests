@@ -50,6 +50,8 @@ stateless-validator-common = { workspace = true, features = ["serde"] }
 # guest
 default = ["std"]
 std = ["once_cell/std", "stateless-validator-common/std"]
+openvm = []
+zisk = []
 
 # host
 host = ["std", "stateless-validator-common/host", "dep:ere-zkvm-interface"]

@@ -5,11 +5,14 @@
 use alloc::{vec, vec::Vec};
 
 use libssz_derive::{HashTreeRoot, SszDecode, SszEncode};
-use libssz_merkle::{HashTreeRoot, Sha256Hasher};
+use libssz_merkle::HashTreeRoot;
 use libssz_types::SszList;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+
+#[rustfmt::skip]
+pub use libssz_merkle::Sha256Hasher;
 
 /// Primitive types
 pub type Hash32 = [u8; 32];

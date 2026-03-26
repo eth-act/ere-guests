@@ -23,7 +23,7 @@ revm = { version = "34.0.0", default-features = false, features = ["bn"] }
 ere-platform-zisk = { git = "https://github.com/eth-act/ere", tag = "v0.5.0", default-features = false, features = ["inputcpy"] }
 
 # local
-stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", features = ["zisk"] }
 
 [profile.release]
 codegen-units = 1

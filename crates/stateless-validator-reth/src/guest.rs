@@ -9,7 +9,7 @@ use reth_evm_ethereum::EthEvmConfig;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use stateless::{ExecutionWitness, Genesis, UncompressedPublicKey, stateless_validation_with_trie};
-use stateless_validator_common::new_payload_request::{NativeSha256Hasher, NewPayloadRequest};
+use stateless_validator_common::new_payload_request::{NewPayloadRequest, Sha256Hasher};
 use tries::zeth::SparseState;
 
 use crate::new_payload_request::new_payload_request_to_block;
@@ -19,6 +19,11 @@ pub use {
     guest::*,
     stateless_validator_common::guest::StatelessValidatorOutput,
 };
+
+#[cfg(feature = "openvm")]
+mod openvm;
+#[cfg(feature = "zisk")]
+mod zisk;
 
 /// Input for the stateless validator guest program.
 #[serde_as]
@@ -49,9 +54,7 @@ impl Guest for StatelessValidatorRethGuest {
     fn compute<P: Platform>(input: GuestInput<Self>) -> GuestOutput<Self> {
         let new_payload_request_root =
             P::cycle_scope("new_payload_request_root_calculation", || {
-                input
-                    .new_payload_request
-                    .tree_hash_root(&NativeSha256Hasher)
+                input.new_payload_request.tree_hash_root(&sha256_hasher())
             });
 
         #[cfg(feature = "std")]
@@ -127,4 +130,14 @@ impl StatelessValidatorRethGuest {
             }
         }
     }
+}
+
+#[allow(unreachable_code)]
+fn sha256_hasher() -> impl Sha256Hasher {
+    #[cfg(feature = "openvm")]
+    return openvm::OpenVMSha256Hasher;
+    #[cfg(feature = "zisk")]
+    return zisk::ZiskSha256Hasher;
+    #[cfg(not(any(feature = "openvm", feature = "zisk")))]
+    return stateless_validator_common::new_payload_request::NativeSha256Hasher;
 }
