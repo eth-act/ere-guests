@@ -7,7 +7,7 @@ edition = "2024"
 
 [dependencies]
 # ere
-ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.5.0", features = [
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.6.0", features = [
     "std",
 ] }
 

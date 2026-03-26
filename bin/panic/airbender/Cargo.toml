@@ -6,4 +6,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ere-platform-airbender = { git = "https://github.com/eth-act/ere", tag = "v0.5.0" }
+ere-platform-airbender = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
