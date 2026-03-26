@@ -565,8 +565,8 @@ dependencies = [
 
 [[package]]
 name = "circuit"
-version = "0.16.0"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.0#61fe43922231290ec0e09f482a88bbf3572a8f1c"
+version = "0.16.1"
+source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
 
 [[package]]
 name = "clap"
@@ -994,24 +994,24 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-io"
-version = "0.5.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.5.0#ba1a5b04c04a236b1e1cf4f0798a9b15cf3d0e24"
+version = "0.6.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
 dependencies = [
  "rkyv",
 ]
 
 [[package]]
 name = "ere-platform-trait"
-version = "0.5.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.5.0#ba1a5b04c04a236b1e1cf4f0798a9b15cf3d0e24"
+version = "0.6.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
 dependencies = [
  "digest",
 ]
 
 [[package]]
 name = "ere-platform-zisk"
-version = "0.5.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.5.0#ba1a5b04c04a236b1e1cf4f0798a9b15cf3d0e24"
+version = "0.6.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
 dependencies = [
  "ere-platform-trait",
  "fnv",
@@ -1284,19 +1284,8 @@ dependencies = [
 
 [[package]]
 name = "fields"
-version = "0.16.0"
-source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.0#d61d40bee66b3c7f02bd4ab8661f9f29ad6730a4"
-dependencies = [
- "cfg-if",
- "num-bigint 0.4.6",
- "paste",
- "serde",
-]
-
-[[package]]
-name = "fields"
-version = "0.16.0"
-source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?branch=pre-develop-0.16.0#620e7c89f39ee2b608bd0f5d43765dc89728ff67"
+version = "0.16.1"
+source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.1#971209423e8fa53fa32dc747744d68c65aafa6c7"
 dependencies = [
  "cfg-if",
  "num-bigint 0.4.6",
@@ -1922,8 +1911,8 @@ dependencies = [
 
 [[package]]
 name = "lib-c"
-version = "0.16.0"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.0#61fe43922231290ec0e09f482a88bbf3572a8f1c"
+version = "0.16.1"
+source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
 
 [[package]]
 name = "libc"
@@ -1939,16 +1928,18 @@ checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
 
 [[package]]
 name = "libssz"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54193e6560611847aceb81ae53c75aa7031b50304bead95ec935f97af79378f2"
 dependencies = [
  "smallvec",
 ]
 
 [[package]]
 name = "libssz-derive"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bb6393ec2e9b660bbcb0d9d74aac7b3c351c7b4440dcc24e9d344e62cf4bf10"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1957,8 +1948,9 @@ dependencies = [
 
 [[package]]
 name = "libssz-merkle"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37acd26ea2fbecfd8af8121780a385284cfb6d6f4c2f77648a9798b5d95a87d8"
 dependencies = [
  "libssz",
  "sha2",
@@ -1966,8 +1958,9 @@ dependencies = [
 
 [[package]]
 name = "libssz-types"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93fc4f9486929bd568731a599e9b4914aa44a0b4ecbd38c702151fe97210c323"
 dependencies = [
  "libssz",
  "libssz-merkle",
@@ -2459,8 +2452,8 @@ dependencies = [
 
 [[package]]
 name = "precompiles-helpers"
-version = "0.16.0"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.0#61fe43922231290ec0e09f482a88bbf3572a8f1c"
+version = "0.16.1"
+source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
 dependencies = [
  "ark-bls12-381",
  "ark-bn254",
@@ -2517,8 +2510,8 @@ dependencies = [
 
 [[package]]
 name = "proofman-util"
-version = "0.16.0"
-source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.0#d61d40bee66b3c7f02bd4ab8661f9f29ad6730a4"
+version = "0.16.1"
+source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.1#971209423e8fa53fa32dc747744d68c65aafa6c7"
 dependencies = [
  "bincode",
  "bytemuck",
@@ -2529,11 +2522,11 @@ dependencies = [
 
 [[package]]
 name = "proofman-verifier"
-version = "0.16.0"
-source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.0#d61d40bee66b3c7f02bd4ab8661f9f29ad6730a4"
+version = "0.16.1"
+source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.1#971209423e8fa53fa32dc747744d68c65aafa6c7"
 dependencies = [
  "bytemuck",
- "fields 0.16.0 (git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.0)",
+ "fields",
  "proofman-util",
  "rayon",
  "tracing",
@@ -3159,6 +3152,7 @@ dependencies = [
  "ethrex-rlp",
  "ethrex-vm",
  "guest",
+ "libssz-merkle",
  "rkyv",
  "stateless-validator-common",
 ]
@@ -3894,25 +3888,25 @@ dependencies = [
 
 [[package]]
 name = "zisk-definitions"
-version = "0.16.0"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.0#61fe43922231290ec0e09f482a88bbf3572a8f1c"
+version = "0.16.1"
+source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
 
 [[package]]
 name = "zisk-verifier"
-version = "0.16.0"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.0#61fe43922231290ec0e09f482a88bbf3572a8f1c"
+version = "0.16.1"
+source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
 dependencies = [
  "proofman-verifier",
 ]
 
 [[package]]
 name = "ziskos"
-version = "0.16.0"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.0#61fe43922231290ec0e09f482a88bbf3572a8f1c"
+version = "0.16.1"
+source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
 dependencies = [
  "bincode",
  "cfg-if",
- "fields 0.16.0 (git+https://github.com/0xPolygonHermez/pil2-proofman.git?branch=pre-develop-0.16.0)",
+ "fields",
  "getrandom",
  "lazy_static",
  "lib-c",

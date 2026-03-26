@@ -94,10 +94,10 @@ libssz_merkle = { package = "libssz-merkle", version = "0.2.1", default-features
 libssz_types = { package = "libssz-types", version = "0.2.1", default-features = false, features = ["alloc"] }
 
 # ere
-ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.5.0" }
-ere-io = { git = "https://github.com/eth-act/ere", tag = "v0.5.0" }
-ere-platform-trait = { git = "https://github.com/eth-act/ere", tag = "v0.5.0" }
-ere-zkvm-interface = { git = "https://github.com/eth-act/ere", tag = "v0.5.0" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
+ere-io = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
+ere-platform-trait = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
+ere-zkvm-interface = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
 
 # local
 guest = { path = "crates/guest", default-features = false }

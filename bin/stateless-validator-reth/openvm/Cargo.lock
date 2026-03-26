@@ -1356,8 +1356,8 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-io"
-version = "0.5.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.5.0#ba1a5b04c04a236b1e1cf4f0798a9b15cf3d0e24"
+version = "0.6.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
 dependencies = [
  "bincode",
  "serde",
@@ -1365,8 +1365,8 @@ dependencies = [
 
 [[package]]
 name = "ere-platform-openvm"
-version = "0.5.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.5.0#ba1a5b04c04a236b1e1cf4f0798a9b15cf3d0e24"
+version = "0.6.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
 dependencies = [
  "ere-platform-trait",
  "openvm",
@@ -1374,8 +1374,8 @@ dependencies = [
 
 [[package]]
 name = "ere-platform-trait"
-version = "0.5.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.5.0#ba1a5b04c04a236b1e1cf4f0798a9b15cf3d0e24"
+version = "0.6.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
 dependencies = [
  "digest 0.10.7",
 ]
@@ -2022,16 +2022,18 @@ checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
 
 [[package]]
 name = "libssz"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54193e6560611847aceb81ae53c75aa7031b50304bead95ec935f97af79378f2"
 dependencies = [
  "smallvec",
 ]
 
 [[package]]
 name = "libssz-derive"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bb6393ec2e9b660bbcb0d9d74aac7b3c351c7b4440dcc24e9d344e62cf4bf10"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2040,8 +2042,9 @@ dependencies = [
 
 [[package]]
 name = "libssz-merkle"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37acd26ea2fbecfd8af8121780a385284cfb6d6f4c2f77648a9798b5d95a87d8"
 dependencies = [
  "libssz",
  "sha2",
@@ -2049,8 +2052,9 @@ dependencies = [
 
 [[package]]
 name = "libssz-types"
-version = "0.1.0"
-source = "git+https://github.com/lambdaclass/libssz?rev=31786524708d853f5ac8da5bdfd8090a9b99103d#31786524708d853f5ac8da5bdfd8090a9b99103d"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93fc4f9486929bd568731a599e9b4914aa44a0b4ecbd38c702151fe97210c323"
 dependencies = [
  "libssz",
  "libssz-merkle",

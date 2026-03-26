@@ -54,8 +54,8 @@ dependencies = [
 
 [[package]]
 name = "ere-platform-openvm"
-version = "0.5.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.5.0#ba1a5b04c04a236b1e1cf4f0798a9b15cf3d0e24"
+version = "0.6.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
 dependencies = [
  "ere-platform-trait",
  "openvm",
@@ -63,8 +63,8 @@ dependencies = [
 
 [[package]]
 name = "ere-platform-trait"
-version = "0.5.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.5.0#ba1a5b04c04a236b1e1cf4f0798a9b15cf3d0e24"
+version = "0.6.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
 dependencies = [
  "digest",
 ]
