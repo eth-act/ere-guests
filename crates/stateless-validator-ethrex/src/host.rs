@@ -9,7 +9,6 @@ use ethrex_common::{
         block_execution_witness::{self, RpcExecutionWitness},
     },
 };
-use ethrex_rpc::debug::execution_witness::execution_witness_from_rpc_chain_config;
 use guest::{GuestIo, Io};
 use stateless_validator_reth::guest::StatelessValidatorRethInput;
 
@@ -142,10 +141,8 @@ fn from_reth_witness_to_ethrex_witness(
         codes,
         headers: block_headers_bytes,
     };
-    let execution_witness =
-        execution_witness_from_rpc_chain_config(rpc_witness, chain_config, block_number)?;
 
-    Ok(execution_witness)
+    Ok(rpc_witness.into_execution_witness(chain_config, block_number)?)
 }
 
 fn get_blob_schedule(

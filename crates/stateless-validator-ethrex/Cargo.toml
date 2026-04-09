@@ -52,7 +52,7 @@ std = ["stateless-validator-common/std"]
 # NOTE: Need additional `ethrex-crypto/risc0` to make `KZG_PRECOMPUTE = 0`
 risc0 = ["ethrex-guest-program/risc0", "ethrex-guest-program/c-kzg", "ethrex-crypto/risc0"]
 sp1 = ["ethrex-guest-program/sp1"]
-zisk = []
+zisk = ["ethrex-guest-program/zisk"]
 
 # host
 host = [
