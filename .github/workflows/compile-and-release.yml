@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
 
 env:
   CARGO_TERM_COLOR: always
@@ -75,11 +73,27 @@ jobs:
             output/${{ matrix.guest }}-${{ matrix.zkvm }}
           if-no-files-found: error
 
-  create-release:
-    name: Create release
+  check-git-tag:
+    name: Check whether git tag exists
     needs: compile
     runs-on: ubuntu-latest
-    if: github.ref_type == 'tag'
+    outputs:
+      exists: ${{ steps.check-git-tag.outputs.exists }}
+      tag: ${{ steps.check-git-tag.outputs.tag }}
+    steps:
+      - name: Check whether tag exists
+        id: check-git-tag
+        run: |
+          TAG=$(git ls-remote --tags "https://github.com/${{ github.repository }}" "v*" \
+            | awk '$1 == "${{ github.sha }}" { sub("refs/tags/", "", $2); sub(/\^\{\}$/, "", $2); print $2; exit }')
+          echo "exists=$([[ -n "$TAG" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+  update-release-with-artifacts:
+    name: Update release with artifacts
+    needs: [compile, check-git-tag]
+    if: needs.check-git-tag.outputs.exists == 'true'
+    runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -92,14 +106,14 @@ jobs:
 
       - name: Generate release notes
         run: |
-          echo "This release contains compiled guest programs for various zkVMs." > release-body.md
+          echo "## Compiled guest programs" > release-body.md
+          echo "" >> release-body.md
+          echo "This release contains compiled guest programs for various zkVMs." >> release-body.md
           echo "" >> release-body.md
           echo "Built with Ere compiler version: \`${{ needs.compile.outputs.ere_tag }}\`." >> release-body.md
           echo "" >> release-body.md
-          echo "## Compiled guest programs" >> release-body.md
-          echo "" >> release-body.md
 
-          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/${{ needs.check-git-tag.outputs.tag }}"
 
           # Get unique guest names from .elf files
           declare -A guests
@@ -140,33 +154,38 @@ jobs:
           echo "$MINISIGN_PUBLIC_KEY" > minisign.pub
 
           echo "Starting signing process..."
-          
+
           # Iterate over artifacts and sign them
           for file in artifacts/*; do
             if [ -f "$file" ]; then
               filename=$(basename "$file")
               echo "Signing $filename..."
-              
+
               # -S: Sign, -m: file, -s: secret key, -x: output signature, -t: trusted comment
               # We output the .minisig directly into the artifacts folder so it gets released
               echo "$MINISIGN_PASSWORD" | minisign -Sm "$file" -s minisign.key -x "$file.minisig" -t "$filename"
             fi
           done
-          
+
           # Move the public key into artifacts so it is included in the release
           cp minisign.pub artifacts/
-          
+
           # Cleanup secret key
           rm minisign.key
-          
+
           echo "Signing complete. Contents of artifacts:"
           ls -R artifacts
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload artifacts to release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: Compiled Guests (${{ github.ref_name }})
-          files: artifacts/*
-          body_path: release-body.md
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --repo "${{ github.repository }}" "${{ needs.check-git-tag.outputs.tag }}" artifacts/* --clobber
+
+      - name: Append artifact info to release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXISTING="$(gh release view --repo "${{ github.repository }}" "${{ needs.check-git-tag.outputs.tag }}" --json body -q .body)"
+          gh release edit --repo "${{ github.repository }}" "${{ needs.check-git-tag.outputs.tag }}" --notes "${EXISTING}
+
+          $(cat release-body.md)"
