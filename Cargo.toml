@@ -87,12 +87,12 @@ stateless = { git = "https://github.com/paradigmxyz/stateless", branch = "bal-de
 tries = { git = "https://github.com/paradigmxyz/stateless", branch = "bal-devnet-3", default-features = false }
 
 # ethrex
-ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", rev = "6ba9d9a458e812ff3afd80eaf89cddd97d3fb67e", default-features = false }
-ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", rev = "6ba9d9a458e812ff3afd80eaf89cddd97d3fb67e", default-features = false }
-ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", rev = "6ba9d9a458e812ff3afd80eaf89cddd97d3fb67e", default-features = false }
-ethrex-rlp = { git = "https://github.com/lambdaclass/ethrex.git", rev = "6ba9d9a458e812ff3afd80eaf89cddd97d3fb67e", default-features = false }
-ethrex-rpc = { git = "https://github.com/lambdaclass/ethrex.git", rev = "6ba9d9a458e812ff3afd80eaf89cddd97d3fb67e", default-features = false }
-ethrex-vm = { git = "https://github.com/lambdaclass/ethrex.git", rev = "6ba9d9a458e812ff3afd80eaf89cddd97d3fb67e", default-features = false }
+ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", branch = "bal-devnet-3", default-features = false }
+ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", branch = "bal-devnet-3", default-features = false }
+ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", branch = "bal-devnet-3", default-features = false }
+ethrex-rlp = { git = "https://github.com/lambdaclass/ethrex.git", branch = "bal-devnet-3", default-features = false }
+ethrex-rpc = { git = "https://github.com/lambdaclass/ethrex.git", branch = "bal-devnet-3", default-features = false }
+ethrex-vm = { git = "https://github.com/lambdaclass/ethrex.git", branch = "bal-devnet-3", default-features = false }
 
 # ssz
 libssz = { version = "0.2.1", default-features = false, features = ["alloc"] }
