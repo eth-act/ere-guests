@@ -1,17 +1,22 @@
 //! Conversion utilities for NewPayloadRequest to ethrex Block.
 
 use anyhow::{Context, Result};
-use ethrex_common::{Address, Bloom, Bytes, H256, types::Block};
+use ethrex_common::{
+    Address, Bloom, Bytes, H256,
+    types::{Block, block_access_list::BlockAccessList},
+};
 use ethrex_crypto::Crypto;
+use ethrex_rlp::decode::RLPDecode;
 use libssz_merkle::Sha256Hasher;
 use stateless_validator_common::new_payload_request::{
-    ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, NewPayloadRequest, Withdrawal,
-    compute_requests_hash,
+    ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, ExecutionPayloadV4,
+    NewPayloadRequest, Withdrawal, compute_requests_hash,
 };
 
 use crate::execution_payload::{
     EncodedTransaction, ExecutionPayload, validate_block_payload_v1_v2, validate_block_payload_v3,
-    validate_execution_payload_v1, validate_execution_payload_v2, validate_execution_payload_v3,
+    validate_block_payload_v4, validate_execution_payload_v1, validate_execution_payload_v2,
+    validate_execution_payload_v3, validate_execution_payload_v4,
 };
 
 /// Converts a [`NewPayloadRequest`] into an ethrex [`Block`].
@@ -26,7 +31,7 @@ pub fn get_block_from_new_payload_request(
             validate_execution_payload_v1(&payload).context("V1 payload validation failed")?;
             let block = payload
                 .clone()
-                .into_block(None, None, crypto)
+                .into_block(None, None, None, crypto)
                 .context("into_block failed")?;
             validate_block_payload_v1_v2(&payload, &block)
                 .context("Block/Payload validation failed")?;
@@ -37,7 +42,7 @@ pub fn get_block_from_new_payload_request(
             validate_execution_payload_v2(&payload).context("V2 payload validation failed")?;
             let block = payload
                 .clone()
-                .into_block(None, None, crypto)
+                .into_block(None, None, None, crypto)
                 .context("into_block failed")?;
             validate_block_payload_v1_v2(&payload, &block)
                 .context("Block/Payload validation failed")?;
@@ -49,7 +54,7 @@ pub fn get_block_from_new_payload_request(
             validate_execution_payload_v3(&payload).context("V3 payload validation failed")?;
             let block = payload
                 .clone()
-                .into_block(parent_beacon_block_root, None, crypto)
+                .into_block(parent_beacon_block_root, None, None, crypto)
                 .context("into_block failed")?;
             validate_block_payload_v3(&payload, &block, &d.versioned_hashes)
                 .context("Block/Payload validation failed")?;
@@ -65,9 +70,35 @@ pub fn get_block_from_new_payload_request(
             validate_execution_payload_v3(&payload).context("V3 payload validation failed")?;
             let block = payload
                 .clone()
-                .into_block(parent_beacon_block_root, requests_hash, crypto)
+                .into_block(parent_beacon_block_root, requests_hash, None, crypto)
                 .context("into_block failed")?;
             validate_block_payload_v3(&payload, &block, &e.versioned_hashes)
+                .context("Block/Payload validation failed")?;
+            Ok(block)
+        }
+        NewPayloadRequest::Amsterdam(a) => {
+            let parent_beacon_block_root = Some(H256::from(a.parent_beacon_block_root));
+            let requests_hash = Some(H256::from(compute_requests_hash(
+                &a.execution_requests,
+                hasher,
+            )));
+            let payload = ExecutionPayload::try_from(a.execution_payload)
+                .context("ExecutionPayloadV4 conversion failed")?;
+            validate_execution_payload_v4(&payload).context("V4 payload validation failed")?;
+            let block_access_list_hash = payload
+                .block_access_list
+                .as_ref()
+                .map(BlockAccessList::compute_hash);
+            let block = payload
+                .clone()
+                .into_block(
+                    parent_beacon_block_root,
+                    requests_hash,
+                    block_access_list_hash,
+                    crypto,
+                )
+                .context("into_block failed")?;
+            validate_block_payload_v4(&payload, &block, &a.versioned_hashes)
                 .context("Block/Payload validation failed")?;
             Ok(block)
         }
@@ -98,6 +129,8 @@ impl From<ExecutionPayloadV1> for ExecutionPayload {
             withdrawals: None,
             blob_gas_used: None,
             excess_blob_gas: None,
+            slot_number: None,
+            block_access_list: None,
         }
     }
 }
@@ -132,6 +165,8 @@ impl From<ExecutionPayloadV2> for ExecutionPayload {
             ),
             blob_gas_used: None,
             excess_blob_gas: None,
+            slot_number: None,
+            block_access_list: None,
         }
     }
 }
@@ -166,7 +201,50 @@ impl From<ExecutionPayloadV3> for ExecutionPayload {
             ),
             blob_gas_used: Some(payload.blob_gas_used),
             excess_blob_gas: Some(payload.excess_blob_gas),
+            slot_number: None,
+            block_access_list: None,
         }
+    }
+}
+
+impl TryFrom<ExecutionPayloadV4> for ExecutionPayload {
+    type Error = anyhow::Error;
+
+    fn try_from(payload: ExecutionPayloadV4) -> Result<Self> {
+        let block_access_list = BlockAccessList::decode(payload.block_access_list.as_ref())
+            .context("failed to decode block access list RLP")?;
+
+        Ok(ExecutionPayload {
+            parent_hash: H256::from(payload.parent_hash),
+            fee_recipient: Address::from(payload.fee_recipient),
+            state_root: H256::from(payload.state_root),
+            receipts_root: H256::from(payload.receipts_root),
+            logs_bloom: Bloom::from_slice(&payload.logs_bloom[..]),
+            prev_randao: H256::from(payload.prev_randao),
+            block_number: payload.block_number,
+            gas_limit: payload.gas_limit,
+            gas_used: payload.gas_used,
+            timestamp: payload.timestamp,
+            extra_data: Bytes::from(payload.extra_data.into_inner()),
+            base_fee_per_gas: base_fee_to_u64(&payload.base_fee_per_gas),
+            block_hash: H256::from(payload.block_hash),
+            transactions: payload
+                .transactions
+                .into_iter()
+                .map(|t| EncodedTransaction(Bytes::from(t.into_inner())))
+                .collect(),
+            withdrawals: Some(
+                payload
+                    .withdrawals
+                    .into_iter()
+                    .map(convert_withdrawal)
+                    .collect(),
+            ),
+            blob_gas_used: Some(payload.blob_gas_used),
+            excess_blob_gas: Some(payload.excess_blob_gas),
+            slot_number: Some(payload.slot_number),
+            block_access_list: Some(block_access_list),
+        })
     }
 }
 

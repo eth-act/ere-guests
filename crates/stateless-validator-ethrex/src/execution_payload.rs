@@ -5,8 +5,8 @@ use ethrex_common::{
     Address, Bloom, H256,
     constants::DEFAULT_OMMERS_HASH,
     types::{
-        Block, BlockBody, BlockHeader, Transaction, Withdrawal, compute_transactions_root,
-        compute_withdrawals_root,
+        Block, BlockBody, BlockHeader, Transaction, Withdrawal, block_access_list::BlockAccessList,
+        compute_transactions_root, compute_withdrawals_root,
     },
 };
 use ethrex_crypto::Crypto;
@@ -32,6 +32,9 @@ pub struct ExecutionPayload {
     // ExecutionPayloadV3 fields. Optional since we support V2 too
     pub blob_gas_used: Option<u64>,
     pub excess_blob_gas: Option<u64>,
+    // ExecutionPayloadV4 fields. Optional since we support previous versions.
+    pub slot_number: Option<u64>,
+    pub block_access_list: Option<BlockAccessList>,
 }
 
 #[derive(Clone, Debug)]
@@ -44,6 +47,7 @@ impl ExecutionPayload {
         self,
         parent_beacon_block_root: Option<H256>,
         requests_hash: Option<H256>,
+        block_access_list_hash: Option<H256>,
         crypto: &dyn Crypto,
     ) -> Result<Block, RLPDecodeError> {
         let body = BlockBody {
@@ -80,6 +84,8 @@ impl ExecutionPayload {
             excess_blob_gas: self.excess_blob_gas,
             parent_beacon_block_root,
             requests_hash,
+            slot_number: self.slot_number,
+            block_access_list_hash,
             ..Default::default()
         };
 
@@ -147,6 +153,21 @@ pub fn validate_execution_payload_v3(payload: &ExecutionPayload) -> Result<()> {
     Ok(())
 }
 
+pub fn validate_execution_payload_v4(payload: &ExecutionPayload) -> Result<()> {
+    validate_execution_payload_v3(payload)
+        .context("ExecutionPayloadV3 validation failed for V4 payload")?;
+    anyhow::ensure!(
+        payload.slot_number.is_some(),
+        "slot_number field is required in ExecutionPayloadV4"
+    );
+    anyhow::ensure!(
+        payload.block_access_list.is_some(),
+        "block_access_list field is required in ExecutionPayloadV4"
+    );
+
+    Ok(())
+}
+
 pub fn validate_block_payload_v1_v2(payload: &ExecutionPayload, block: &Block) -> Result<()> {
     let block_hash = payload.block_hash;
     let actual_block_hash = block.hash();
@@ -189,6 +210,35 @@ pub fn validate_block_payload_v3(
             actual
         );
     }
+
+    Ok(())
+}
+
+pub fn validate_block_payload_v4(
+    payload: &ExecutionPayload,
+    block: &Block,
+    versioned_hashes: &[[u8; 32]],
+) -> Result<()> {
+    validate_block_payload_v3(payload, block, versioned_hashes)
+        .context("Block validation against payload for v3 fields failed")?;
+
+    anyhow::ensure!(
+        block.header.slot_number == payload.slot_number,
+        "Invalid slot_number: expected {:?}, got {:?}",
+        payload.slot_number,
+        block.header.slot_number
+    );
+
+    let expected_bal_hash = payload
+        .block_access_list
+        .as_ref()
+        .map(BlockAccessList::compute_hash);
+    anyhow::ensure!(
+        block.header.block_access_list_hash == expected_bal_hash,
+        "Invalid block_access_list_hash: expected {:?}, got {:?}",
+        expected_bal_hash,
+        block.header.block_access_list_hash
+    );
 
     Ok(())
 }

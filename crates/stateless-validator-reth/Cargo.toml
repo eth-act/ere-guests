@@ -26,6 +26,7 @@ alloy-rpc-types-engine = { workspace = true, default-features = false, features 
 
 # reth
 reth-chainspec.workspace = true
+reth-consensus-common.workspace = true
 reth-payload-validator = { workspace = true, default-features = false }
 reth-ethereum-primitives.workspace = true
 reth-evm-ethereum.workspace = true

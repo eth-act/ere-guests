@@ -4,22 +4,24 @@ use alloc::{format, vec::Vec};
 use std::sync::Arc;
 
 use alloy_consensus::Transaction;
-use alloy_eips::{Encodable2718, eip7685::Requests};
+use alloy_eips::{Encodable2718, eip7685::Requests, eip7928::BlockAccessList};
 use alloy_genesis::{ChainConfig, Genesis};
 use alloy_primitives::U256;
 use anyhow::Context;
 use ere_zkvm_interface::Input;
 use guest::{GuestIo, Io};
-use reth_chainspec::ChainSpec;
+use reth_chainspec::{ChainSpec, EthereumHardforks};
 use reth_ethereum_primitives::TransactionSigned;
 use reth_evm_ethereum::EthEvmConfig;
-use reth_primitives_traits::Block;
+use reth_primitives_traits::Block as _;
 pub use stateless::StatelessInput;
-use stateless::{UncompressedPublicKey, stateless_validation_with_trie};
+use stateless::{
+    UncompressedPublicKey, recover_block_with_public_keys, stateless_validation_recovered_with_trie,
+};
 pub use stateless_validator_common::guest::StatelessValidatorOutput;
 use stateless_validator_common::new_payload_request::{
-    ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, ExtraData, ForkName,
-    NewPayloadRequest, Transaction as Tx, Transactions, Withdrawal, Withdrawals,
+    ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, ExecutionPayloadV4, ExtraData,
+    ForkName, NewPayloadRequest, Transaction as Tx, Transactions, Withdrawal, Withdrawals,
 };
 use tries::zeth::SparseState;
 
@@ -29,8 +31,9 @@ impl StatelessValidatorRethInput {
     /// Construct [`StatelessValidatorRethInput`] given [`StatelessInput`].
     pub fn new(stateless_input: &StatelessInput, valid_block: bool) -> anyhow::Result<Self> {
         let signers = recover_signers(&stateless_input.block.body.transactions)?;
-        let requests = get_requests(stateless_input, &signers, valid_block)?;
-        let new_payload_request = to_new_payload_request(stateless_input, requests)?;
+        let execution_artifacts = get_execution_artifacts(stateless_input, &signers, valid_block)?;
+        let new_payload_request =
+            to_new_payload_request(stateless_input, &execution_artifacts, valid_block)?;
 
         Ok(Self {
             new_payload_request,
@@ -70,6 +73,12 @@ where
 pub fn determine_fork_name(chain_config: &ChainConfig, timestamp: u64) -> ForkName {
     // Check forks in reverse chronological order
     if chain_config
+        .amsterdam_time
+        .is_some_and(|amsterdam_time| timestamp >= amsterdam_time)
+    {
+        return ForkName::Amsterdam;
+    }
+    if chain_config
         .osaka_time
         .is_some_and(|osaka_time| timestamp >= osaka_time)
     {
@@ -97,9 +106,10 @@ pub fn determine_fork_name(chain_config: &ChainConfig, timestamp: u64) -> ForkNa
 }
 
 /// Converts a [`StatelessInput`] to a [`NewPayloadRequest`].
-pub fn to_new_payload_request(
+fn to_new_payload_request(
     stateless_input: &StatelessInput,
-    requests: Requests,
+    execution_artifacts: &ExecutionArtifacts,
+    valid_block: bool,
 ) -> anyhow::Result<NewPayloadRequest> {
     let header = stateless_input.block.header();
     let body = stateless_input.block.body();
@@ -271,19 +281,96 @@ pub fn to_new_payload_request(
                 payload,
                 versioned_hashes,
                 parent_beacon_block_root,
-                &requests,
+                &execution_artifacts.requests,
+            )
+        }
+        ForkName::Amsterdam => {
+            let withdrawals = build_withdrawals()?;
+            let block_access_list = match &execution_artifacts.block_access_list {
+                Some(block_access_list) => {
+                    Tx::try_from(block_access_list.clone()).map_err(|err| {
+                        anyhow::anyhow!("block access list length should be within bounds: {err:?}")
+                    })?
+                }
+                None if valid_block => {
+                    anyhow::bail!("Amsterdam block is missing the block access list");
+                }
+                None => {
+                    Tx::try_from(alloy_rlp::encode(BlockAccessList::default())).map_err(|err| {
+                        anyhow::anyhow!(
+                            "default block access list length should be within bounds: {err:?}"
+                        )
+                    })?
+                }
+            };
+            let slot_number = match header.slot_number {
+                Some(slot_number) => slot_number,
+                None if valid_block => anyhow::bail!("Amsterdam block is missing slot_number"),
+                None => 0,
+            };
+
+            let payload = ExecutionPayloadV4 {
+                parent_hash: header.parent_hash.0,
+                fee_recipient: header.beneficiary.0.0,
+                state_root: header.state_root.0,
+                receipts_root: header.receipts_root.0,
+                logs_bloom,
+                prev_randao: header.mix_hash.0,
+                block_number: header.number,
+                gas_limit: header.gas_limit,
+                gas_used: header.gas_used,
+                timestamp: header.timestamp,
+                extra_data,
+                base_fee_per_gas: U256::from(header.base_fee_per_gas.unwrap_or_default())
+                    .to_le_bytes(),
+                block_hash: stateless_input.block.hash_slow().0,
+                transactions,
+                withdrawals,
+                blob_gas_used: header.blob_gas_used.unwrap_or_default(),
+                excess_blob_gas: header.excess_blob_gas.unwrap_or_default(),
+                block_access_list,
+                slot_number,
+            };
+
+            let versioned_hashes: Vec<[u8; 32]> = body
+                .transactions()
+                .filter_map(|tx| tx.blob_versioned_hashes())
+                .flatten()
+                .map(|h| h.0)
+                .collect();
+
+            let parent_beacon_block_root = stateless_input
+                .block
+                .parent_beacon_block_root
+                .unwrap_or_default()
+                .0;
+
+            NewPayloadRequest::new_amsterdam(
+                payload,
+                versioned_hashes,
+                parent_beacon_block_root,
+                &execution_artifacts.requests,
             )
         }
     }
 }
 
-fn get_requests(
+#[derive(Debug, Default)]
+struct ExecutionArtifacts {
+    requests: Requests,
+    block_access_list: Option<Vec<u8>>,
+}
+
+fn get_execution_artifacts(
     stateless_input: &StatelessInput,
     signers: &[UncompressedPublicKey],
     valid_block: bool,
-) -> anyhow::Result<Requests> {
+) -> anyhow::Result<ExecutionArtifacts> {
     if !valid_block {
-        return Ok(Requests::default());
+        return Ok(ExecutionArtifacts {
+            requests: Requests::default(),
+            block_access_list: Some(alloy_rlp::encode(BlockAccessList::default())),
+        });
     }
 
     let genesis = Genesis {
@@ -292,19 +379,34 @@ fn get_requests(
     };
     let chain_spec: Arc<ChainSpec> = Arc::new(genesis.into());
     let evm_config = EthEvmConfig::new(chain_spec.clone());
-    let (_, out) = stateless_validation_with_trie::<SparseState, _, _>(
+    let recovered_block = recover_block_with_public_keys(
         stateless_input.block.clone(),
         signers.to_owned(),
+        &*chain_spec,
+    )
+    .context("failed to recover block with signer public keys")?;
+
+    let output = stateless_validation_recovered_with_trie::<SparseState, _, _>(
+        recovered_block,
         stateless_input.witness.clone(),
         chain_spec.clone(),
         evm_config,
     )
-    .context("stateless validation failed")?;
+    .map_err(|err| anyhow::anyhow!("stateless execution failed: {err}"))?;
 
-    // This clone doesn't make much sense, but rust-analyzer can't figure out
-    // why isn't required and mark it as error otherwise. Since this is only used
-    // in the host side, we can afford the extra clone.
-    Ok(out.requests.clone())
+    let is_amsterdam_active =
+        chain_spec.is_amsterdam_active_at_timestamp(stateless_input.block.header.timestamp);
+    if is_amsterdam_active && output.block_access_list.is_none() {
+        anyhow::bail!("Amsterdam block execution did not produce a block access list");
+    }
+    if !is_amsterdam_active && output.block_access_list.is_some() {
+        anyhow::bail!("pre-Amsterdam block execution unexpectedly produced a block access list");
+    }
+
+    Ok(ExecutionArtifacts {
+        requests: output.execution_output.requests.clone(),
+        block_access_list: output.block_access_list.as_ref().map(alloy_rlp::encode),
+    })
 }
 
 #[cfg(test)]
