@@ -5681,7 +5681,7 @@ dependencies = [
 [[package]]
 name = "reth-evm-ethereum"
 version = "1.11.3"
-source = "git+https://github.com/paradigmxyz/reth?branch=bal-devnet-3#d6abebc8d54ff57a08df8ab1e34dc44ee043c145"
+source = "git+https://github.com/paradigmxyz/reth?branch=bal-devnet-3#354dd47ad1bf755616d991e97882e528e35bd54a"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -5742,7 +5742,7 @@ dependencies = [
 [[package]]
 name = "reth-payload-validator"
 version = "1.11.3"
-source = "git+https://github.com/paradigmxyz/reth?branch=bal-devnet-3#d6abebc8d54ff57a08df8ab1e34dc44ee043c145"
+source = "git+https://github.com/paradigmxyz/reth?branch=bal-devnet-3#354dd47ad1bf755616d991e97882e528e35bd54a"
 dependencies = [
  "alloy-consensus",
  "alloy-rpc-types-engine",

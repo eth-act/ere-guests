@@ -319,7 +319,14 @@ impl Crypto for CustomEvmCrypto {
 
     /// Blake2 compression function.
     #[inline]
-    fn blake2_compress(&self, rounds: u32, h: &mut [u64; 8], m: [u64; 16], t: [u64; 2], f: bool) {
+    fn blake2_compress(
+        &self,
+        rounds: u32,
+        h: &mut [u64; 8],
+        m: &[u64; 16],
+        t: &[u64; 2],
+        f: bool,
+    ) {
         #[cfg(any(all(target_os = "zkvm", target_vendor = "zisk"), zisk_hints))]
         {
             #[cfg(zisk_hints)]
