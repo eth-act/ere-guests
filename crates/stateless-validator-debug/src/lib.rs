@@ -34,6 +34,9 @@ pub struct Cli {
     /// Guest program to run.
     #[arg(long, value_enum)]
     pub guest: GuestKind,
+    /// Output format for each fixture result.
+    #[arg(long = "format", value_enum, default_value_t = OutputFormat::Summary)]
+    pub output_format: OutputFormat,
     /// Warn and continue when fixture success does not match guest output.
     #[arg(long)]
     pub allow_success_mismatch: bool,
@@ -61,6 +64,7 @@ pub enum GuestKind {
 
 impl GuestKind {
     fn run_fixture(self, fixture: &StatelessValidatorFixture) -> anyhow::Result<RunSummary> {
+        let block_hash = fixture.stateless_input.block.hash_slow().0;
         let output: StatelessValidatorOutput = match self {
             Self::Reth => {
                 let input =
@@ -79,6 +83,7 @@ impl GuestKind {
             guest: self,
             expected_success: fixture.success,
             actual_success: output.successful_block_validation,
+            block_hash,
             new_payload_request_root: output.new_payload_request_root,
         })
     }
@@ -89,6 +94,15 @@ impl GuestKind {
             Self::Ethrex => "ethrex",
         }
     }
+}
+
+/// Output format for fixture execution summaries.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum OutputFormat {
+    /// Emit a human-readable summary line for each fixture.
+    Summary,
+    /// Emit copy-pasteable Rust map entries keyed by block hash.
+    RustMap,
 }
 
 /// Deserialized JSON fixture supported by the debug runner.
@@ -113,6 +127,8 @@ pub struct RunSummary {
     pub expected_success: bool,
     /// Actual guest success reported by the guest output.
     pub actual_success: bool,
+    /// Canonical execution block hash for the fixture.
+    pub block_hash: [u8; 32],
     /// The resulting new payload request root.
     pub new_payload_request_root: [u8; 32],
 }
@@ -126,7 +142,19 @@ impl std::fmt::Display for RunSummary {
             self.guest.as_str(),
             self.expected_success,
             self.actual_success,
+            encode_hex(&self.new_payload_request_root)
+        )?;
+        write!(f, " block_hash=0x{}", encode_hex(&self.block_hash))
+    }
+}
+
+impl RunSummary {
+    fn rust_map_entry(&self) -> String {
+        format!(
+            "(b256!(\"{}\"), b256!(\"{}\")), // {}",
+            encode_hex(&self.block_hash),
             encode_hex(&self.new_payload_request_root),
+            self.fixture_name,
         )
     }
 }
@@ -155,7 +183,12 @@ impl Platform for StdoutNoopPlatform {
 /// Entry point for the debug runner binary.
 pub fn main_entry() -> anyhow::Result<()> {
     init_tracing();
-    execute(Cli::parse(), |summary| println!("{summary}"))
+    let cli = Cli::parse();
+    let output_format = cli.output_format;
+    execute(cli, |summary| match output_format {
+        OutputFormat::Summary => println!("{summary}"),
+        OutputFormat::RustMap => println!("{}", summary.rust_map_entry()),
+    })
 }
 
 /// Executes one or more fixtures and reports each summary via `on_summary`.
@@ -354,10 +387,10 @@ fn encode_hex(bytes: &[u8]) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use flate2::{Compression, write::GzEncoder};
     use tempfile::tempdir;
+
+    use super::*;
 
     #[test]
     fn prepare_fixture_paths_extracts_tar_gz_archives() {

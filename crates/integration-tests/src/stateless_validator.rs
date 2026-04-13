@@ -22,8 +22,7 @@ pub struct StatelessValidatorFixture {
 /// calculated by an independent implementation.
 pub fn get_stateless_validator_output(block_hash: B256, success: bool) -> StatelessValidatorOutput {
     let expected_roots = expected_execution_payload_tree_roots();
-    // Temporary fallback while newer fixture sets are not yet present in the hardcoded map.
-    let expected_root = expected_roots.get(&block_hash).copied().unwrap_or_default();
+    let expected_root = *expected_roots.get(&block_hash).unwrap();
 
     StatelessValidatorOutput::new(expected_root.0, success)
 }
@@ -32,6 +31,7 @@ pub fn get_stateless_validator_output(block_hash: B256, success: bool) -> Statel
 /// These roots where independently computed from this repository.
 fn expected_execution_payload_tree_roots() -> HashMap<B256, B256> {
     HashMap::from([
+        // mainnet blocks
         (
             b256!("e6e4c256069674f7939f82fc808d0cd104210533c83add12d2c33d274fc3c027"),
             b256!("043b1e44af00a6ff2b3c0570404d8b6701fe6221ed6aa3a39856c835f1ccdec4"),
@@ -99,6 +99,27 @@ fn expected_execution_payload_tree_roots() -> HashMap<B256, B256> {
         (
             b256!("cec65cbf796165f17dc68b583aff9bb8e2f5ccd0fb41c03ac53d57b4740b6534"),
             b256!("895c7d51f58aeab5ec891651de307043efd42300338db3dbaf0d1e36dc13138c"),
+        ),
+        // bal-devnet-3 blocks
+        (
+            b256!("13d2d969a52d4edcf015162e293b752e03b91f3bb18d661e1e7afd6c03f3d79e"),
+            b256!("f433b096670e28ae8e063f02a66a32f04711f0d0367ff6008428f0b82e3034ba"),
+        ),
+        (
+            b256!("efe306f60958288a4f403b31da07739d75b744b59ef6802b5fcac73d2d61e03a"),
+            b256!("37cad465684241068571bf503c81b53e6cd71ded73ede440e2aa1c99bb16e2c4"),
+        ),
+        (
+            b256!("1397c68794119641a19005aa18986e7b59487eedcddfcb04bf66afbd6d259c6f"),
+            b256!("29e7a0bf0b6f4b592885c410c045432695a5213816e32e996634335d7379f1a5"),
+        ),
+        (
+            b256!("6b0a230081a38b6e5c2264e88e46e040270f099254aca6247cbc3077c6512155"),
+            b256!("609d76725d335397cd8318dd39a73820aec872959aa0a452b872ba1a9b241ab7"),
+        ),
+        (
+            b256!("553ced0643bb49499eb7cce6e420fbcdf82ced67f66f05a030ea889e170b7c77"),
+            b256!("d1047e3e5267f9124979499e8ee30ae34efcaf80514033a9ad63739c0a08cd02"),
         ),
     ])
 }
