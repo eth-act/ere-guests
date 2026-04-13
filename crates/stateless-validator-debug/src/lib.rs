@@ -1,13 +1,14 @@
 //! Host-side debug runner for stateless validator guest fixtures.
 
 use std::{
-    fs,
+    fs::{self, File},
     io::{self, Write},
     path::{Path, PathBuf},
 };
 
 use anyhow::{Context, bail};
 use clap::{Parser, ValueEnum};
+use flate2::read::GzDecoder;
 use guest::{Guest, Platform};
 use serde::Deserialize;
 use stateless::StatelessInput;
@@ -17,6 +18,8 @@ use stateless_validator_ethrex::guest::{
 use stateless_validator_reth::guest::{
     StatelessValidatorOutput, StatelessValidatorRethGuest, StatelessValidatorRethInput,
 };
+use tar::Archive;
+use tempfile::TempDir;
 use tracing_subscriber::EnvFilter;
 
 /// CLI options for the stateless validator debug runner.
@@ -34,8 +37,17 @@ pub struct Cli {
     /// Warn and continue when fixture success does not match guest output.
     #[arg(long)]
     pub allow_success_mismatch: bool,
-    /// Path to a fixture file or directory.
+    /// Path to a fixture JSON file, `.tar.gz` archive, or directory.
     pub path: PathBuf,
+}
+
+/// Collected fixture paths plus any temporary extraction directory they depend on.
+#[derive(Debug)]
+struct PreparedFixturePaths {
+    /// The concrete JSON fixture files to execute.
+    paths: Vec<PathBuf>,
+    /// Temporary directory holding extracted fixtures from an archive input.
+    _extracted_dir: Option<TempDir>,
 }
 
 /// Stateless validator guest selection.
@@ -148,9 +160,9 @@ pub fn main_entry() -> anyhow::Result<()> {
 
 /// Executes one or more fixtures and reports each summary via `on_summary`.
 pub fn execute(cli: Cli, mut on_summary: impl FnMut(&RunSummary)) -> anyhow::Result<()> {
-    let fixture_paths = collect_fixture_paths(&cli.path)?;
+    let fixture_paths = prepare_fixture_paths(&cli.path)?;
 
-    for fixture_path in fixture_paths {
+    for fixture_path in &fixture_paths.paths {
         let fixture = load_fixture(&fixture_path)?;
         let summary = cli
             .guest
@@ -162,6 +174,27 @@ pub fn execute(cli: Cli, mut on_summary: impl FnMut(&RunSummary)) -> anyhow::Res
     }
 
     Ok(())
+}
+
+fn prepare_fixture_paths(path: &Path) -> anyhow::Result<PreparedFixturePaths> {
+    if path.is_file() && is_tar_gz_path(path) {
+        let extracted_dir = tempfile::tempdir()
+            .context("failed to create temporary directory for fixture archive")?;
+        unpack_fixture_archive(path, extracted_dir.path())?;
+        let paths = collect_fixture_paths_recursive(extracted_dir.path()).with_context(|| {
+            format!("failed to collect fixtures from archive {}", path.display())
+        })?;
+
+        return Ok(PreparedFixturePaths {
+            paths,
+            _extracted_dir: Some(extracted_dir),
+        });
+    }
+
+    Ok(PreparedFixturePaths {
+        paths: collect_fixture_paths(path)?,
+        _extracted_dir: None,
+    })
 }
 
 fn init_tracing() {
@@ -241,12 +274,72 @@ pub fn collect_fixture_paths(path: &Path) -> anyhow::Result<Vec<PathBuf>> {
     Ok(paths)
 }
 
+fn collect_fixture_paths_recursive(path: &Path) -> anyhow::Result<Vec<PathBuf>> {
+    let mut directories = vec![path.to_path_buf()];
+    let mut paths = Vec::new();
+
+    while let Some(directory) = directories.pop() {
+        let entries = fs::read_dir(&directory)
+            .with_context(|| format!("failed to read fixture directory {}", directory.display()))?;
+
+        for entry in entries {
+            let entry = entry.with_context(|| {
+                format!(
+                    "failed to read fixture directory entry in {}",
+                    directory.display()
+                )
+            })?;
+            let entry_path = entry.path();
+            let file_type = entry.file_type().with_context(|| {
+                format!("failed to inspect fixture path {}", entry_path.display())
+            })?;
+
+            if file_type.is_dir() {
+                directories.push(entry_path);
+                continue;
+            }
+
+            if file_type.is_file()
+                && entry_path.extension().and_then(|ext| ext.to_str()) == Some("json")
+            {
+                paths.push(entry_path);
+            }
+        }
+    }
+
+    paths.sort();
+
+    if paths.is_empty() {
+        bail!("no JSON fixtures found in {}", path.display());
+    }
+
+    Ok(paths)
+}
+
 /// Loads one JSON fixture from disk.
 pub fn load_fixture(path: &Path) -> anyhow::Result<StatelessValidatorFixture> {
     let bytes =
         fs::read(path).with_context(|| format!("failed to read fixture {}", path.display()))?;
     serde_json::from_slice(&bytes)
         .with_context(|| format!("failed to deserialize fixture {}", path.display()))
+}
+
+fn unpack_fixture_archive(archive_path: &Path, target_dir: &Path) -> anyhow::Result<()> {
+    let file = File::open(archive_path)
+        .with_context(|| format!("failed to open fixture archive {}", archive_path.display()))?;
+    let gz = GzDecoder::new(file);
+    Archive::new(gz).unpack(target_dir).with_context(|| {
+        format!(
+            "failed to unpack fixture archive {}",
+            archive_path.display()
+        )
+    })
+}
+
+fn is_tar_gz_path(path: &Path) -> bool {
+    path.file_name()
+        .and_then(|file_name| file_name.to_str())
+        .is_some_and(|file_name| file_name.ends_with(".tar.gz"))
 }
 
 fn encode_hex(bytes: &[u8]) -> String {
@@ -257,4 +350,44 @@ fn encode_hex(bytes: &[u8]) -> String {
         let _ = write!(hex, "{byte:02x}");
     }
     hex
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use flate2::{Compression, write::GzEncoder};
+    use tempfile::tempdir;
+
+    #[test]
+    fn prepare_fixture_paths_extracts_tar_gz_archives() {
+        let dir = tempdir().unwrap();
+        let source_dir = dir.path().join("source");
+        let fixture_dir = source_dir.join("block");
+        fs::create_dir_all(&fixture_dir).unwrap();
+        fs::write(fixture_dir.join("example.json"), br#"{"fixture":"ok"}"#).unwrap();
+        fs::write(fixture_dir.join("ignore.txt"), b"ignore").unwrap();
+
+        let archive_path = dir.path().join("fixtures.tar.gz");
+        let archive_file = File::create(&archive_path).unwrap();
+        let encoder = GzEncoder::new(archive_file, Compression::default());
+        let mut builder = tar::Builder::new(encoder);
+        builder
+            .append_path_with_name(fixture_dir.join("example.json"), "block/example.json")
+            .unwrap();
+        builder
+            .append_path_with_name(fixture_dir.join("ignore.txt"), "block/ignore.txt")
+            .unwrap();
+        builder.finish().unwrap();
+        builder.into_inner().unwrap().finish().unwrap();
+
+        let fixture_paths = prepare_fixture_paths(&archive_path).unwrap();
+
+        assert_eq!(fixture_paths.paths.len(), 1);
+        assert!(fixture_paths.paths[0].ends_with("example.json"));
+        assert_eq!(
+            fs::read_to_string(&fixture_paths.paths[0]).unwrap(),
+            r#"{"fixture":"ok"}"#
+        );
+    }
 }

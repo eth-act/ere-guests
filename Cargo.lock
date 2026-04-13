@@ -6999,12 +6999,15 @@ version = "0.8.0"
 dependencies = [
  "anyhow",
  "clap",
+ "flate2",
  "guest",
  "serde",
  "serde_json",
  "stateless",
  "stateless-validator-ethrex",
  "stateless-validator-reth",
+ "tar",
+ "tempfile",
  "tracing",
  "tracing-subscriber",
 ]
