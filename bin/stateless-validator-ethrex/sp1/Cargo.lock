@@ -914,7 +914,7 @@ dependencies = [
 [[package]]
 name = "ethrex-common"
 version = "9.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?branch=bal-devnet-3#91d783bd7e43d8948714a83b72b6242791371428"
+source = "git+https://github.com/jsign/ethrex.git?branch=jsign-bal-devnet-3-with-fixes#fce2b0e1bc4c31403847123d023daaf9f437c5e6"
 dependencies = [
  "bytes",
  "crc32fast",
@@ -926,7 +926,6 @@ dependencies = [
  "hex-literal",
  "hex-simd",
  "indexmap 2.12.1",
- "kzg-rs",
  "lazy_static",
  "libc",
  "lru",
@@ -945,7 +944,7 @@ dependencies = [
 [[package]]
 name = "ethrex-crypto"
 version = "9.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?branch=bal-devnet-3#91d783bd7e43d8948714a83b72b6242791371428"
+source = "git+https://github.com/jsign/ethrex.git?branch=jsign-bal-devnet-3-with-fixes#fce2b0e1bc4c31403847123d023daaf9f437c5e6"
 dependencies = [
  "ark-bn254",
  "ark-ec",
@@ -969,7 +968,7 @@ dependencies = [
 [[package]]
 name = "ethrex-guest-program"
 version = "9.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?branch=bal-devnet-3#91d783bd7e43d8948714a83b72b6242791371428"
+source = "git+https://github.com/jsign/ethrex.git?branch=jsign-bal-devnet-3-with-fixes#fce2b0e1bc4c31403847123d023daaf9f437c5e6"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -990,7 +989,7 @@ dependencies = [
 [[package]]
 name = "ethrex-l2-common"
 version = "9.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?branch=bal-devnet-3#91d783bd7e43d8948714a83b72b6242791371428"
+source = "git+https://github.com/jsign/ethrex.git?branch=jsign-bal-devnet-3-with-fixes#fce2b0e1bc4c31403847123d023daaf9f437c5e6"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -1009,7 +1008,7 @@ dependencies = [
 [[package]]
 name = "ethrex-levm"
 version = "9.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?branch=bal-devnet-3#91d783bd7e43d8948714a83b72b6242791371428"
+source = "git+https://github.com/jsign/ethrex.git?branch=jsign-bal-devnet-3-with-fixes#fce2b0e1bc4c31403847123d023daaf9f437c5e6"
 dependencies = [
  "bytes",
  "derive_more",
@@ -1027,7 +1026,7 @@ dependencies = [
 [[package]]
 name = "ethrex-rlp"
 version = "9.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?branch=bal-devnet-3#91d783bd7e43d8948714a83b72b6242791371428"
+source = "git+https://github.com/jsign/ethrex.git?branch=jsign-bal-devnet-3-with-fixes#fce2b0e1bc4c31403847123d023daaf9f437c5e6"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -1037,7 +1036,7 @@ dependencies = [
 [[package]]
 name = "ethrex-trie"
 version = "9.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?branch=bal-devnet-3#91d783bd7e43d8948714a83b72b6242791371428"
+source = "git+https://github.com/jsign/ethrex.git?branch=jsign-bal-devnet-3-with-fixes#fce2b0e1bc4c31403847123d023daaf9f437c5e6"
 dependencies = [
  "anyhow",
  "bytes",
@@ -1056,7 +1055,7 @@ dependencies = [
 [[package]]
 name = "ethrex-vm"
 version = "9.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?branch=bal-devnet-3#91d783bd7e43d8948714a83b72b6242791371428"
+source = "git+https://github.com/jsign/ethrex.git?branch=jsign-bal-devnet-3-with-fixes#fce2b0e1bc4c31403847123d023daaf9f437c5e6"
 dependencies = [
  "bytes",
  "derive_more",
@@ -3352,3 +3351,8 @@ dependencies = [
  "sha3",
  "subtle",
 ]
+
+[[patch.unused]]
+name = "ethrex-rpc"
+version = "9.0.0"
+source = "git+https://github.com/jsign/ethrex.git?branch=jsign-bal-devnet-3-with-fixes#fce2b0e1bc4c31403847123d023daaf9f437c5e6"
