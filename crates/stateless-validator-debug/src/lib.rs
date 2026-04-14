@@ -196,14 +196,14 @@ pub fn execute(cli: Cli, mut on_summary: impl FnMut(&RunSummary)) -> anyhow::Res
     let fixture_paths = prepare_fixture_paths(&cli.path)?;
 
     for fixture_path in &fixture_paths.paths {
-        let fixture = load_fixture(&fixture_path)?;
+        let fixture = load_fixture(fixture_path)?;
         let summary = cli
             .guest
             .run_fixture(&fixture)
             .with_context(|| format!("failed to execute fixture {}", fixture_path.display()))?;
         on_summary(&summary);
 
-        handle_success_mismatch(&summary, &fixture_path, cli.allow_success_mismatch)?;
+        handle_success_mismatch(&summary, fixture_path, cli.allow_success_mismatch)?;
     }
 
     Ok(())
