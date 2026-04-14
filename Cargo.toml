@@ -143,11 +143,6 @@ alloy-rpc-types-engine = { git = "https://github.com/alloy-rs/alloy", branch = "
 alloy-rpc-types-eth = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
 alloy-serde = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
 
-[patch."https://github.com/paradigmxyz/stateless"]
-stateless = { git = "https://github.com/jsign/stateless", rev = "719303c8ca810bf70b19eb9989dc0adb53788d57" }
-tries = { git = "https://github.com/jsign/stateless", rev = "719303c8ca810bf70b19eb9989dc0adb53788d57" }
-zeth-mpt = { git = "https://github.com/jsign/stateless", rev = "719303c8ca810bf70b19eb9989dc0adb53788d57" }
-
 # Patched Ethrex of `bal-devnet-3` plus cherry-picked #6462, #6382 and #6448.
 # We can remove this patch in their next merge of `main` into `bal-devnet-3`.
 [patch."https://github.com/lambdaclass/ethrex.git"]

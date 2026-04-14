@@ -14,16 +14,22 @@ alloy-primitives = { version = "1.5", default-features = false, features = [
     "map-foldhash",
     "native-keccak",
 ] }
-revm = { git = "https://github.com/bluealloy/revm", rev = "30e1c40", default-features = false, features = ["bn"] }
+revm = { git = "https://github.com/bluealloy/revm", rev = "30e1c40", default-features = false, features = [
+    "bn",
+] }
 
 # ere
 # NOTE: Using `default-features = false, features = ["inputcpy"]` mainly to disable the other
 #       feature enabled by default `user-hints`, which this binary doesn't use but introduces lots
 #       of dependencies.
-ere-platform-zisk = { git = "https://github.com/eth-act/ere", tag = "v0.6.0", default-features = false, features = ["inputcpy"] }
+ere-platform-zisk = { git = "https://github.com/eth-act/ere", tag = "v0.6.0", default-features = false, features = [
+    "inputcpy",
+] }
 
 # local
-stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", features = ["zisk"] }
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", features = [
+    "zisk",
+] }
 
 [patch.crates-io]
 revm = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
@@ -49,14 +55,13 @@ alloy-rpc-types-engine = { git = "https://github.com/alloy-rs/alloy", branch = "
 alloy-rpc-types-eth = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
 alloy-serde = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
 
-[patch."https://github.com/paradigmxyz/stateless"]
-stateless = { git = "https://github.com/jsign/stateless", rev = "719303c8ca810bf70b19eb9989dc0adb53788d57" }
-tries = { git = "https://github.com/jsign/stateless", rev = "719303c8ca810bf70b19eb9989dc0adb53788d57" }
-zeth-mpt = { git = "https://github.com/jsign/stateless", rev = "719303c8ca810bf70b19eb9989dc0adb53788d57" }
-
 [profile.release]
 codegen-units = 1
 lto = "fat"
 
 [lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(zisk_hints)', 'cfg(zisk_hints_debug)', 'cfg(target_vendor, values("zisk"))'] }
+unexpected_cfgs = { level = "warn", check-cfg = [
+    'cfg(zisk_hints)',
+    'cfg(zisk_hints_debug)',
+    'cfg(target_vendor, values("zisk"))',
+] }

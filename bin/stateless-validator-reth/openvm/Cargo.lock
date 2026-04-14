@@ -3986,7 +3986,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 [[package]]
 name = "stateless"
 version = "0.1.0"
-source = "git+https://github.com/jsign/stateless?rev=719303c8ca810bf70b19eb9989dc0adb53788d57#719303c8ca810bf70b19eb9989dc0adb53788d57"
+source = "git+https://github.com/paradigmxyz/stateless?branch=bal-devnet-3#3eda34bf7bb8f66ef49fa0a1cb42fd7e06f4db03"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -4332,7 +4332,7 @@ dependencies = [
 [[package]]
 name = "tries"
 version = "0.1.0"
-source = "git+https://github.com/jsign/stateless?rev=719303c8ca810bf70b19eb9989dc0adb53788d57#719303c8ca810bf70b19eb9989dc0adb53788d57"
+source = "git+https://github.com/paradigmxyz/stateless?branch=bal-devnet-3#3eda34bf7bb8f66ef49fa0a1cb42fd7e06f4db03"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",
@@ -4852,7 +4852,7 @@ dependencies = [
 [[package]]
 name = "zeth-mpt"
 version = "0.1.0"
-source = "git+https://github.com/jsign/stateless?rev=719303c8ca810bf70b19eb9989dc0adb53788d57#719303c8ca810bf70b19eb9989dc0adb53788d57"
+source = "git+https://github.com/paradigmxyz/stateless?branch=bal-devnet-3#3eda34bf7bb8f66ef49fa0a1cb42fd7e06f4db03"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",
