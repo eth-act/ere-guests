@@ -2236,7 +2236,7 @@ checksum = "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
 [[package]]
 name = "reth-codecs"
 version = "1.11.3"
-source = "git+https://github.com/paradigmxyz/reth?rev=d6abebc8d54ff57a08df8ab1e34dc44ee043c145#d6abebc8d54ff57a08df8ab1e34dc44ee043c145"
+source = "git+https://github.com/paradigmxyz/reth?branch=bal-devnet-3#354dd47ad1bf755616d991e97882e528e35bd54a"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -2254,7 +2254,7 @@ dependencies = [
 [[package]]
 name = "reth-codecs-derive"
 version = "1.11.3"
-source = "git+https://github.com/paradigmxyz/reth?rev=d6abebc8d54ff57a08df8ab1e34dc44ee043c145#d6abebc8d54ff57a08df8ab1e34dc44ee043c145"
+source = "git+https://github.com/paradigmxyz/reth?branch=bal-devnet-3#354dd47ad1bf755616d991e97882e528e35bd54a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2264,7 +2264,7 @@ dependencies = [
 [[package]]
 name = "reth-ethereum-primitives"
 version = "1.11.3"
-source = "git+https://github.com/paradigmxyz/reth?rev=d6abebc8d54ff57a08df8ab1e34dc44ee043c145#d6abebc8d54ff57a08df8ab1e34dc44ee043c145"
+source = "git+https://github.com/paradigmxyz/reth?branch=bal-devnet-3#354dd47ad1bf755616d991e97882e528e35bd54a"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -2278,7 +2278,7 @@ dependencies = [
 [[package]]
 name = "reth-primitives-traits"
 version = "1.11.3"
-source = "git+https://github.com/paradigmxyz/reth?rev=d6abebc8d54ff57a08df8ab1e34dc44ee043c145#d6abebc8d54ff57a08df8ab1e34dc44ee043c145"
+source = "git+https://github.com/paradigmxyz/reth?branch=bal-devnet-3#354dd47ad1bf755616d991e97882e528e35bd54a"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -2306,7 +2306,7 @@ dependencies = [
 [[package]]
 name = "reth-zstd-compressors"
 version = "1.11.3"
-source = "git+https://github.com/paradigmxyz/reth?rev=d6abebc8d54ff57a08df8ab1e34dc44ee043c145#d6abebc8d54ff57a08df8ab1e34dc44ee043c145"
+source = "git+https://github.com/paradigmxyz/reth?branch=bal-devnet-3#354dd47ad1bf755616d991e97882e528e35bd54a"
 dependencies = [
  "zstd",
 ]
