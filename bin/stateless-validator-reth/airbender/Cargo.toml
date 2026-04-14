@@ -11,7 +11,7 @@ alloy-primitives = { version = "1.5.0", default-features = false, features = [
     "map-foldhash",
     "sha3-keccak",
 ] }
-revm = { version = "34.0.0", default-features = false, features = ["bn"] }
+revm = { git = "https://github.com/bluealloy/revm", rev = "30e1c40", default-features = false, features = ["bn"] }
 
 # ere
 ere-platform-airbender = { git = "https://github.com/eth-act/ere", tag = "v0.6.0", features = [
@@ -23,6 +23,24 @@ stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", 
 
 [patch.crates-io]
 radium = { git = "https://github.com/han0110/radium", branch = "feature/riscv32ima" }
+revm = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-bytecode = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-context = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-context-interface = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-database = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-database-interface = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-handler = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-inspector = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-interpreter = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-precompile = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-state = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+alloy-evm = { git = "https://github.com/alloy-rs/evm", branch = "bal-devnet3" }
+
+[patch."https://github.com/paradigmxyz/stateless"]
+stateless = { git = "https://github.com/jsign/stateless", rev = "719303c8ca810bf70b19eb9989dc0adb53788d57" }
+tries = { git = "https://github.com/jsign/stateless", rev = "719303c8ca810bf70b19eb9989dc0adb53788d57" }
+zeth-mpt = { git = "https://github.com/jsign/stateless", rev = "719303c8ca810bf70b19eb9989dc0adb53788d57" }
 
 [profile.release]
 codegen-units = 1
