@@ -33,6 +33,10 @@ jobs:
             zkvm: airbender
           - guest: stateless-validator-ethrex
             zkvm: openvm
+          - guest: stateless-validator-reth
+            zkvm: risc0
+          - guest: block-encoding-length
+            zkvm: risc0
         include:
           - zkvm: airbender
             threads: 12
