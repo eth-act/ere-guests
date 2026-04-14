@@ -35,9 +35,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-consensus"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f16daaf7e1f95f62c6c3bf8a3fc3d78b08ae9777810c0bb5e94966c7cd57ef0"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
  "alloy-eips",
  "alloy-primitives",
@@ -62,9 +61,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-consensus-any"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "118998d9015332ab1b4720ae1f1e3009491966a0349938a1f43ff45a8a4c6299"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -128,9 +126,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-eips"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6ef28c9fdad22d4eec52d894f5f2673a0895f1e5ef196734568e68c0f6caca8"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
  "alloy-eip2124",
  "alloy-eip2930",
@@ -147,6 +144,7 @@ dependencies = [
  "serde",
  "serde_with",
  "sha2",
+ "thiserror",
 ]
 
 [[package]]
@@ -168,9 +166,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-genesis"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbf9480307b09d22876efb67d30cadd9013134c21f3a17ec9f93fd7536d38024"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
  "alloy-eips",
  "alloy-primitives",
@@ -196,9 +193,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-network-primitives"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb82711d59a43fdfd79727c99f270b974c784ec4eb5728a0d0d22f26716c87ef"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -258,9 +254,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-rpc-types-debug"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2145138f3214928f08cd13da3cb51ef7482b5920d8ac5a02ecd4e38d1a8f6d1e"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
  "alloy-primitives",
  "derive_more",
@@ -270,9 +265,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-rpc-types-engine"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb9b97b6e7965679ad22df297dda809b11cebc13405c1b537e5cffecc95834fa"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -287,9 +281,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-rpc-types-eth"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59c095f92c4e1ff4981d89e9aa02d5f98c762a1980ab66bec49c44be11349da2"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
  "alloy-consensus",
  "alloy-consensus-any",
@@ -307,9 +300,8 @@ dependencies = [
 
 [[package]]
 name = "alloy-serde"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11ece63b89294b8614ab3f483560c08d016930f842bf36da56bf0b764a15c11e"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
  "alloy-primitives",
  "serde",
@@ -407,11 +399,10 @@ dependencies = [
 
 [[package]]
 name = "alloy-tx-macros"
-version = "1.8.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d69722eddcdf1ce096c3ab66cf8116999363f734eb36fe94a148f4f71c85da84"
+version = "1.7.3"
+source = "git+https://github.com/alloy-rs/alloy?branch=bal-devnet2#1fd12c4107dcf3ad3fbbc404004a710bf91db3e6"
 dependencies = [
- "darling",
+ "darling 0.21.3",
  "proc-macro2",
  "quote",
  "syn 2.0.117",
@@ -1109,12 +1100,37 @@ dependencies = [
 
 [[package]]
 name = "darling"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9cdf337090841a411e2a7f3deb9187445851f91b309c0c0a29e05f74a00a48c0"
+dependencies = [
+ "darling_core 0.21.3",
+ "darling_macro 0.21.3",
+]
+
+[[package]]
+name = "darling"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "25ae13da2f202d56bd7f91c25fba009e7717a1e4a1cc98a76d844b65ae912e9d"
 dependencies = [
- "darling_core",
- "darling_macro",
+ "darling_core 0.23.0",
+ "darling_macro 0.23.0",
+]
+
+[[package]]
+name = "darling_core"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1247195ecd7e3c85f83c8d2a366e4210d588e802133e1e355180a9870b517ea4"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "strsim",
+ "syn 2.0.117",
 ]
 
 [[package]]
@@ -1126,8 +1142,18 @@ dependencies = [
  "ident_case",
  "proc-macro2",
  "quote",
- "serde",
  "strsim",
+ "syn 2.0.117",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d38308df82d1080de0afee5d069fa14b0326a88c14f15c5ccda35b4a6c414c81"
+dependencies = [
+ "darling_core 0.21.3",
+ "quote",
  "syn 2.0.117",
 ]
 
@@ -1137,7 +1163,7 @@ version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac3984ec7bd6cfa798e62b4a642426a5be0e68f9401cfc2a01e3fa9ea2fcdb8d"
 dependencies = [
- "darling_core",
+ "darling_core 0.23.0",
  "quote",
  "syn 2.0.117",
 ]
@@ -3877,7 +3903,7 @@ version = "3.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3db8978e608f1fe7357e211969fd9abdcae80bac1ba7a3369bb7eb6b404eb65"
 dependencies = [
- "darling",
+ "darling 0.23.0",
  "proc-macro2",
  "quote",
  "syn 2.0.117",
