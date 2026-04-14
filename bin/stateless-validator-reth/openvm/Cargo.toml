@@ -45,6 +45,35 @@ ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.6.0", 
 # local
 stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", features = ["openvm"] }
 
+[patch.crates-io]
+revm = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-bytecode = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-context = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-context-interface = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-database = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-database-interface = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-handler = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-inspector = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-interpreter = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-precompile = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-state = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+alloy-evm = { git = "https://github.com/alloy-rs/evm", branch = "bal-devnet3" }
+alloy-consensus = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-consensus-any = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-eips = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-genesis = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-network-primitives = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-rpc-types-debug = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-rpc-types-engine = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-rpc-types-eth = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-serde = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+
+[patch."https://github.com/paradigmxyz/stateless"]
+stateless = { git = "https://github.com/jsign/stateless", rev = "fe731dfef09f4aaf358cd3a6a7829d46c68a4442" }
+tries = { git = "https://github.com/jsign/stateless", rev = "fe731dfef09f4aaf358cd3a6a7829d46c68a4442" }
+zeth-mpt = { git = "https://github.com/jsign/stateless", rev = "fe731dfef09f4aaf358cd3a6a7829d46c68a4442" }
+
 [patch."https://github.com/openvm-org/openvm.git"]
 openvm = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
 openvm-algebra-complex-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v1.4.3" }
