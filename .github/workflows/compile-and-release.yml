@@ -55,7 +55,7 @@ jobs:
       - name: Compile guest
         run: |
           docker run \
-            -e OPENVM_RUST_TOOLCHAIN=nightly-2025-08-19 \
+            -e OPENVM_RUST_TOOLCHAIN=nightly-2025-10-30 \
             -v $PWD:/ere-guests \
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
