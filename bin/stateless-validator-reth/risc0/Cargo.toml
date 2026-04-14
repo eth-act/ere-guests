@@ -11,7 +11,7 @@ alloy-primitives = { version = "1.5.0", default-features = false, features = [
     "map-foldhash",
     "tiny-keccak",
 ] }
-revm = { version = "34.0.0", default-features = false, features = [
+revm = { git = "https://github.com/bluealloy/revm", rev = "30e1c40", default-features = false, features = [
     "std",
     "c-kzg",
     "blst",
@@ -51,15 +51,6 @@ revm-precompile = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
 revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
 revm-state = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
 alloy-evm = { git = "https://github.com/alloy-rs/evm", branch = "bal-devnet3" }
-alloy-consensus = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
-alloy-consensus-any = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
-alloy-eips = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
-alloy-genesis = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
-alloy-network-primitives = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
-alloy-rpc-types-debug = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
-alloy-rpc-types-engine = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
-alloy-rpc-types-eth = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
-alloy-serde = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
 
 [patch."https://github.com/paradigmxyz/stateless"]
 stateless = { git = "https://github.com/jsign/stateless", rev = "fe731dfef09f4aaf358cd3a6a7829d46c68a4442" }
