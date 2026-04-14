@@ -11,3 +11,12 @@ ere-platform-zisk = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
 
 # local
 block-encoding-length = { path = "../../../crates/block-encoding-length" }
+
+[patch.crates-io]
+alloy-consensus = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-eips = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-genesis = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+alloy-serde = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
+revm-bytecode = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }
+revm-state = { git = "https://github.com/bluealloy/revm", rev = "30e1c40" }

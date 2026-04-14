@@ -77,13 +77,13 @@ alloy-rlp = { version = "0.3.10", default-features = false }
 alloy-trie = { version = "0.9.1", default-features = false }
 
 # reth
-reth-chainspec = { git = "https://github.com/paradigmxyz/reth", branch = "bal-devnet-3", default-features = false }
-reth-consensus-common = { git = "https://github.com/paradigmxyz/reth", branch = "bal-devnet-3", default-features = false }
-reth-ethereum-payload-builder = { git = "https://github.com/paradigmxyz/reth", branch = "bal-devnet-3", default-features = false }
-reth-ethereum-primitives = { git = "https://github.com/paradigmxyz/reth", branch = "bal-devnet-3", default-features = false }
-reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", branch = "bal-devnet-3", default-features = false }
-reth-primitives-traits = { git = "https://github.com/paradigmxyz/reth", branch = "bal-devnet-3", default-features = false }
-reth-payload-validator = { git = "https://github.com/paradigmxyz/reth", branch = "bal-devnet-3", default-features = false }
+reth-chainspec = { git = "https://github.com/paradigmxyz/reth", rev = "d6abebc8d54ff57a08df8ab1e34dc44ee043c145", default-features = false }
+reth-consensus-common = { git = "https://github.com/paradigmxyz/reth", rev = "d6abebc8d54ff57a08df8ab1e34dc44ee043c145", default-features = false }
+reth-ethereum-payload-builder = { git = "https://github.com/paradigmxyz/reth", rev = "d6abebc8d54ff57a08df8ab1e34dc44ee043c145", default-features = false }
+reth-ethereum-primitives = { git = "https://github.com/paradigmxyz/reth", rev = "d6abebc8d54ff57a08df8ab1e34dc44ee043c145", default-features = false }
+reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", rev = "d6abebc8d54ff57a08df8ab1e34dc44ee043c145", default-features = false }
+reth-primitives-traits = { git = "https://github.com/paradigmxyz/reth", rev = "d6abebc8d54ff57a08df8ab1e34dc44ee043c145", default-features = false }
+reth-payload-validator = { git = "https://github.com/paradigmxyz/reth", rev = "d6abebc8d54ff57a08df8ab1e34dc44ee043c145", default-features = false }
 stateless = { git = "https://github.com/paradigmxyz/stateless", branch = "bal-devnet-3", default-features = false }
 tries = { git = "https://github.com/paradigmxyz/stateless", branch = "bal-devnet-3", default-features = false }
 
