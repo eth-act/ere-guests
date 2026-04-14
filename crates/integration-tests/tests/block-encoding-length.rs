@@ -10,8 +10,8 @@ fn test_execution(zkvm_kind: zkVMKind) {
     let fixtures = get_fixtures();
     let fixture = fixtures
         .into_iter()
-        .find(|f| f.name == "rpc_block_22974575")
-        .expect("Fixture rpc_block_22974575.json not found");
+        .min_by(|a, b| a.name.cmp(&b.name))
+        .expect("No integration test fixtures found");
     let block = fixture.stateless_input.block;
     let loop_count = 10;
     let test_cases = [BlockEncodingFormat::Rlp, BlockEncodingFormat::Ssz].map(|format| {
