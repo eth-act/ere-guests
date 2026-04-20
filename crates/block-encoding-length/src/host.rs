@@ -1,12 +1,9 @@
 //! Implementations for host environment.
 
-use ere_zkvm_interface::Input;
-use guest::{GuestIo, Io};
+use ere_prover_core::{Input, codec::Encode};
 use reth_ethereum_primitives::Block;
 
-use crate::guest::{
-    BincodeBlock, BlockEncodingFormat, BlockEncodingLengthGuest, BlockEncodingLengthInput,
-};
+use crate::guest::{BincodeBlock, BlockEncodingFormat, BlockEncodingLengthInput};
 
 impl BlockEncodingLengthInput {
     /// Construct [`BlockEncodingLengthInput`] given block, loop count and the
@@ -23,11 +20,10 @@ impl BlockEncodingLengthInput {
         })
     }
 
-    /// Returns [`Input`] to [`zkVM`] methods.
+    /// Returns [`Input`] to [`zkVMProver`] methods.
     ///
-    /// [`zkVM`]: ere_zkvm_interface::zkVM
+    /// [`zkVMProver`]: ere_prover_core::zkVMProver
     pub fn to_zkvm_input(&self) -> anyhow::Result<Input> {
-        let stdin = GuestIo::<BlockEncodingLengthGuest>::serialize_input(self)?;
-        Ok(Input::new().with_prefixed_stdin(stdin))
+        Ok(Input::new().with_prefixed_stdin(self.encode_to_vec()?))
     }
 }

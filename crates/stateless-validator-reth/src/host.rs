@@ -8,8 +8,7 @@ use alloy_eips::{Encodable2718, eip7685::Requests};
 use alloy_genesis::{ChainConfig, Genesis};
 use alloy_primitives::U256;
 use anyhow::Context;
-use ere_zkvm_interface::Input;
-use guest::{GuestIo, Io};
+use ere_prover_core::{Input, codec::Encode};
 use reth_chainspec::ChainSpec;
 use reth_ethereum_primitives::TransactionSigned;
 use reth_evm_ethereum::EthEvmConfig;
@@ -23,7 +22,7 @@ use stateless_validator_common::new_payload_request::{
 };
 use tries::zeth::SparseState;
 
-use crate::guest::{StatelessValidatorRethGuest, StatelessValidatorRethInput};
+use crate::guest::StatelessValidatorRethInput;
 
 impl StatelessValidatorRethInput {
     /// Construct [`StatelessValidatorRethInput`] given [`StatelessInput`].
@@ -40,12 +39,11 @@ impl StatelessValidatorRethInput {
         })
     }
 
-    /// Returns [`Input`] to [`zkVM`] methods.
+    /// Returns [`Input`] to [`zkVMProver`] methods.
     ///
-    /// [`zkVM`]: ere_zkvm_interface::zkVM
+    /// [`zkVMProver`]: ere_prover_core::zkVMProver
     pub fn to_zkvm_input(&self) -> anyhow::Result<Input> {
-        let stdin = GuestIo::<StatelessValidatorRethGuest>::serialize_input(self)?;
-        Ok(Input::new().with_prefixed_stdin(stdin))
+        Ok(Input::new().with_prefixed_stdin(self.encode_to_vec()?))
     }
 }
 
@@ -305,43 +303,4 @@ fn get_requests(
     // why isn't required and mark it as error otherwise. Since this is only used
     // in the host side, we can afford the extra clone.
     Ok(out.requests.clone())
-}
-
-#[cfg(test)]
-mod test {
-    use stateless_validator_common::new_payload_request::{
-        ExecutionPayloadV1, NativeSha256Hasher, NewPayloadRequest,
-    };
-
-    use crate::guest::{Io, StatelessValidatorOutput, StatelessValidatorRethIo};
-
-    #[test]
-    fn serialize_output() {
-        let dummy_new_payload_request_root = NewPayloadRequest::new_bellatrix(ExecutionPayloadV1 {
-            parent_hash: [1; 32],
-            fee_recipient: [2; 20],
-            state_root: [3; 32],
-            receipts_root: [4; 32],
-            logs_bloom: [0; 256],
-            prev_randao: [5; 32],
-            block_number: 1,
-            gas_limit: 2,
-            gas_used: 3,
-            timestamp: 4,
-            extra_data: Default::default(),
-            base_fee_per_gas: [6; 32],
-            block_hash: [7; 32],
-            transactions: Default::default(),
-        })
-        .tree_hash_root(&NativeSha256Hasher);
-        for output in [
-            StatelessValidatorOutput::new(dummy_new_payload_request_root, false),
-            StatelessValidatorOutput::new(dummy_new_payload_request_root, true),
-        ] {
-            assert_eq!(
-                StatelessValidatorRethIo::serialize_output(&output).unwrap(),
-                output.serialize()
-            );
-        }
-    }
 }

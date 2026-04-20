@@ -1,8 +1,9 @@
 //! [`Guest`] implementation for the block encoding length calculation.
 
+use alloc::vec::Vec;
 use core::ops::Deref;
 
-use ere_io::serde::{IoSerde, bincode::BincodeLegacy};
+use guest::codec::impl_codec_by_bincode_legacy;
 use libssz::SszEncode;
 use reth_ethereum_primitives::Block;
 use serde::{Deserialize, Serialize};
@@ -52,14 +53,17 @@ pub struct BlockEncodingLengthInput {
     pub format: BlockEncodingFormat,
 }
 
+impl_codec_by_bincode_legacy!(BlockEncodingLengthInput);
+
 /// [`Guest`] implementation for the block encoding length calculation.
 #[derive(Debug, Clone)]
 pub struct BlockEncodingLengthGuest;
 
 impl Guest for BlockEncodingLengthGuest {
-    type Io = IoSerde<BlockEncodingLengthInput, (), BincodeLegacy>;
+    type Input = BlockEncodingLengthInput;
+    type Output = ();
 
-    fn compute<P: Platform>(input: GuestInput<Self>) -> GuestOutput<Self> {
+    fn compute<P: Platform>(input: Self::Input) -> Self::Output {
         match input.format {
             BlockEncodingFormat::Rlp => {
                 P::cycle_scope("block_encoding_length_calculation", || {

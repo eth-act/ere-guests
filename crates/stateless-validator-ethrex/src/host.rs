@@ -1,7 +1,7 @@
 //! Implementations for host environment.
 
 use alloy_eips::eip6110::MAINNET_DEPOSIT_CONTRACT_ADDRESS;
-use ere_zkvm_interface::Input;
+use ere_prover_core::{Input, codec::Encode};
 use ethrex_common::{
     H160,
     types::{
@@ -9,10 +9,9 @@ use ethrex_common::{
         block_execution_witness::{self, RpcExecutionWitness},
     },
 };
-use guest::{GuestIo, Io};
 use stateless_validator_reth::guest::StatelessValidatorRethInput;
 
-use crate::guest::{StatelessValidatorEthrexGuest, StatelessValidatorEthrexInput};
+use crate::guest::StatelessValidatorEthrexInput;
 
 #[rustfmt::skip]
 pub use {
@@ -35,12 +34,11 @@ impl StatelessValidatorEthrexInput {
         })
     }
 
-    /// Returns [`Input`] to [`zkVM`] methods.
+    /// Returns [`Input`] to [`zkVMProver`] methods.
     ///
-    /// [`zkVM`]: ere_zkvm_interface::zkVM
+    /// [`zkVMProver`]: ere_prover_core::zkVMProver
     pub fn to_zkvm_input(&self) -> anyhow::Result<Input> {
-        let stdin = GuestIo::<StatelessValidatorEthrexGuest>::serialize_input(self)?;
-        Ok(Input::new().with_prefixed_stdin(stdin))
+        Ok(Input::new().with_prefixed_stdin(self.encode_to_vec()?))
     }
 }
 
@@ -153,8 +151,9 @@ fn get_blob_schedule(
         .blob_schedule
         .get(name)
         .map(|s| ForkBlobSchedule {
-            // Reth and Ethrex have some mismatched data type representations. Reth uses bigger ints.
-            // Downcasting should never cause an overflow, but let's be safe and panic if this ever happens.
+            // Reth and Ethrex have some mismatched data type representations. Reth uses bigger
+            // ints. Downcasting should never cause an overflow, but let's be safe and
+            // panic if this ever happens.
             base_fee_update_fraction: s.update_fraction.try_into().unwrap(),
             target: s.target_blob_count.try_into().unwrap(),
             max: s.max_blob_count.try_into().unwrap(),

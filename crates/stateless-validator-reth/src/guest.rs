@@ -3,7 +3,7 @@
 use alloc::{format, sync::Arc, vec::Vec};
 
 use alloy_genesis::ChainConfig;
-use ere_io::serde::{IoSerde, bincode::BincodeLegacy};
+use guest::codec::impl_codec_by_bincode_legacy;
 use reth_chainspec::ChainSpec;
 use reth_evm_ethereum::EthEvmConfig;
 use serde::{Deserialize, Serialize};
@@ -40,18 +40,17 @@ pub struct StatelessValidatorRethInput {
     pub public_keys: Vec<UncompressedPublicKey>,
 }
 
-/// [`Io`] implementation of Reth stateless validator.
-pub type StatelessValidatorRethIo =
-    IoSerde<StatelessValidatorRethInput, StatelessValidatorOutput, BincodeLegacy>;
+impl_codec_by_bincode_legacy!(StatelessValidatorRethInput);
 
 /// [`Guest`] implementation for Reth stateless validator.
 #[derive(Debug, Clone)]
 pub struct StatelessValidatorRethGuest;
 
 impl Guest for StatelessValidatorRethGuest {
-    type Io = StatelessValidatorRethIo;
+    type Input = StatelessValidatorRethInput;
+    type Output = StatelessValidatorOutput;
 
-    fn compute<P: Platform>(input: GuestInput<Self>) -> GuestOutput<Self> {
+    fn compute<P: Platform>(input: Self::Input) -> Self::Output {
         let new_payload_request_root =
             P::cycle_scope("new_payload_request_root_calculation", || {
                 input.new_payload_request.tree_hash_root(&sha256_hasher())

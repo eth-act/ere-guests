@@ -5,9 +5,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use ere_dockerized::{CompilerKind, DockerizedCompiler, DockerizedzkVM, zkVMKind};
-use ere_io::Io;
-use ere_zkvm_interface::{Compiler, Input, ProverResource, zkVM};
+use ere_dockerized::{
+    Compiler, CompilerKind, DockerizedCompiler, DockerizedzkVM, DockerizedzkVMConfig, Input,
+    ProverResource, codec::Encode, zkVMKind,
+};
 use flate2::read::GzDecoder;
 use guest::{Guest, GuestInput, GuestOutput, Platform};
 use rayon::prelude::*;
@@ -74,7 +75,13 @@ pub fn compile_and_init_zkvm(guest: &str, zkvm_kind: zkVMKind) -> DockerizedzkVM
     let bin = workspace.join("bin").join(guest).join(zkvm_kind.as_str());
     let program = compiler.compile(&bin).unwrap();
 
-    DockerizedzkVM::new(zkvm_kind, program, ProverResource::Cpu).unwrap()
+    DockerizedzkVM::new(
+        zkvm_kind,
+        program,
+        ProverResource::Cpu,
+        DockerizedzkVMConfig::default(),
+    )
+    .unwrap()
 }
 
 /// Compiles guest program and runs execution, then check output are expected.
@@ -116,7 +123,7 @@ pub fn test_execution(
         }
 
         assert_eq!(
-            public_values, expected_public_values,
+            public_values.0, expected_public_values,
             "Expected public values of test case {} to be \
                 {expected_public_values:?}, but got {public_values:?}",
             test_case.name
@@ -144,8 +151,8 @@ impl TestCase {
     ) -> Self {
         Self {
             name: name.as_ref().to_string(),
-            input: Input::new().with_prefixed_stdin(G::Io::serialize_input(&input).unwrap()),
-            expected_public_values: G::Io::serialize_output(&output).unwrap(),
+            input: Input::new().with_prefixed_stdin(input.encode_to_vec().unwrap()),
+            expected_public_values: output.encode_to_vec().unwrap(),
         }
     }
 

@@ -3,10 +3,10 @@
 use alloc::{format, sync::Arc};
 use core::fmt::Debug;
 
-use ere_io::rkyv::IoRkyv;
 use ethrex_common::types::block_execution_witness::ExecutionWitness;
 use ethrex_crypto::Crypto;
 use ethrex_guest_program::{execution::execution_program, input::ProgramInput};
+use guest::codec::impl_codec_by_rkyv;
 use libssz_merkle::Sha256Hasher;
 use stateless_validator_common::new_payload_request::NewPayloadRequest;
 
@@ -63,9 +63,7 @@ impl Debug for StatelessValidatorEthrexInput {
     }
 }
 
-/// [`Io`] implementation of Ethrex stateless validator.
-pub type StatelessValidatorEthrexIo =
-    IoRkyv<StatelessValidatorEthrexInput, StatelessValidatorOutput>;
+impl_codec_by_rkyv!(StatelessValidatorEthrexInput);
 
 /// [`Guest`] implementation for Ethrex stateless validator.
 #[derive(Debug, Clone)]
@@ -88,9 +86,10 @@ impl Sha256Hasher for EthrexSha256Hasher<'_> {
 }
 
 impl Guest for StatelessValidatorEthrexGuest {
-    type Io = StatelessValidatorEthrexIo;
+    type Input = StatelessValidatorEthrexInput;
+    type Output = StatelessValidatorOutput;
 
-    fn compute<P: Platform>(input: GuestInput<Self>) -> GuestOutput<Self> {
+    fn compute<P: Platform>(input: Self::Input) -> Self::Output {
         let crypto = crypto();
         let new_payload_request_root =
             P::cycle_scope("new_payload_request_root_calculation", || {
@@ -169,47 +168,4 @@ fn crypto() -> Arc<dyn Crypto> {
     return Arc::new(ethrex_guest_program::crypto::zisk::ZiskCrypto);
     #[cfg(not(any(feature = "risc0", feature = "sp1", feature = "zisk")))]
     return Arc::new(ethrex_guest_program::crypto::NativeCrypto);
-}
-
-#[cfg(test)]
-mod test {
-    use stateless_validator_common::new_payload_request::{
-        ExecutionPayloadV1, NativeSha256Hasher, NewPayloadRequest, NewPayloadRequestBellatrix,
-    };
-
-    use crate::guest::{Io, StatelessValidatorEthrexIo, StatelessValidatorOutput};
-
-    #[test]
-    fn serialize_output() {
-        let dummy_new_payload_request_root =
-            NewPayloadRequest::Bellatrix(NewPayloadRequestBellatrix {
-                execution_payload: ExecutionPayloadV1 {
-                    parent_hash: [1; 32],
-                    fee_recipient: [2; 20],
-                    state_root: [3; 32],
-                    receipts_root: [4; 32],
-                    logs_bloom: [0; 256],
-                    prev_randao: [5; 32],
-                    block_number: 1,
-                    gas_limit: 2,
-                    gas_used: 3,
-                    timestamp: 4,
-                    extra_data: Default::default(),
-                    base_fee_per_gas: [6; 32],
-                    block_hash: [7; 32],
-                    transactions: Default::default(),
-                },
-            })
-            .tree_hash_root(&NativeSha256Hasher);
-
-        for output in [
-            StatelessValidatorOutput::new(dummy_new_payload_request_root, false),
-            StatelessValidatorOutput::new(dummy_new_payload_request_root, true),
-        ] {
-            assert_eq!(
-                StatelessValidatorEthrexIo::serialize_output(&output).unwrap(),
-                output.serialize()
-            );
-        }
-    }
 }

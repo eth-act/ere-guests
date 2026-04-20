@@ -14,11 +14,9 @@ use tokio::{fs, process::Command};
 const REPO_API_URL: &str = "https://api.github.com/repos/eth-act/ere-guests";
 const ACTION_NAME: &str = "Compile and Release Compiled Guests";
 
-/// Compiled guest with serialized program and ELF.
+/// Compiled guest ELF.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CompiledGuest {
-    /// Serialized `Program` defined by each zkVM.
-    pub program: Vec<u8>,
     /// Raw ELF bytes.
     pub elf: Vec<u8>,
 }
@@ -76,17 +74,13 @@ impl Downloader {
         assets: &BTreeMap<String, String>,
         guest_name: &str,
     ) -> anyhow::Result<CompiledGuest> {
-        let program_url = assets
-            .get(guest_name)
-            .with_context(|| format!("Program not found: {guest_name}"))?;
         let elf_url = assets
             .get(&format!("{guest_name}.elf"))
             .with_context(|| format!("ELF not found: {guest_name}.elf"))?;
 
-        let program = get_bytes(&self.client, program_url).await?;
         let elf = get_bytes(&self.client, elf_url).await?;
 
-        Ok(CompiledGuest { program, elf })
+        Ok(CompiledGuest { elf })
     }
 
     async fn download_from_action(
@@ -114,14 +108,11 @@ impl Downloader {
             .context("Failed to run unzip")?;
         ensure!(output.status.success(), "Unzip exited with non-zero status");
 
-        let program = fs::read(tempdir.path().join(guest_name))
-            .await
-            .with_context(|| format!("Failed to read program: {guest_name}"))?;
         let elf = fs::read(tempdir.path().join(format!("{guest_name}.elf")))
             .await
             .with_context(|| format!("Failed to read ELF: {guest_name}.elf"))?;
 
-        Ok(CompiledGuest { program, elf })
+        Ok(CompiledGuest { elf })
     }
 }
 
@@ -265,7 +256,7 @@ mod tests {
             .await?
             .download("empty-zisk")
             .await?;
-        assert!(!guest.program.is_empty() && !guest.elf.is_empty());
+        assert!(!guest.elf.is_empty());
         Ok(())
     }
 
@@ -279,7 +270,7 @@ mod tests {
             .await?
             .download("empty-zisk")
             .await?;
-        assert!(!guest.program.is_empty() && !guest.elf.is_empty());
+        assert!(!guest.elf.is_empty());
         Ok(())
     }
 }

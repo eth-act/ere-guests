@@ -39,7 +39,8 @@ pub struct EncodedTransaction(pub Bytes);
 
 impl ExecutionPayload {
     /// Converts an `ExecutionPayload` into a block (aka a BlockHeader and BlockBody)
-    /// using the parentBeaconBlockRoot received along with the payload in the rpc call `engine_newPayloadV2/V3`
+    /// using the parentBeaconBlockRoot received along with the payload in the rpc call
+    /// `engine_newPayloadV2/V3`
     pub fn into_block(
         self,
         parent_beacon_block_root: Option<H256>,

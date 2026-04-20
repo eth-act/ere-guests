@@ -18,8 +18,8 @@ pub struct StatelessValidatorFixture {
     pub success: bool,
 }
 
-/// Returns the expected `StatelessValidatorOutput` for a given block hash in the fixtures, which was
-/// calculated by an independent implementation.
+/// Returns the expected `StatelessValidatorOutput` for a given block hash in the fixtures, which
+/// was calculated by an independent implementation.
 pub fn get_stateless_validator_output(block_hash: B256, success: bool) -> StatelessValidatorOutput {
     let expected_roots = expected_execution_payload_tree_roots();
     let expected_root = *expected_roots.get(&block_hash).unwrap();

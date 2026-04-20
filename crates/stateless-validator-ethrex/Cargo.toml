@@ -34,8 +34,7 @@ libssz_merkle.workspace = true
 stateless = { workspace = true, optional = true }
 
 # ere
-ere-io = { workspace = true, features = ["rkyv"] }
-ere-zkvm-interface = { workspace = true, optional = true }
+ere-prover-core = { workspace = true, optional = true }
 
 # local
 guest.workspace = true
@@ -63,7 +62,7 @@ host = [
     "dep:alloy-eips",
     "dep:alloy-rlp",
     "dep:alloy-genesis",
-    "dep:ere-zkvm-interface",
+    "dep:ere-prover-core",
     "dep:ethrex-rpc",
     "dep:stateless",
     "dep:stateless-validator-reth",

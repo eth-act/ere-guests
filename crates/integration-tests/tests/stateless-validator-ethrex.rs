@@ -21,8 +21,9 @@ fn test_execution(zkvm_kind: zkVMKind) {
             // need to execute the block successfully first.
             StatelessValidatorRethGuest::compute::<NoopPlatform>(input.clone())
         } else {
-            // For valid blocks (i.e. mainnet), we can rely on testing the output against an independent
-            // implementation that calculated the NewPayloadRequest root from a CL block.
+            // For valid blocks (i.e. mainnet), we can rely on testing the output against an
+            // independent implementation that calculated the NewPayloadRequest root
+            // from a CL block.
             get_stateless_validator_output(
                 fixture.stateless_input.block.hash_slow(),
                 fixture.success,

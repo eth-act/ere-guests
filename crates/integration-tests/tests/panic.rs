@@ -1,7 +1,6 @@
 //! Execution tests for `panic` guest program
 
-use ere_dockerized::zkVMKind;
-use ere_zkvm_interface::{Input, zkVM};
+use ere_dockerized::{Input, zkVMKind};
 use integration_tests::compile_and_init_zkvm;
 
 fn test_execution(zkvm_kind: zkVMKind) {

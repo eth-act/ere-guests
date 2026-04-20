@@ -36,8 +36,8 @@ stateless.workspace = true
 tries.workspace = true
 
 # ere
-ere-io = { workspace = true, features = ["bincode"] }
-ere-zkvm-interface = { workspace = true, optional = true }
+bincode = { workspace = true, features = ["alloc", "serde"] }
+ere-prover-core = { workspace = true, optional = true }
 
 # crypto
 sha2.workspace = true
@@ -54,4 +54,4 @@ openvm = []
 zisk = []
 
 # host
-host = ["std", "stateless-validator-common/host", "dep:ere-zkvm-interface"]
+host = ["std", "stateless-validator-common/host", "dep:ere-prover-core"]
