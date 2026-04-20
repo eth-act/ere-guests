@@ -30,16 +30,6 @@ substrate-bn = { git = "https://github.com/sp1-patches/bn", tag = "patch-0.6.0-s
 # [patch."https://github.com/lambdaclass/bls12_381"]
 # bls12_381 = { git = "https://github.com/lambdaclass/bls12_381-patch/", branch = "expose-affine-constructors" }
 
-# Patched Ethrex of `bal-devnet-3` plus cherry-picked #6462, #6382 and #6448.
-# We can remove this patch in their next merge of `main` into `bal-devnet-3`.
-
-[patch."https://github.com/lambdaclass/ethrex.git"]
-ethrex-common = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-ethrex-crypto = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-ethrex-guest-program = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-ethrex-rlp = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-ethrex-vm = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-
 [profile.release]
 codegen-units = 1
 lto = "fat"

@@ -142,13 +142,3 @@ alloy-rpc-types-debug = { git = "https://github.com/alloy-rs/alloy", branch = "b
 alloy-rpc-types-engine = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
 alloy-rpc-types-eth = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
 alloy-serde = { git = "https://github.com/alloy-rs/alloy", branch = "bal-devnet2" }
-
-# Patched Ethrex of `bal-devnet-3` plus cherry-picked #6462, #6382 and #6448.
-# We can remove this patch in their next merge of `main` into `bal-devnet-3`.
-[patch."https://github.com/lambdaclass/ethrex.git"]
-ethrex-common = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-ethrex-crypto = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-ethrex-guest-program = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-ethrex-rlp = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-ethrex-rpc = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
-ethrex-vm = { git = "https://github.com/jsign/ethrex.git", branch = "jsign-bal-devnet-3-with-fixes" }
