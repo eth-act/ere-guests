@@ -54,7 +54,7 @@ jobs:
         shell: bash
         run: |
           .github/scripts/check-duplicate-pkg.sh \
-            --include '^(alloy|ethrex|ere|reth|revm)' \
+            --include '^(alloy|ethrex|ere|reth|revm|openvm|risc0|sp1|zisk)' \
             --exclude '^alloy-trie$' # Crate `mpt` depends on an older `alloy-trie` but it's okay.
 
   test:
