@@ -17,7 +17,7 @@ use crate::new_payload_request::new_payload_request_to_block;
 #[rustfmt::skip]
 pub use {
     guest::*,
-    stateless_validator_common::guest::StatelessValidatorOutput,
+    stateless_validator_common::{guest::StatelessValidatorOutput, new_payload_request},
 };
 
 #[cfg(feature = "openvm")]

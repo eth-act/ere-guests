@@ -15,7 +15,7 @@ use crate::new_payload_request::get_block_from_new_payload_request;
 #[rustfmt::skip]
 pub use {
     guest::*,
-    stateless_validator_common::guest::StatelessValidatorOutput,
+    stateless_validator_common::{guest::StatelessValidatorOutput, new_payload_request},
 };
 
 /// Input for the Ethrex stateless validator guest program.
