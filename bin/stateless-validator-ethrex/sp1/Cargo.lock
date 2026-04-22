@@ -860,28 +860,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "ere-io"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
-dependencies = [
- "rkyv",
-]
+name = "ere-codec"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+
+[[package]]
+name = "ere-platform-core"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 
 [[package]]
 name = "ere-platform-sp1"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 dependencies = [
- "ere-platform-trait",
+ "ere-platform-core",
  "sp1-zkvm",
-]
-
-[[package]]
-name = "ere-platform-trait"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
-dependencies = [
- "digest",
 ]
 
 [[package]]
@@ -1310,8 +1304,8 @@ dependencies = [
 name = "guest"
 version = "0.8.0"
 dependencies = [
- "ere-io",
- "ere-platform-trait",
+ "ere-codec",
+ "ere-platform-core",
  "sha2",
 ]
 
@@ -2798,6 +2792,8 @@ name = "stateless-validator-common"
 version = "0.8.0"
 dependencies = [
  "anyhow",
+ "ere-codec",
+ "ere-platform-core",
  "libssz",
  "libssz-derive",
  "libssz-merkle",
@@ -2814,7 +2810,6 @@ version = "0.8.0"
 dependencies = [
  "anyhow",
  "bytes",
- "ere-io",
  "ethrex-common",
  "ethrex-crypto",
  "ethrex-guest-program",

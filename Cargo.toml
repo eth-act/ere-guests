@@ -46,6 +46,7 @@ result_large_err = "allow"
 
 [workspace.dependencies]
 anyhow = { version = "1.0", default-features = false }
+bincode = { version = "2.0.1", default-features = false }
 clap = { version = "4.6.0", features = ["derive"] }
 once_cell = { version = "1.21", default-features = false }
 rkyv = { version = "0.8.10", default-features = false }
@@ -103,10 +104,10 @@ libssz_types = { package = "libssz-types", version = "0.2.1", default-features =
 ] }
 
 # ere
-ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
-ere-io = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
-ere-platform-trait = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
-ere-zkvm-interface = { git = "https://github.com/eth-act/ere", tag = "v0.6.0" }
+ere-codec = { git = "https://github.com/eth-act/ere", tag = "v0.8.0" }
+ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.8.0" }
+ere-prover-core = { git = "https://github.com/eth-act/ere", tag = "v0.8.0" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.8.0" }
 
 # local
 guest = { path = "crates/guest", default-features = false }

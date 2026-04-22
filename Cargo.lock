@@ -361,7 +361,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-serde",
  "alloy-sol-types",
- "itertools 0.14.0",
+ "itertools 0.13.0",
  "serde",
  "serde_json",
  "serde_with",
@@ -1106,8 +1106,8 @@ dependencies = [
  "alloy-eips",
  "alloy-primitives",
  "anyhow",
- "ere-io",
- "ere-zkvm-interface",
+ "bincode 2.0.1",
+ "ere-prover-core",
  "guest",
  "libssz",
  "libssz-derive",
@@ -1394,7 +1394,7 @@ version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "faf9468729b8cbcea668e36183cb69d317348c2e08e994829fb56ebfdfbaac34"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1956,33 +1956,39 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "ere-build-utils"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
+name = "ere-catalog"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 dependencies = [
- "cargo_metadata",
-]
-
-[[package]]
-name = "ere-common"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
-dependencies = [
- "ere-build-utils",
+ "ere-util-build",
  "serde",
  "strum",
 ]
 
 [[package]]
+name = "ere-codec"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+
+[[package]]
+name = "ere-compiler-core"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "ere-dockerized"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 dependencies = [
  "anyhow",
- "ere-common",
- "ere-server",
- "ere-zkvm-interface",
- "serde",
+ "ere-catalog",
+ "ere-compiler-core",
+ "ere-prover-core",
+ "ere-server-client",
+ "ere-util-tokio",
  "tempfile",
  "thiserror 2.0.18",
  "tokio",
@@ -1990,52 +1996,73 @@ dependencies = [
 ]
 
 [[package]]
-name = "ere-io"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
-dependencies = [
- "bincode 2.0.1",
- "rkyv",
- "serde",
-]
+name = "ere-platform-core"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 
 [[package]]
-name = "ere-platform-trait"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
-dependencies = [
- "digest 0.10.7",
-]
-
-[[package]]
-name = "ere-server"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
-dependencies = [
- "anyhow",
- "bincode 2.0.1",
- "ere-zkvm-interface",
- "prost",
- "serde",
- "thiserror 2.0.18",
- "tokio",
- "twirp",
-]
-
-[[package]]
-name = "ere-zkvm-interface"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
+name = "ere-prover-core"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 dependencies = [
  "anyhow",
  "auto_impl",
  "bincode 2.0.1",
  "clap",
+ "ere-codec",
+ "ere-verifier-core",
  "indexmap 2.13.0",
  "serde",
  "strum",
  "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ere-server-api"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+dependencies = [
+ "prost",
+ "serde",
+ "twirp",
+]
+
+[[package]]
+name = "ere-server-client"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+dependencies = [
+ "bincode 2.0.1",
+ "ere-prover-core",
+ "ere-server-api",
+ "thiserror 2.0.18",
+ "twirp",
+]
+
+[[package]]
+name = "ere-util-build"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+dependencies = [
+ "cargo_metadata",
+]
+
+[[package]]
+name = "ere-util-tokio"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+dependencies = [
  "tokio",
+]
+
+[[package]]
+name = "ere-verifier-core"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+dependencies = [
+ "auto_impl",
+ "ere-codec",
+ "serde",
 ]
 
 [[package]]
@@ -2760,8 +2787,8 @@ dependencies = [
 name = "guest"
 version = "0.8.0"
 dependencies = [
- "ere-io",
- "ere-platform-trait",
+ "ere-codec",
+ "ere-platform-core",
  "sha2",
 ]
 
@@ -3276,8 +3303,6 @@ dependencies = [
  "alloy-primitives",
  "block-encoding-length",
  "ere-dockerized",
- "ere-io",
- "ere-zkvm-interface",
  "flate2",
  "guest",
  "rayon",
@@ -4676,7 +4701,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "27c6023962132f4b30eb4c172c91ce92d933da334c59c23cddee82358ddafb0b"
 dependencies = [
  "anyhow",
- "itertools 0.14.0",
+ "itertools 0.12.1",
  "proc-macro2",
  "quote",
  "syn 2.0.117",
@@ -6347,6 +6372,8 @@ dependencies = [
  "alloy-eips",
  "alloy-primitives",
  "anyhow",
+ "ere-codec",
+ "ere-platform-core",
  "libssz",
  "libssz-derive",
  "libssz-merkle",
@@ -6383,8 +6410,7 @@ dependencies = [
  "alloy-rlp",
  "anyhow",
  "bytes",
- "ere-io",
- "ere-zkvm-interface",
+ "ere-prover-core",
  "ethrex-common",
  "ethrex-crypto",
  "ethrex-guest-program",
@@ -6410,8 +6436,8 @@ dependencies = [
  "alloy-rlp",
  "alloy-rpc-types-engine",
  "anyhow",
- "ere-io",
- "ere-zkvm-interface",
+ "bincode 2.0.1",
+ "ere-prover-core",
  "guest",
  "once_cell",
  "reth-chainspec",

@@ -362,11 +362,6 @@ version = "0.16.1"
 source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 
 [[package]]
-name = "circuit"
-version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
-
-[[package]]
 name = "colored"
 version = "3.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -691,29 +686,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "ere-io"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
-dependencies = [
- "rkyv",
-]
+name = "ere-codec"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 
 [[package]]
-name = "ere-platform-trait"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
-dependencies = [
- "digest",
-]
+name = "ere-platform-core"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 
 [[package]]
 name = "ere-platform-zisk"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 dependencies = [
- "ere-platform-trait",
+ "ere-platform-core",
  "fnv",
- "ziskos 0.16.1 (git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1)",
+ "ziskos",
 ]
 
 [[package]]
@@ -812,7 +801,7 @@ dependencies = [
  "serde_with",
  "substrate-bn",
  "thiserror",
- "ziskos 0.16.1 (git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1)",
+ "ziskos",
 ]
 
 [[package]]
@@ -1002,8 +991,8 @@ dependencies = [
 name = "guest"
 version = "0.8.0"
 dependencies = [
- "ere-io",
- "ere-platform-trait",
+ "ere-codec",
+ "ere-platform-core",
  "sha2",
 ]
 
@@ -1260,11 +1249,6 @@ dependencies = [
 name = "lib-c"
 version = "0.16.1"
 source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
-
-[[package]]
-name = "lib-c"
-version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
 
 [[package]]
 name = "libc"
@@ -1578,26 +1562,8 @@ dependencies = [
  "ark-secp256r1",
  "ark-std",
  "cfg-if",
- "circuit 0.16.1 (git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1)",
- "lib-c 0.16.1 (git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1)",
- "num-bigint",
- "num-traits",
-]
-
-[[package]]
-name = "precompiles-helpers"
-version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
-dependencies = [
- "ark-bls12-381",
- "ark-bn254",
- "ark-ff",
- "ark-secp256k1",
- "ark-secp256r1",
- "ark-std",
- "cfg-if",
- "circuit 0.16.1 (git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1)",
- "lib-c 0.16.1 (git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1)",
+ "circuit",
+ "lib-c",
  "num-bigint",
  "num-traits",
 ]
@@ -2063,6 +2029,8 @@ name = "stateless-validator-common"
 version = "0.8.0"
 dependencies = [
  "anyhow",
+ "ere-codec",
+ "ere-platform-core",
  "libssz",
  "libssz-derive",
  "libssz-merkle",
@@ -2079,7 +2047,6 @@ version = "0.8.0"
 dependencies = [
  "anyhow",
  "bytes",
- "ere-io",
  "ethrex-common",
  "ethrex-crypto",
  "ethrex-guest-program",
@@ -2681,22 +2648,9 @@ version = "0.16.1"
 source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 
 [[package]]
-name = "zisk-definitions"
-version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
-
-[[package]]
 name = "zisk-verifier"
 version = "0.16.1"
 source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
-dependencies = [
- "proofman-verifier",
-]
-
-[[package]]
-name = "zisk-verifier"
-version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
 dependencies = [
  "proofman-verifier",
 ]
@@ -2711,38 +2665,15 @@ dependencies = [
  "fields",
  "getrandom",
  "lazy_static",
- "lib-c 0.16.1 (git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1)",
+ "lib-c",
  "num-bigint",
  "num-integer",
  "num-traits",
- "precompiles-helpers 0.16.1 (git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1)",
+ "precompiles-helpers",
  "rand",
  "serde",
  "sha2",
  "tiny-keccak",
- "zisk-definitions 0.16.1 (git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1)",
- "zisk-verifier 0.16.1 (git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1)",
-]
-
-[[package]]
-name = "ziskos"
-version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
-dependencies = [
- "bincode",
- "cfg-if",
- "fields",
- "getrandom",
- "lazy_static",
- "lib-c 0.16.1 (git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1)",
- "num-bigint",
- "num-integer",
- "num-traits",
- "precompiles-helpers 0.16.1 (git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1)",
- "rand",
- "serde",
- "sha2",
- "tiny-keccak",
- "zisk-definitions 0.16.1 (git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1)",
- "zisk-verifier 0.16.1 (git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1)",
+ "zisk-definitions",
+ "zisk-verifier",
 ]

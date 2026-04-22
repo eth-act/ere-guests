@@ -452,7 +452,7 @@ dependencies = [
 [[package]]
 name = "circuit"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 
 [[package]]
 name = "clang-sys"
@@ -755,19 +755,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "ere-platform-trait"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
-dependencies = [
- "digest",
-]
+name = "ere-platform-core"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 
 [[package]]
 name = "ere-platform-zisk"
-version = "0.6.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.6.0#12d266ed44845bf092798fc70c08e69294ef8e7d"
+version = "0.8.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
 dependencies = [
- "ere-platform-trait",
+ "ere-platform-core",
  "fnv",
  "ziskos",
 ]
@@ -1014,12 +1011,12 @@ checksum = "830d08ce1d1d941e6b30645f1a0eb5643013d835ce3779a5fc208261dbe10f55"
 [[package]]
 name = "lib-c"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 
 [[package]]
 name = "lib-float"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 
 [[package]]
 name = "libc"
@@ -1358,7 +1355,7 @@ dependencies = [
 [[package]]
 name = "precompiles-helpers"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 dependencies = [
  "ark-bls12-381",
  "ark-bn254",
@@ -1734,7 +1731,7 @@ dependencies = [
 [[package]]
 name = "riscv"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 
 [[package]]
 name = "rustc-hash"
@@ -2924,7 +2921,7 @@ dependencies = [
 [[package]]
 name = "zisk-common"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 dependencies = [
  "anyhow",
  "bincode",
@@ -2949,7 +2946,7 @@ dependencies = [
 [[package]]
 name = "zisk-core"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 dependencies = [
  "elf",
  "fields",
@@ -2969,12 +2966,12 @@ dependencies = [
 [[package]]
 name = "zisk-definitions"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 
 [[package]]
 name = "zisk-verifier"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 dependencies = [
  "proofman-verifier",
 ]
@@ -2982,7 +2979,7 @@ dependencies = [
 [[package]]
 name = "ziskos"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 dependencies = [
  "anyhow",
  "bincode",
@@ -3012,7 +3009,7 @@ dependencies = [
 [[package]]
 name = "ziskos-hints"
 version = "0.16.1"
-source = "git+https://github.com/han0110/zisk.git?branch=patch%2Fv0.16.1#48bba0e327f9de7360ec58583e561bfbe12b3632"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 dependencies = [
  "anyhow",
  "bincode",
