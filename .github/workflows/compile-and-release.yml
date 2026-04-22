@@ -85,7 +85,6 @@ jobs:
             --program-vk-path /output/${{ matrix.guest }}-${{ matrix.zkvm }}.vk
 
       - name: Upload artifact
-        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.guest }}-${{ matrix.zkvm }}
