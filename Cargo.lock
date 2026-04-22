@@ -1100,7 +1100,7 @@ dependencies = [
 
 [[package]]
 name = "block-encoding-length"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -1828,7 +1828,7 @@ dependencies = [
 
 [[package]]
 name = "downloader"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "reqwest",
@@ -2785,7 +2785,7 @@ dependencies = [
 
 [[package]]
 name = "guest"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "ere-codec",
  "ere-platform-core",
@@ -3298,7 +3298,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "alloy-primitives",
  "block-encoding-length",
@@ -6367,7 +6367,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-common"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "alloy-eips",
  "alloy-primitives",
@@ -6386,7 +6386,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-debug"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -6402,7 +6402,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-ethrex"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -6427,7 +6427,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-reth"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
