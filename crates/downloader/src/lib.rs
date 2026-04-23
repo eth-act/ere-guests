@@ -19,6 +19,8 @@ const ACTION_NAME: &str = "Compile and Release Compiled Guests";
 pub struct CompiledGuest {
     /// Raw ELF bytes.
     pub elf: Vec<u8>,
+    /// Raw Program VK bytes.
+    pub program_vk: Vec<u8>,
 }
 
 #[derive(Clone, Debug)]
@@ -77,10 +79,14 @@ impl Downloader {
         let elf_url = assets
             .get(&format!("{guest_name}.elf"))
             .with_context(|| format!("ELF not found: {guest_name}.elf"))?;
+        let program_vk_url = assets
+            .get(&format!("{guest_name}.vk"))
+            .with_context(|| format!("Program VK not found: {guest_name}.vk"))?;
 
         let elf = get_bytes(&self.client, elf_url).await?;
+        let program_vk = get_bytes(&self.client, program_vk_url).await?;
 
-        Ok(CompiledGuest { elf })
+        Ok(CompiledGuest { elf, program_vk })
     }
 
     async fn download_from_action(
@@ -111,8 +117,11 @@ impl Downloader {
         let elf = fs::read(tempdir.path().join(format!("{guest_name}.elf")))
             .await
             .with_context(|| format!("Failed to read ELF: {guest_name}.elf"))?;
+        let program_vk = fs::read(tempdir.path().join(format!("{guest_name}.vk")))
+            .await
+            .with_context(|| format!("Failed to read Program VK: {guest_name}.vk"))?;
 
-        Ok(CompiledGuest { elf })
+        Ok(CompiledGuest { elf, program_vk })
     }
 }
 
@@ -252,11 +261,12 @@ mod tests {
 
     #[tokio::test]
     async fn download_from_tag() -> anyhow::Result<()> {
-        let guest = Downloader::from_tag("v0.5.0")
+        let guest = Downloader::from_tag("v0.9.0")
             .await?
             .download("empty-zisk")
             .await?;
         assert!(!guest.elf.is_empty());
+        assert!(!guest.program_vk.is_empty());
         Ok(())
     }
 
@@ -266,11 +276,12 @@ mod tests {
             return Ok(());
         };
 
-        let guest = Downloader::from_commit("c696d4b", &github_token)
+        let guest = Downloader::from_commit("73457de", &github_token)
             .await?
             .download("empty-zisk")
             .await?;
         assert!(!guest.elf.is_empty());
+        assert!(!guest.program_vk.is_empty());
         Ok(())
     }
 }
