@@ -4,7 +4,7 @@ use alloc::{format, vec::Vec};
 use std::sync::Arc;
 
 use alloy_consensus::Transaction;
-use alloy_eips::{Encodable2718, eip7685::Requests};
+use alloy_eips::{Encodable2718, eip7685::Requests, eip7928::BlockAccessList};
 use alloy_genesis::{ChainConfig, Genesis};
 use alloy_primitives::U256;
 use anyhow::Context;
@@ -17,8 +17,8 @@ pub use stateless::StatelessInput;
 use stateless::{UncompressedPublicKey, stateless_validation_with_trie};
 pub use stateless_validator_common::guest::StatelessValidatorOutput;
 use stateless_validator_common::new_payload_request::{
-    ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, ExtraData, ForkName,
-    NewPayloadRequest, Transaction as Tx, Transactions, Withdrawal, Withdrawals,
+    ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, ExecutionPayloadV4, ExtraData,
+    ForkName, NewPayloadRequest, Transaction as Tx, Transactions, Withdrawal, Withdrawals,
 };
 use tries::zeth::SparseState;
 
@@ -68,6 +68,12 @@ where
 pub fn determine_fork_name(chain_config: &ChainConfig, timestamp: u64) -> ForkName {
     // Check forks in reverse chronological order
     if chain_config
+        .amsterdam_time
+        .is_some_and(|amsterdam_time| timestamp >= amsterdam_time)
+    {
+        return ForkName::Amsterdam;
+    }
+    if chain_config
         .osaka_time
         .is_some_and(|osaka_time| timestamp >= osaka_time)
     {
@@ -95,7 +101,7 @@ pub fn determine_fork_name(chain_config: &ChainConfig, timestamp: u64) -> ForkNa
 }
 
 /// Converts a [`StatelessInput`] to a [`NewPayloadRequest`].
-pub fn to_new_payload_request(
+fn to_new_payload_request(
     stateless_input: &StatelessInput,
     requests: Requests,
 ) -> anyhow::Result<NewPayloadRequest> {
@@ -266,6 +272,60 @@ pub fn to_new_payload_request(
                 .0;
 
             NewPayloadRequest::new_electra_fulu(
+                payload,
+                versioned_hashes,
+                parent_beacon_block_root,
+                &requests,
+            )
+        }
+        ForkName::Amsterdam => {
+            let withdrawals = build_withdrawals()?;
+            // TODO(Amsterdam): use actual BAL that should be received from parameter.
+            let block_access_list = Tx::try_from(alloy_rlp::encode(BlockAccessList::default()))
+                .map_err(|err| {
+                    anyhow::anyhow!(
+                        "default block access list length should be within bounds: {err:?}"
+                    )
+                })?;
+            let slot_number = header.slot_number.unwrap_or_default();
+
+            let payload = ExecutionPayloadV4 {
+                parent_hash: header.parent_hash.0,
+                fee_recipient: header.beneficiary.0.0,
+                state_root: header.state_root.0,
+                receipts_root: header.receipts_root.0,
+                logs_bloom,
+                prev_randao: header.mix_hash.0,
+                block_number: header.number,
+                gas_limit: header.gas_limit,
+                gas_used: header.gas_used,
+                timestamp: header.timestamp,
+                extra_data,
+                base_fee_per_gas: U256::from(header.base_fee_per_gas.unwrap_or_default())
+                    .to_le_bytes(),
+                block_hash: stateless_input.block.hash_slow().0,
+                transactions,
+                withdrawals,
+                blob_gas_used: header.blob_gas_used.unwrap_or_default(),
+                excess_blob_gas: header.excess_blob_gas.unwrap_or_default(),
+                block_access_list,
+                slot_number,
+            };
+
+            let versioned_hashes: Vec<[u8; 32]> = body
+                .transactions()
+                .filter_map(|tx| tx.blob_versioned_hashes())
+                .flatten()
+                .map(|h| h.0)
+                .collect();
+
+            let parent_beacon_block_root = stateless_input
+                .block
+                .parent_beacon_block_root
+                .unwrap_or_default()
+                .0;
+
+            NewPayloadRequest::new_amsterdam(
                 payload,
                 versioned_hashes,
                 parent_beacon_block_root,

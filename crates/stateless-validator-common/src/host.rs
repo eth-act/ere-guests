@@ -9,9 +9,9 @@ use crate::{
     guest::StatelessValidatorOutput,
     new_payload_request::{
         ConsolidationRequest, DepositRequest, ExecutionPayloadV1, ExecutionPayloadV2,
-        ExecutionPayloadV3, ExecutionRequests, Hash32, NewPayloadRequest,
-        NewPayloadRequestBellatrix, NewPayloadRequestCapella, NewPayloadRequestDeneb,
-        NewPayloadRequestElectraFulu, WithdrawalRequest,
+        ExecutionPayloadV3, ExecutionPayloadV4, ExecutionRequests, Hash32, NewPayloadRequest,
+        NewPayloadRequestAmsterdam, NewPayloadRequestBellatrix, NewPayloadRequestCapella,
+        NewPayloadRequestDeneb, NewPayloadRequestElectraFulu, WithdrawalRequest,
     },
 };
 
@@ -65,6 +65,24 @@ impl NewPayloadRequest {
                 execution_requests,
             },
         ))
+    }
+
+    /// Constructs a new [`NewPayloadRequest`] for Amsterdam.
+    pub fn new_amsterdam(
+        execution_payload: ExecutionPayloadV4,
+        versioned_hashes: Vec<Hash32>,
+        parent_beacon_block_root: Hash32,
+        execution_requests: &[impl AsRef<[u8]>],
+    ) -> Result<Self> {
+        let versioned_hashes = bounded_list(versioned_hashes, "versioned hashes")?;
+        let execution_requests = decode_execution_requests(execution_requests)
+            .context("Decoding execution requests failed")?;
+        Ok(NewPayloadRequest::Amsterdam(NewPayloadRequestAmsterdam {
+            execution_payload,
+            versioned_hashes,
+            parent_beacon_block_root,
+            execution_requests,
+        }))
     }
 }
 

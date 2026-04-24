@@ -122,7 +122,7 @@ fn from_reth_witness_to_ethrex_witness(
         bpo3_time: stateless_input.chain_config.bpo3_time,
         bpo4_time: stateless_input.chain_config.bpo4_time,
         bpo5_time: stateless_input.chain_config.bpo5_time,
-        amsterdam_time: None,
+        amsterdam_time: stateless_input.chain_config.amsterdam_time,
         enable_verkle_at_genesis: false,
     };
 
