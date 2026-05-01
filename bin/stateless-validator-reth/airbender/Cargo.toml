@@ -15,7 +15,7 @@ revm = { version = "38.0.0", default-features = false, features = ["bn"] }
 
 # ere
 ere-platform-airbender = { git = "https://github.com/eth-act/ere", tag = "v0.8.0", features = [
-    "custom_allocator",
+    "std",
 ] }
 
 # local
