@@ -2,7 +2,7 @@
 
 #![no_main]
 
-use ere_platform_airbender::{entrypoint, AirbenderPlatform};
+use ere_platform_airbender::{AirbenderPlatform, entrypoint};
 use stateless_validator_reth::guest::{Guest, StatelessValidatorRethGuest};
 
 entrypoint!(main);
