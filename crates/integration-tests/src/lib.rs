@@ -73,7 +73,7 @@ pub fn compile_and_init_zkvm(guest: &str, zkvm_kind: zkVMKind) -> DockerizedzkVM
     let compiler =
         DockerizedCompiler::new(zkvm_kind, CompilerKind::RustCustomized, &workspace).unwrap();
     let bin = workspace.join("bin").join(guest).join(zkvm_kind.as_str());
-    let program = compiler.compile(&bin).unwrap();
+    let program = compiler.compile(&bin, &[]).unwrap();
 
     DockerizedzkVM::new(
         zkvm_kind,
