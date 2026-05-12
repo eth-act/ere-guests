@@ -7,10 +7,10 @@ use std::{
 
 use ere_dockerized::{
     Compiler, CompilerKind, DockerizedCompiler, DockerizedzkVM, DockerizedzkVMConfig, Input,
-    ProverResource, codec::Encode, zkVMKind,
+    ProverResource, zkVMKind,
 };
 use flate2::read::GzDecoder;
-use guest::{Guest, GuestInput, GuestOutput, Platform};
+use guest::{Guest, GuestInput, GuestOutput, Platform, codec::Encode};
 use rayon::prelude::*;
 use sha2::{Digest, Sha256};
 use tar::Archive;
