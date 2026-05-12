@@ -1,13 +1,11 @@
 //! Airbender empty guest program.
 
-#![no_std]
 #![no_main]
-#![no_builtins]
 
-use ere_platform_airbender::riscv_common::zksync_os_finish_success;
+use ere_platform_airbender::{airbender, entrypoint};
 
-mod airbender_rt;
+entrypoint!(main);
 
 fn main() {
-    zksync_os_finish_success(&[0; 8]);
+    airbender::rt::sys::exit_success(&[0; 8]);
 }

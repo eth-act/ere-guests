@@ -1,9 +1,11 @@
 [workspace]
 
 [package]
-name = "panic-airbender"
+name = "empty-airbender"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ere-platform-airbender = { git = "https://github.com/eth-act/ere", tag = "v0.9.0" }
+ere-platform-airbender = { git = "https://github.com/eth-act/ere", tag = "v0.9.0", features = [
+    "std",
+] }
