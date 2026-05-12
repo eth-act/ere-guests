@@ -7,5 +7,8 @@ use ere_platform_airbender::{airbender, entrypoint};
 entrypoint!(main);
 
 fn main() {
-    airbender::rt::sys::exit_error();
+    if core::hint::black_box(false) {
+        airbender::rt::sys::exit_success(&[0; 8]);
+    }
+    panic!("The ticker is eth")
 }
