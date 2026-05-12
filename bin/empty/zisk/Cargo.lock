@@ -763,13 +763,13 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-platform-core"
-version = "0.8.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+version = "0.9.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.9.0#7b0db7895fd1bafd9a3542bb1eb820dd9c575df8"
 
 [[package]]
 name = "ere-platform-zisk"
-version = "0.8.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.8.0#54b00745fa5fabe008b037f61f6864305c41af80"
+version = "0.9.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.9.0#7b0db7895fd1bafd9a3542bb1eb820dd9c575df8"
 dependencies = [
  "ere-platform-core",
  "fnv",
