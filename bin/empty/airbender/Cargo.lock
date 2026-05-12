@@ -83,6 +83,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "empty-airbender"
+version = "0.1.0"
+dependencies = [
+ "ere-platform-airbender",
+]
+
+[[package]]
 name = "ere-platform-airbender"
 version = "0.9.0"
 source = "git+https://github.com/eth-act/ere?tag=v0.9.0#7b0db7895fd1bafd9a3542bb1eb820dd9c575df8"
@@ -120,13 +127,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "224399e74b87b5f3557511d98dff8b14089b3dadafcab6bb93eab67d3aace965"
 dependencies = [
  "scopeguard",
-]
-
-[[package]]
-name = "panic-airbender"
-version = "0.1.0"
-dependencies = [
- "ere-platform-airbender",
 ]
 
 [[package]]
