@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.0](https://github.com/eth-act/ere-guests/compare/v0.9.0...v0.10.0) (2026-05-13)
+
+
+### Features
+
+* bump ere and update airbender ([#45](https://github.com/eth-act/ere-guests/issues/45)) ([2d763c7](https://github.com/eth-act/ere-guests/commit/2d763c7cc013d3d9e119f0f023afc71c70205425))
+* **ethrex:** Use EIP-8025 feature to delegate as much logic into their guest program ([3387b8f](https://github.com/eth-act/ere-guests/commit/3387b8f251d4af90ef031b9fa46372e85a3aa317))
+* update downloader to download program vk as well ([#40](https://github.com/eth-act/ere-guests/issues/40)) ([a9072ff](https://github.com/eth-act/ere-guests/commit/a9072ff53d2d65c817b5c7cded775d44da33614c))
+
+
+### Bug Fixes
+
+* update ethrex dependencies to latest revision and correct execution program import ([62ca670](https://github.com/eth-act/ere-guests/commit/62ca670ff95e9fd77b1ded8651bdfb1c2aabb9b8))
+
 ## [0.9.0](https://github.com/eth-act/ere-guests/compare/v0.8.0...v0.9.0) (2026-04-22)
 
 
