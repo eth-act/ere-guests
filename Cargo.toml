@@ -108,10 +108,10 @@ libssz_types = { package = "libssz-types", version = "0.2.1", default-features =
 ] }
 
 # ere
-ere-codec = { git = "https://github.com/eth-act/ere", tag = "v0.9.0" }
-ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.9.0" }
-ere-prover-core = { git = "https://github.com/eth-act/ere", tag = "v0.9.0" }
-ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.9.0" }
+ere-codec = { git = "https://github.com/eth-act/ere", tag = "v0.9.1" }
+ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.9.1" }
+ere-prover-core = { git = "https://github.com/eth-act/ere", tag = "v0.9.1" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.9.1" }
 
 # local
 guest = { path = "crates/guest", default-features = false }
