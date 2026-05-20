@@ -1309,18 +1309,18 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-codec"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 
 [[package]]
 name = "ere-platform-core"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 
 [[package]]
 name = "ere-platform-risc0"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "ere-platform-core",
  "risc0-zkvm",
@@ -3463,6 +3463,7 @@ dependencies = [
  "reth-evm-ethereum",
  "reth-payload-validator",
  "reth-primitives-traits",
+ "revm",
  "serde",
  "serde_with",
  "sha2",

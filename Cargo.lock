@@ -923,28 +923,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ark-secp256k1"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8bd211c48debd3037b48873a7aa22c3aba034e83388aa4124795c9f220b88c7"
-dependencies = [
- "ark-ec",
- "ark-ff 0.5.0",
- "ark-std 0.5.0",
-]
-
-[[package]]
-name = "ark-secp256r1"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cf8be5820de567729bfa73a410ddd07cec8ad102d9a4bf61fd6b2e60db264e8"
-dependencies = [
- "ark-ec",
- "ark-ff 0.5.0",
- "ark-std 0.5.0",
-]
-
-[[package]]
 name = "ark-serialize"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1203,6 +1181,8 @@ dependencies = [
  "cexpr",
  "clang-sys",
  "itertools 0.10.5",
+ "log",
+ "prettyplease",
  "proc-macro2",
  "quote",
  "regex",
@@ -1565,11 +1545,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "circuit"
-version = "0.16.1"
-source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
-
-[[package]]
 name = "clang-sys"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1625,15 +1600,6 @@ name = "colorchoice"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
-
-[[package]]
-name = "colored"
-version = "3.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "faf9468729b8cbcea668e36183cb69d317348c2e08e994829fb56ebfdfbaac34"
-dependencies = [
- "windows-sys 0.61.2",
-]
 
 [[package]]
 name = "concat-kdf"
@@ -2258,8 +2224,8 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-catalog"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "ere-util-build",
  "serde",
@@ -2268,21 +2234,21 @@ dependencies = [
 
 [[package]]
 name = "ere-codec"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 
 [[package]]
 name = "ere-compiler-core"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "ere-dockerized"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "anyhow",
  "ere-catalog",
@@ -2298,13 +2264,13 @@ dependencies = [
 
 [[package]]
 name = "ere-platform-core"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 
 [[package]]
 name = "ere-prover-core"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "anyhow",
  "auto_impl",
@@ -2320,8 +2286,8 @@ dependencies = [
 
 [[package]]
 name = "ere-server-api"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "prost",
  "serde",
@@ -2330,8 +2296,8 @@ dependencies = [
 
 [[package]]
 name = "ere-server-client"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "bincode 2.0.1",
  "ere-prover-core",
@@ -2342,24 +2308,24 @@ dependencies = [
 
 [[package]]
 name = "ere-util-build"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "cargo_metadata",
 ]
 
 [[package]]
 name = "ere-util-tokio"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "tokio",
 ]
 
 [[package]]
 name = "ere-verifier-core"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "auto_impl",
  "ere-codec",
@@ -2506,7 +2472,6 @@ dependencies = [
  "serde_with",
  "substrate-bn",
  "thiserror 2.0.18",
- "ziskos",
 ]
 
 [[package]]
@@ -2800,17 +2765,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "fields"
-version = "0.16.1"
-source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.1#971209423e8fa53fa32dc747744d68c65aafa6c7"
-dependencies = [
- "cfg-if",
- "num-bigint 0.4.6",
- "paste",
- "serde",
 ]
 
 [[package]]
@@ -3949,11 +3903,6 @@ name = "leb128fmt"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
-
-[[package]]
-name = "lib-c"
-version = "0.16.1"
-source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
 
 [[package]]
 name = "libc"
@@ -5201,24 +5150,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "precompiles-helpers"
-version = "0.16.1"
-source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
-dependencies = [
- "ark-bls12-381",
- "ark-bn254",
- "ark-ff 0.5.0",
- "ark-secp256k1",
- "ark-secp256r1",
- "ark-std 0.5.0",
- "cfg-if",
- "circuit",
- "lib-c",
- "num-bigint 0.4.6",
- "num-traits",
-]
-
-[[package]]
 name = "prettyplease"
 version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5338,30 +5269,6 @@ dependencies = [
  "procfs",
  "protobuf",
  "thiserror 2.0.18",
-]
-
-[[package]]
-name = "proofman-util"
-version = "0.16.1"
-source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.1#971209423e8fa53fa32dc747744d68c65aafa6c7"
-dependencies = [
- "bincode 1.3.3",
- "bytemuck",
- "colored",
- "serde",
- "sysinfo 0.35.2",
-]
-
-[[package]]
-name = "proofman-verifier"
-version = "0.16.1"
-source = "git+https://github.com/0xPolygonHermez/pil2-proofman.git?tag=v0.16.1#971209423e8fa53fa32dc747744d68c65aafa6c7"
-dependencies = [
- "bytemuck",
- "fields",
- "proofman-util",
- "rayon",
- "tracing",
 ]
 
 [[package]]
@@ -5953,7 +5860,7 @@ dependencies = [
  "reth-tracing",
  "rustc-hash",
  "strum",
- "sysinfo 0.38.4",
+ "sysinfo",
  "tempfile",
  "thiserror 2.0.18",
  "tracing",
@@ -7874,6 +7781,7 @@ dependencies = [
  "stateless",
  "stateless-validator-common",
  "stateless-validator-reth",
+ "zkvm-interface",
 ]
 
 [[package]]
@@ -7896,12 +7804,14 @@ dependencies = [
  "reth-evm-ethereum",
  "reth-payload-validator",
  "reth-primitives-traits",
+ "revm",
  "serde",
  "serde_with",
  "sha2",
  "stateless",
  "stateless-validator-common",
  "tries",
+ "zkvm-interface",
 ]
 
 [[package]]
@@ -8014,20 +7924,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.117",
-]
-
-[[package]]
-name = "sysinfo"
-version = "0.35.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c3ffa3e4ff2b324a57f7aeb3c349656c7b127c3c189520251a648102a92496e"
-dependencies = [
- "libc",
- "memchr",
- "ntapi",
- "objc2-core-foundation",
- "objc2-io-kit",
- "windows 0.61.3",
 ]
 
 [[package]]
@@ -9664,42 +9560,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "zisk-definitions"
-version = "0.16.1"
-source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
-
-[[package]]
-name = "zisk-verifier"
-version = "0.16.1"
-source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
-dependencies = [
- "proofman-verifier",
-]
-
-[[package]]
-name = "ziskos"
-version = "0.16.1"
-source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.16.1#48cf7ccefb5ed62261abf6bfb007b5be8a23c547"
-dependencies = [
- "bincode 1.3.3",
- "cfg-if",
- "fields",
- "getrandom 0.2.17",
- "lazy_static",
- "lib-c",
- "num-bigint 0.4.6",
- "num-integer",
- "num-traits",
- "precompiles-helpers",
- "rand 0.8.6",
- "serde",
- "sha2",
- "tiny-keccak",
- "zisk-definitions",
- "zisk-verifier",
-]
-
-[[package]]
 name = "zkhash"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9724,6 +9584,14 @@ dependencies = [
  "sha2",
  "sha3",
  "subtle",
+]
+
+[[package]]
+name = "zkvm-interface"
+version = "0.18.0"
+source = "git+https://github.com/0xPolygonHermez/zisk.git?tag=v0.18.0#790f9e28a6d1d8575e38dc77f2af4966b8659722"
+dependencies = [
+ "bindgen",
 ]
 
 [[package]]

@@ -91,8 +91,8 @@ dependencies = [
 
 [[package]]
 name = "ere-platform-airbender"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 dependencies = [
  "airbender-sdk",
  "ere-platform-core",
@@ -100,8 +100,8 @@ dependencies = [
 
 [[package]]
 name = "ere-platform-core"
-version = "0.9.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.9.1#a0ff5701d6328bb55126a59d7091b1777944c8b0"
+version = "0.10.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
 
 [[package]]
 name = "getrandom"
