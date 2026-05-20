@@ -293,12 +293,13 @@ mod tests {
 
     #[tokio::test]
     async fn download_from_tag() -> anyhow::Result<()> {
-        let guest = Downloader::from_tag("v0.9.0")
+        let guest = Downloader::from_tag("v0.11.0")
             .await?
             .download("empty-zisk")
             .await?;
         assert!(!guest.elf.is_empty());
         assert!(!guest.program_vk.is_empty());
+        assert!(guest.profiling_elf.is_some_and(|elf| !elf.is_empty()));
         Ok(())
     }
 
