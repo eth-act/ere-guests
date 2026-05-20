@@ -5,6 +5,9 @@ use alloc::{sync::Arc, vec::Vec};
 use ethrex_crypto::Crypto;
 use ethrex_guest_program::execution::execution_program;
 
+#[cfg(feature = "zkvm-interface")]
+mod zkvm_interface;
+
 #[rustfmt::skip]
 pub use {
     guest::*,
@@ -44,12 +47,12 @@ impl StatelessValidatorEthrexGuest {
 
 #[allow(unreachable_code)]
 fn crypto() -> Arc<dyn Crypto> {
+    #[cfg(feature = "zkvm-interface")]
+    return zkvm_interface::crypto();
     #[cfg(feature = "risc0")]
     return Arc::new(ethrex_guest_program::crypto::risc0::Risc0Crypto);
     #[cfg(feature = "sp1")]
     return Arc::new(ethrex_guest_program::crypto::sp1::Sp1Crypto);
-    #[cfg(feature = "zisk")]
-    return Arc::new(ethrex_guest_program::crypto::zisk::ZiskCrypto);
-    #[cfg(not(any(feature = "risc0", feature = "sp1", feature = "zisk")))]
+    #[cfg(not(any(feature = "zkvm-interface", feature = "risc0", feature = "sp1")))]
     return Arc::new(ethrex_guest_program::crypto::NativeCrypto);
 }

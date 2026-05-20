@@ -31,13 +31,15 @@ libssz_merkle.workspace = true
 # reth
 stateless = { workspace = true, optional = true }
 
+# zkvm-standard
+zkvm-interface = { workspace = true, optional = true }
+
 # local
 guest.workspace = true
 stateless-validator-common.workspace = true
 stateless-validator-reth = { workspace = true, default-features = true, optional = true, features = [
     "host",
 ] }
-
 
 [features]
 # guest
@@ -46,7 +48,8 @@ std = ["stateless-validator-common/std"]
 # NOTE: Need additional `ethrex-crypto/risc0` to make `KZG_PRECOMPUTE = 0`
 risc0 = ["ethrex-guest-program/risc0", "ethrex-guest-program/c-kzg", "ethrex-crypto/risc0"]
 sp1 = ["ethrex-guest-program/sp1", "ethrex-guest-program/secp256k1"]
-zisk = ["ethrex-guest-program/zisk"]
+zisk = ["zkvm-interface"]
+zkvm-interface = ["dep:zkvm-interface"]
 
 # host
 host = [
