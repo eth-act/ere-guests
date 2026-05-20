@@ -18,6 +18,9 @@ stateless-validator-ethrex = { path = "../../../crates/stateless-validator-ethre
     "zisk",
 ] }
 
+[features]
+cycle-scope = ["ere-platform-zisk/cycle-scope"]
+
 [profile.release]
 codegen-units = 1
 lto = "fat"

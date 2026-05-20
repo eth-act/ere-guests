@@ -7,3 +7,6 @@ edition = "2024"
 
 [dependencies]
 ere-platform-zisk = { git = "https://github.com/eth-act/ere", tag = "v0.9.1" }
+
+[features]
+cycle-scope = ["ere-platform-zisk/cycle-scope"]

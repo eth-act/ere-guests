@@ -29,6 +29,9 @@ stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", 
     "zisk",
 ] }
 
+[features]
+cycle-scope = ["ere-platform-zisk/cycle-scope"]
+
 [profile.release]
 codegen-units = 1
 lto = "fat"

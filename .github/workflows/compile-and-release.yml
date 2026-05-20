@@ -74,6 +74,22 @@ jobs:
             --output-dir /output \
             --elf-name ${{ matrix.guest }}-${{ matrix.zkvm }}.elf
 
+      - name: Compile ZisK guest with feature cycle-scope enabled
+        if: ${{ matrix.zkvm == 'zisk' }}
+        run: |
+          docker run \
+            -e OPENVM_RUST_TOOLCHAIN=nightly-2025-10-30 \
+            -e RUST_LOG=info \
+            -v $PWD:/ere-guests \
+            -v $PWD/output:/output \
+            ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
+            --compiler-kind rust-customized \
+            --guest-dir /ere-guests/bin/${{ matrix.guest }}/${{ matrix.zkvm }} \
+            --output-dir /output \
+            --elf-name ${{ matrix.guest }}-${{ matrix.zkvm }}-profiling.elf \
+            -- \
+            --features cycle-scope
+
       - name: Generate program VK
         run: |
           docker run \
@@ -89,7 +105,7 @@ jobs:
         with:
           name: ${{ matrix.guest }}-${{ matrix.zkvm }}
           path: |
-            output/${{ matrix.guest }}-${{ matrix.zkvm }}.elf
+            output/${{ matrix.guest }}-${{ matrix.zkvm }}*.elf
             output/${{ matrix.guest }}-${{ matrix.zkvm }}.vk
           if-no-files-found: error
 
@@ -140,6 +156,8 @@ jobs:
           for file in artifacts/*.elf; do
             if [ -f "$file" ]; then
               filename=$(basename "$file")
+              # Skip variant ELFs (e.g. -profiling.elf) — only canonical guest-zkvm.elf entries are listed.
+              [[ "$filename" == *-profiling.elf ]] && continue
               # Strip the last -zkvm.elf segment to get the guest name
               guest=$(echo "$filename" | sed 's/-[^-]*\.elf$//')
               guests["$guest"]=1
@@ -153,6 +171,7 @@ jobs:
             for elf_file in artifacts/$guest-*.elf; do
               if [ -f "$elf_file" ]; then
                 elf_name=$(basename "$elf_file")
+                [[ "$elf_name" == *-profiling.elf ]] && continue
                 program_vk_name="${elf_name%.elf}.vk"
                 echo "- [\`$elf_name\`]($RELEASE_URL/$elf_name) | [\`$program_vk_name\`]($RELEASE_URL/$program_vk_name)" >> release-body.md
               fi
