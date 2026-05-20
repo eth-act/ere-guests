@@ -21,6 +21,9 @@ pub struct CompiledGuest {
     pub elf: Vec<u8>,
     /// Raw Program VK bytes.
     pub program_vk: Vec<u8>,
+    /// Raw ELF bytes of ZisK guest with feature `cycle-scope` enabled. `Some` only if the guest is
+    /// a ZisK guest.
+    pub profiling_elf: Option<Vec<u8>>,
 }
 
 #[derive(Clone, Debug)]
@@ -86,7 +89,20 @@ impl Downloader {
         let elf = get_bytes(&self.client, elf_url).await?;
         let program_vk = get_bytes(&self.client, program_vk_url).await?;
 
-        Ok(CompiledGuest { elf, program_vk })
+        let profiling_elf = if guest_name.contains("zisk") {
+            let url = assets
+                .get(&format!("{guest_name}-profiling.elf"))
+                .with_context(|| format!("Profiling ELF not found: {guest_name}-profiling.elf"))?;
+            Some(get_bytes(&self.client, url).await?)
+        } else {
+            None
+        };
+
+        Ok(CompiledGuest {
+            elf,
+            program_vk,
+            profiling_elf,
+        })
     }
 
     async fn download_from_action(
@@ -121,7 +137,23 @@ impl Downloader {
             .await
             .with_context(|| format!("Failed to read Program VK: {guest_name}.vk"))?;
 
-        Ok(CompiledGuest { elf, program_vk })
+        let profiling_elf = if guest_name.contains("zisk") {
+            Some(
+                fs::read(tempdir.path().join(format!("{guest_name}-profiling.elf")))
+                    .await
+                    .with_context(|| {
+                        format!("Failed to read profiling ELF: {guest_name}-profiling.elf")
+                    })?,
+            )
+        } else {
+            None
+        };
+
+        Ok(CompiledGuest {
+            elf,
+            program_vk,
+            profiling_elf,
+        })
     }
 }
 
@@ -276,12 +308,13 @@ mod tests {
             return Ok(());
         };
 
-        let guest = Downloader::from_commit("73457de", &github_token)
+        let guest = Downloader::from_commit("f245755", &github_token)
             .await?
             .download("empty-zisk")
             .await?;
         assert!(!guest.elf.is_empty());
         assert!(!guest.program_vk.is_empty());
+        assert!(guest.profiling_elf.is_some_and(|elf| !elf.is_empty()));
         Ok(())
     }
 }
