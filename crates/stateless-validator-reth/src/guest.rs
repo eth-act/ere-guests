@@ -22,8 +22,8 @@ pub use {
 
 #[cfg(feature = "openvm")]
 mod openvm;
-#[cfg(feature = "zisk")]
-mod zisk;
+#[cfg(feature = "zkvm-interface")]
+pub mod zkvm_interface;
 
 /// Input for the stateless validator guest program.
 #[serde_as]
@@ -137,8 +137,8 @@ impl StatelessValidatorRethGuest {
 fn sha256_hasher() -> impl Sha256Hasher {
     #[cfg(feature = "openvm")]
     return openvm::OpenVMSha256Hasher;
-    #[cfg(feature = "zisk")]
-    return zisk::ZiskSha256Hasher;
-    #[cfg(not(any(feature = "openvm", feature = "zisk")))]
+    #[cfg(feature = "zkvm-interface")]
+    return zkvm_interface::sha256_hasher();
+    #[cfg(not(any(feature = "openvm", feature = "zkvm-interface")))]
     return stateless_validator_common::new_payload_request::NativeSha256Hasher;
 }

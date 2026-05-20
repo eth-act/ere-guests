@@ -79,6 +79,9 @@ alloy-primitives = { version = "1.5.6", default-features = false, features = [
 alloy-rlp = { version = "0.3", default-features = false }
 alloy-trie = { version = "0.9", default-features = false }
 
+# revm
+revm = { version = "38.0.0", default-features = false }
+
 # reth
 reth-chainspec = { git = "https://github.com/paradigmxyz/reth", tag = "v2.1.0", default-features = false }
 reth-ethereum-payload-builder = { git = "https://github.com/paradigmxyz/reth", tag = "v2.1.0", default-features = false }
@@ -107,6 +110,9 @@ libssz_merkle = { package = "libssz-merkle", version = "0.2.1", default-features
 libssz_types = { package = "libssz-types", version = "0.2.1", default-features = false, features = [
     "alloc",
 ] }
+
+# zkvm-standard
+zkvm-interface = { git = "https://github.com/0xPolygonHermez/zisk.git", tag = "v0.18.0" }
 
 # ere
 ere-codec = { git = "https://github.com/eth-act/ere", tag = "v0.9.1" }
