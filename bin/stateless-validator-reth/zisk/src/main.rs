@@ -15,7 +15,7 @@ fn main() {
 
 #[unsafe(no_mangle)]
 fn _critical_section_1_0_acquire() -> u64 {
-    return 0;
+    0
 }
 
 #[unsafe(no_mangle)]

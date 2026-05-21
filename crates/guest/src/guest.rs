@@ -36,7 +36,7 @@ pub trait Guest {
     }
 
     /// Runs the complete guest program workflow but hash the output by sha256
-    /// before calling the inner `P::write_whole_output`.
+    /// before calling the inner `P::write_output`.
     fn run_output_sha256<P: Platform>()
     where
         Self: Sized,
@@ -48,7 +48,7 @@ pub trait Guest {
 }
 
 fn run_inner<G: Guest, P: Platform, T: AsRef<[u8]>>(output_bytes_modifier: impl Fn(Vec<u8>) -> T) {
-    let input_bytes = P::cycle_scope("read_input", || P::read_whole_input());
+    let input_bytes = P::cycle_scope("read_input", || P::read_input());
 
     let input = P::cycle_scope("deserialize_input", || {
         G::Input::decode_from_slice(&input_bytes).unwrap()
@@ -61,7 +61,7 @@ fn run_inner<G: Guest, P: Platform, T: AsRef<[u8]>>(output_bytes_modifier: impl 
     let modified_output_bytes = output_bytes_modifier(output_bytes);
 
     P::cycle_scope("write_output", || {
-        P::write_whole_output(modified_output_bytes.as_ref())
+        P::write_output(modified_output_bytes.as_ref())
     });
 }
 

@@ -51,7 +51,6 @@ impl Guest for StatelessValidatorRethGuest {
     type Output = StatelessValidatorOutput;
 
     fn compute<P: Platform>(input: Self::Input) -> Self::Output {
-        let chain_id = input.chain_config.chain_id;
         let new_payload_request_root =
             P::cycle_scope("new_payload_request_root_calculation", || {
                 input.new_payload_request.tree_hash_root(&sha256_hasher())
@@ -59,6 +58,8 @@ impl Guest for StatelessValidatorRethGuest {
 
         #[cfg(feature = "std")]
         {
+            let chain_id = input.chain_config.chain_id;
+
             let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 Self::compute_inner::<P>(input, new_payload_request_root)
             }));

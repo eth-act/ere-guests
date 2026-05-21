@@ -43,7 +43,7 @@ impl StatelessValidatorRethInput {
     ///
     /// [`zkVMProver`]: ere_prover_core::zkVMProver
     pub fn to_zkvm_input(&self) -> anyhow::Result<Input> {
-        Ok(Input::new().with_prefixed_stdin(self.encode_to_vec()?))
+        Ok(Input::new().with_stdin(self.encode_to_vec()?))
     }
 }
 

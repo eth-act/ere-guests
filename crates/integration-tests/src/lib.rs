@@ -151,7 +151,7 @@ impl TestCase {
     ) -> Self {
         Self {
             name: name.as_ref().to_string(),
-            input: Input::new().with_prefixed_stdin(input.encode_to_vec().unwrap()),
+            input: Input::new().with_stdin(input.encode_to_vec().unwrap()),
             expected_public_values: output.encode_to_vec().unwrap(),
         }
     }
@@ -168,12 +168,12 @@ pub struct NoopPlatform;
 
 impl Platform for NoopPlatform {
     #[allow(unreachable_code)]
-    fn read_whole_input() -> impl std::ops::Deref<Target = [u8]> {
+    fn read_input() -> impl std::ops::Deref<Target = [u8]> {
         panic!("Can't read input in NoopPlatform");
         &[] as &[u8]
     }
 
-    fn write_whole_output(_: &[u8]) {
+    fn write_output(_: &[u8]) {
         panic!("Can't write output in NoopPlatform");
     }
 

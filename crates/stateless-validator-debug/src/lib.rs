@@ -138,12 +138,12 @@ pub struct StdoutNoopPlatform;
 
 impl Platform for StdoutNoopPlatform {
     #[allow(unreachable_code)]
-    fn read_whole_input() -> impl std::ops::Deref<Target = [u8]> {
+    fn read_input() -> impl std::ops::Deref<Target = [u8]> {
         panic!("Can't read input in StdoutNoopPlatform");
         &[] as &[u8]
     }
 
-    fn write_whole_output(_: &[u8]) {
+    fn write_output(_: &[u8]) {
         panic!("Can't write output in StdoutNoopPlatform");
     }
 
