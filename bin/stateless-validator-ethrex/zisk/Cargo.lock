@@ -1087,7 +1087,7 @@ dependencies = [
 
 [[package]]
 name = "guest"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "ere-codec",
  "ere-platform-core",
@@ -2347,7 +2347,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-common"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "ere-codec",
@@ -2363,7 +2363,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-ethrex"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "ethrex-common",
