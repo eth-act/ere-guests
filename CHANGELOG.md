@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.11.0](https://github.com/eth-act/ere-guests/compare/v0.10.0...v0.11.0) (2026-05-21)
+
+
+### Features
+
+* update ere ([#47](https://github.com/eth-act/ere-guests/issues/47)) ([c231f46](https://github.com/eth-act/ere-guests/commit/c231f460e7ae8a059caf84b7a19d9c712645f90d))
+* update ere to v0.11.0 ([#48](https://github.com/eth-act/ere-guests/issues/48)) ([9561e83](https://github.com/eth-act/ere-guests/commit/9561e839ac3f8b193018e9302ab51a39ac2c4597))
+
+
+### Bug Fixes
+
+* update ethrex ([40bb85c](https://github.com/eth-act/ere-guests/commit/40bb85c8547a5a5983abbbb397d98ae15db575b9))
+
 ## [0.10.0](https://github.com/eth-act/ere-guests/compare/v0.9.0...v0.10.0) (2026-05-13)
 
 
