@@ -1147,22 +1147,21 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-codec"
-version = "0.10.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
+version = "0.11.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.11.0#e1d345c5e4e2b41d1334421310443306ea44f65f"
 
 [[package]]
 name = "ere-platform-core"
-version = "0.10.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
+version = "0.11.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.11.0#e1d345c5e4e2b41d1334421310443306ea44f65f"
 
 [[package]]
 name = "ere-platform-zisk"
-version = "0.10.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.10.0#1a4068a9c402d0813e7f0f0f05f48e1605b944f8"
+version = "0.11.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.11.0#e1d345c5e4e2b41d1334421310443306ea44f65f"
 dependencies = [
  "ere-platform-core",
  "ziskos",
- "zkvm-interface",
 ]
 
 [[package]]

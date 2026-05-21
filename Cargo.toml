@@ -115,10 +115,10 @@ libssz_types = { package = "libssz-types", version = "0.2.1", default-features =
 zkvm-interface = { git = "https://github.com/0xPolygonHermez/zisk.git", tag = "v0.18.0" }
 
 # ere
-ere-codec = { git = "https://github.com/eth-act/ere", tag = "v0.10.0" }
-ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.10.0" }
-ere-prover-core = { git = "https://github.com/eth-act/ere", tag = "v0.10.0" }
-ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.10.0" }
+ere-codec = { git = "https://github.com/eth-act/ere", tag = "v0.11.0" }
+ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.11.0" }
+ere-prover-core = { git = "https://github.com/eth-act/ere", tag = "v0.11.0" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.11.0" }
 
 # local
 guest = { path = "crates/guest", default-features = false }

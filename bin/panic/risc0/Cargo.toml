@@ -6,6 +6,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-ere-platform-risc0 = { git = "https://github.com/eth-act/ere", tag = "v0.10.0", features = [
+ere-platform-risc0 = { git = "https://github.com/eth-act/ere", tag = "v0.11.0", features = [
     "std",
 ] }
