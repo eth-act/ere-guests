@@ -18,18 +18,16 @@ permissions:
 
 jobs:
   compile:
-    name: Compile ${{ matrix.guest }}-${{ matrix.zkvm }}
+    name: Compile stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
     runs-on: ubuntu-latest
     outputs:
       ere_tag: ${{ steps.get_ere_tag.outputs.ere_tag }}
     strategy:
       fail-fast: false
       matrix:
-        guest:
-          - empty
-          - panic
-          - stateless-validator-ethrex
-          - stateless-validator-reth
+        el:
+          - ethrex
+          - reth
         zkvm:
           - airbender
           - openvm
@@ -37,9 +35,9 @@ jobs:
           - sp1
           - zisk
         exclude:
-          - guest: stateless-validator-ethrex
+          - el: ethrex
             zkvm: airbender
-          - guest: stateless-validator-ethrex
+          - el: ethrex
             zkvm: openvm
     steps:
       - name: Checkout code
@@ -70,9 +68,9 @@ jobs:
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
             --compiler-kind rust-customized \
-            --guest-dir /ere-guests/bin/${{ matrix.guest }}/${{ matrix.zkvm }} \
+            --guest-dir /ere-guests/bin/stateless-validator-${{ matrix.el }}/${{ matrix.zkvm }} \
             --output-dir /output \
-            --elf-name ${{ matrix.guest }}-${{ matrix.zkvm }}.elf
+            --elf-name stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.elf
 
       - name: Compile ZisK guest with feature cycle-scope enabled
         if: ${{ matrix.zkvm == 'zisk' }}
@@ -84,9 +82,9 @@ jobs:
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
             --compiler-kind rust-customized \
-            --guest-dir /ere-guests/bin/${{ matrix.guest }}/${{ matrix.zkvm }} \
+            --guest-dir /ere-guests/bin/stateless-validator-${{ matrix.el }}/${{ matrix.zkvm }} \
             --output-dir /output \
-            --elf-name ${{ matrix.guest }}-${{ matrix.zkvm }}-profiling.elf \
+            --elf-name stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}-profiling.elf \
             -- \
             --features cycle-scope
 
@@ -96,17 +94,17 @@ jobs:
             -e RUST_LOG=info \
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
-            --elf-path /output/${{ matrix.guest }}-${{ matrix.zkvm }}.elf \
+            --elf-path /output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.elf \
             keygen \
-            --program-vk-path /output/${{ matrix.guest }}-${{ matrix.zkvm }}.vk
+            --program-vk-path /output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.guest }}-${{ matrix.zkvm }}
+          name: stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
           path: |
-            output/${{ matrix.guest }}-${{ matrix.zkvm }}*.elf
-            output/${{ matrix.guest }}-${{ matrix.zkvm }}.vk
+            output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}*.elf
+            output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
           if-no-files-found: error
 
   check-git-tag:
