@@ -41,6 +41,9 @@ stateless-validator-reth = { workspace = true, default-features = true, optional
     "host",
 ] }
 
+[build-dependencies]
+ere-util-build.workspace = true
+
 [features]
 # guest
 default = ["std"]

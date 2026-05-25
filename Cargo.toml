@@ -119,6 +119,7 @@ ere-codec = { git = "https://github.com/eth-act/ere", tag = "v0.11.0" }
 ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.11.0" }
 ere-prover-core = { git = "https://github.com/eth-act/ere", tag = "v0.11.0" }
 ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.11.0" }
+ere-util-build = { git = "https://github.com/eth-act/ere", tag = "v0.11.0" }
 
 # local
 guest = { path = "crates/guest", default-features = false }

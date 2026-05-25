@@ -52,6 +52,9 @@ sha2.workspace = true
 guest.workspace = true
 stateless-validator-common = { workspace = true, features = ["serde"] }
 
+[build-dependencies]
+ere-util-build.workspace = true
+
 [features]
 # guest
 default = ["std"]

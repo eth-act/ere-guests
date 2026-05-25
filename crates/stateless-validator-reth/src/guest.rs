@@ -25,6 +25,9 @@ mod openvm;
 #[cfg(feature = "zkvm-interface")]
 pub mod zkvm_interface;
 
+/// Reth version.
+pub const EL_VERSION: &str = env!("EL_VERSION");
+
 /// Input for the stateless validator guest program.
 #[serde_as]
 #[derive(Debug, Clone, Serialize, Deserialize)]

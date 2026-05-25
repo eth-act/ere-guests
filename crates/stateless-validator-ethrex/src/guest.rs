@@ -14,6 +14,9 @@ pub use {
     stateless_validator_common::guest::StatelessValidatorOutput,
 };
 
+/// Ethrex version.
+pub const EL_VERSION: &str = env!("EL_VERSION");
+
 /// [`Guest`] implementation for Ethrex stateless validator.
 #[derive(Debug, Clone)]
 pub struct StatelessValidatorEthrexGuest;
