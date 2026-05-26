@@ -1,6 +1,6 @@
 //! Downloads compiled guests from GitHub releases or action artifacts.
 
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, io::ErrorKind};
 
 use anyhow::{Context, ensure};
 use reqwest::{
@@ -21,8 +21,8 @@ pub struct CompiledGuest {
     pub elf: Vec<u8>,
     /// Raw Program VK bytes.
     pub program_vk: Vec<u8>,
-    /// Raw ELF bytes of ZisK guest with feature `cycle-scope` enabled. `Some` only if the guest is
-    /// a ZisK guest.
+    /// Raw ELF bytes of a ZisK guest compiled with feature `cycle-scope` enabled. `Some` only when
+    /// a `{guest_name}-profiling.elf` artifact is released.
     pub profiling_elf: Option<Vec<u8>>,
 }
 
@@ -89,10 +89,7 @@ impl Downloader {
         let elf = get_bytes(&self.client, elf_url).await?;
         let program_vk = get_bytes(&self.client, program_vk_url).await?;
 
-        let profiling_elf = if guest_name.contains("zisk") {
-            let url = assets
-                .get(&format!("{guest_name}-profiling.elf"))
-                .with_context(|| format!("Profiling ELF not found: {guest_name}-profiling.elf"))?;
+        let profiling_elf = if let Some(url) = assets.get(&format!("{guest_name}-profiling.elf")) {
             Some(get_bytes(&self.client, url).await?)
         } else {
             None
@@ -130,23 +127,26 @@ impl Downloader {
             .context("Failed to run unzip")?;
         ensure!(output.status.success(), "Unzip exited with non-zero status");
 
-        let elf = fs::read(tempdir.path().join(format!("{guest_name}.elf")))
+        let elf_path = tempdir.path().join(format!("{guest_name}.elf"));
+        let program_vk_path = tempdir.path().join(format!("{guest_name}.vk"));
+        let profiling_elf_path = tempdir.path().join(format!("{guest_name}-profiling.elf"));
+        let elf = fs::read(&elf_path)
             .await
-            .with_context(|| format!("Failed to read ELF: {guest_name}.elf"))?;
-        let program_vk = fs::read(tempdir.path().join(format!("{guest_name}.vk")))
+            .with_context(|| format!("Failed to read ELF: {}", elf_path.display()))?;
+        let program_vk = fs::read(&program_vk_path)
             .await
-            .with_context(|| format!("Failed to read Program VK: {guest_name}.vk"))?;
-
-        let profiling_elf = if guest_name.contains("zisk") {
-            Some(
-                fs::read(tempdir.path().join(format!("{guest_name}-profiling.elf")))
-                    .await
-                    .with_context(|| {
-                        format!("Failed to read profiling ELF: {guest_name}-profiling.elf")
-                    })?,
-            )
-        } else {
-            None
+            .with_context(|| format!("Failed to read Program VK: {}", program_vk_path.display()))?;
+        let profiling_elf = match fs::read(&profiling_elf_path).await {
+            Ok(bytes) => Some(bytes),
+            Err(err) if err.kind() == ErrorKind::NotFound => None,
+            Err(err) => {
+                return Err(err).with_context(|| {
+                    format!(
+                        "Failed to read profiling ELF: {}",
+                        profiling_elf_path.display()
+                    )
+                });
+            }
         };
 
         Ok(CompiledGuest {
