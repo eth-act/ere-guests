@@ -34,7 +34,7 @@ impl Sha256Hasher for NativeSha256Hasher {
 }
 
 /// Limits
-pub const MAX_WITHDRAWALS_PER_PAYLOAD: usize = 65536; // Re-defined in EIP-8025 at least temporarily.
+pub const MAX_WITHDRAWALS_PER_PAYLOAD: usize = 16;
 pub const MAX_TRANSACTIONS_PER_PAYLOAD: usize = 1024 * 1024;
 pub const MAX_BYTES_PER_TRANSACTION: usize = MAX_TRANSACTIONS_PER_PAYLOAD * 1024;
 pub const MAX_BLOB_COMMITMENTS_PER_BLOCK: usize = 4096;
