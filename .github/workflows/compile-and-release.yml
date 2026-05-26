@@ -129,6 +129,15 @@ jobs:
     if: needs.check-git-tag.outputs.exists == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo build
+        uses: Swatinem/rust-cache@v2
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -138,44 +147,10 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R artifacts
 
-      - name: Generate release notes
+      - name: Generate release notes body
         run: |
-          echo "## Compiled guest programs" > release-body.md
-          echo "" >> release-body.md
-          echo "This release contains compiled guest programs for various zkVMs." >> release-body.md
-          echo "" >> release-body.md
-          echo "Built with Ere compiler version: \`${{ needs.compile.outputs.ere_tag }}\`." >> release-body.md
-          echo "" >> release-body.md
-
-          RELEASE_URL="https://github.com/${{ github.repository }}/releases/download/${{ needs.check-git-tag.outputs.tag }}"
-
-          # Get unique guest names from .elf files
-          declare -A guests
-          for file in artifacts/*.elf; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              # Skip variant ELFs (e.g. -profiling.elf) — only canonical guest-zkvm.elf entries are listed.
-              [[ "$filename" == *-profiling.elf ]] && continue
-              # Strip the last -zkvm.elf segment to get the guest name
-              guest=$(echo "$filename" | sed 's/-[^-]*\.elf$//')
-              guests["$guest"]=1
-            fi
-          done
-
-          # Sort and group by guest
-          for guest in $(echo "${!guests[@]}" | tr ' ' '\n' | sort); do
-            echo "### $guest" >> release-body.md
-            echo "" >> release-body.md
-            for elf_file in artifacts/$guest-*.elf; do
-              if [ -f "$elf_file" ]; then
-                elf_name=$(basename "$elf_file")
-                [[ "$elf_name" == *-profiling.elf ]] && continue
-                program_vk_name="${elf_name%.elf}.vk"
-                echo "- [\`$elf_name\`]($RELEASE_URL/$elf_name) | [\`$program_vk_name\`]($RELEASE_URL/$program_vk_name)" >> release-body.md
-              fi
-            done
-            echo "" >> release-body.md
-          done
+          .github/scripts/release-body.py --tag "${{ needs.check-git-tag.outputs.tag }}" > release-body.md
+          cat release-body.md
 
       - name: Install Minisign
         run: sudo apt-get update && sudo apt-get install -y minisign
@@ -222,7 +197,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          EXISTING="$(gh release view --repo "${{ github.repository }}" "${{ needs.check-git-tag.outputs.tag }}" --json body -q .body)"
-          gh release edit --repo "${{ github.repository }}" "${{ needs.check-git-tag.outputs.tag }}" --notes "${EXISTING}
-
-          $(cat release-body.md)"
+          gh release view --repo "${{ github.repository }}" "${{ needs.check-git-tag.outputs.tag }}" --json body -q .body > combined-notes.md
+          printf '\n\n' >> combined-notes.md
+          cat release-body.md >> combined-notes.md
+          gh release edit --repo "${{ github.repository }}" "${{ needs.check-git-tag.outputs.tag }}" --notes-file combined-notes.md
