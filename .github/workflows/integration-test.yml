@@ -47,6 +47,9 @@ jobs:
             threads: 2
           - zkvm: zisk
             threads: 1
+          - guest: stateless-validator-ethrex
+            zkvm: zisk
+            ere_profile: ethrex
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,6 +87,12 @@ jobs:
           key: ${{ runner.os }}-bin-${{ matrix.guest }}-${{ matrix.zkvm }}-${{ hashFiles('bin/${{ matrix.guest }}/${{ matrix.zkvm }}/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-bin-${{ matrix.guest }}-${{ matrix.zkvm }}-
+
+      - name: Enable Ere profile
+        if: matrix.ere_profile != ''
+        env:
+          ERE_PROFILE: ${{ matrix.ere_profile }}
+        run: echo "ERE_PROFILE=$ERE_PROFILE" >> "$GITHUB_ENV"
 
       - name: Test
         env:
