@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.12.0](https://github.com/eth-act/ere-guests/compare/v0.11.0...v0.12.0) (2026-06-08)
+
+
+### Features
+
+* revert MAX_WITHDRAWALS_PER_PAYLOAD to 16 ([#50](https://github.com/eth-act/ere-guests/issues/50)) ([53610d8](https://github.com/eth-act/ere-guests/commit/53610d8db55de41b69f34ba7fa8d4f8280bb84fc))
+* update CI release workflow ([#49](https://github.com/eth-act/ere-guests/issues/49)) ([b842e05](https://github.com/eth-act/ere-guests/commit/b842e05e0f8fc0e043f9dbc5f90b10117617c52c))
+* update ere ([#53](https://github.com/eth-act/ere-guests/issues/53)) ([1852a93](https://github.com/eth-act/ere-guests/commit/1852a93c19adb1b8ca1d0930a2609484735521b0))
+
 ## [0.11.0](https://github.com/eth-act/ere-guests/compare/v0.10.0...v0.11.0) (2026-05-21)
 
 
