@@ -852,8 +852,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-common"
-version = "13.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=ef81882cfab3eedcf52c788ced3333530ab01fdb#ef81882cfab3eedcf52c788ced3333530ab01fdb"
+version = "15.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v15.0.0#f902422ada4b4004c4e5e0630987d116661a5dd0"
 dependencies = [
  "bytes",
  "crc32fast",
@@ -884,8 +884,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-crypto"
-version = "13.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=ef81882cfab3eedcf52c788ced3333530ab01fdb#ef81882cfab3eedcf52c788ced3333530ab01fdb"
+version = "15.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v15.0.0#f902422ada4b4004c4e5e0630987d116661a5dd0"
 dependencies = [
  "ark-bn254",
  "ark-ec",
@@ -905,8 +905,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-guest-program"
-version = "13.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=ef81882cfab3eedcf52c788ced3333530ab01fdb#ef81882cfab3eedcf52c788ced3333530ab01fdb"
+version = "15.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v15.0.0#f902422ada4b4004c4e5e0630987d116661a5dd0"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -928,8 +928,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-l2-common"
-version = "13.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=ef81882cfab3eedcf52c788ced3333530ab01fdb#ef81882cfab3eedcf52c788ced3333530ab01fdb"
+version = "15.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v15.0.0#f902422ada4b4004c4e5e0630987d116661a5dd0"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -946,8 +946,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-levm"
-version = "13.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=ef81882cfab3eedcf52c788ced3333530ab01fdb#ef81882cfab3eedcf52c788ced3333530ab01fdb"
+version = "15.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v15.0.0#f902422ada4b4004c4e5e0630987d116661a5dd0"
 dependencies = [
  "bytes",
  "derive_more",
@@ -963,8 +963,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-rlp"
-version = "13.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=ef81882cfab3eedcf52c788ced3333530ab01fdb#ef81882cfab3eedcf52c788ced3333530ab01fdb"
+version = "15.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v15.0.0#f902422ada4b4004c4e5e0630987d116661a5dd0"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -973,8 +973,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-trie"
-version = "13.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=ef81882cfab3eedcf52c788ced3333530ab01fdb#ef81882cfab3eedcf52c788ced3333530ab01fdb"
+version = "15.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v15.0.0#f902422ada4b4004c4e5e0630987d116661a5dd0"
 dependencies = [
  "anyhow",
  "bytes",
@@ -992,8 +992,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-vm"
-version = "13.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=ef81882cfab3eedcf52c788ced3333530ab01fdb#ef81882cfab3eedcf52c788ced3333530ab01fdb"
+version = "15.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v15.0.0#f902422ada4b4004c4e5e0630987d116661a5dd0"
 dependencies = [
  "bytes",
  "derive_more",

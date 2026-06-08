@@ -94,12 +94,12 @@ stateless = { git = "https://github.com/paradigmxyz/stateless", rev = "e5480e71a
 tries = { git = "https://github.com/paradigmxyz/stateless", rev = "e5480e71a8031641ff471cad9dc482a7a14b32d5", default-features = false }
 
 # ethrex
-ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", rev = "ef81882cfab3eedcf52c788ced3333530ab01fdb", default-features = false }
-ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", rev = "ef81882cfab3eedcf52c788ced3333530ab01fdb", default-features = false }
-ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", rev = "ef81882cfab3eedcf52c788ced3333530ab01fdb", default-features = false }
-ethrex-rlp = { git = "https://github.com/lambdaclass/ethrex.git", rev = "ef81882cfab3eedcf52c788ced3333530ab01fdb", default-features = false }
-ethrex-rpc = { git = "https://github.com/lambdaclass/ethrex.git", rev = "ef81882cfab3eedcf52c788ced3333530ab01fdb", default-features = false }
-ethrex-vm = { git = "https://github.com/lambdaclass/ethrex.git", rev = "ef81882cfab3eedcf52c788ced3333530ab01fdb", default-features = false }
+ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v15.0.0", default-features = false }
+ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v15.0.0", default-features = false }
+ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v15.0.0", default-features = false }
+ethrex-rlp = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v15.0.0", default-features = false }
+ethrex-rpc = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v15.0.0", default-features = false }
+ethrex-vm = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v15.0.0", default-features = false }
 
 # ssz
 libssz = { version = "0.2.2", default-features = false, features = ["alloc"] }
