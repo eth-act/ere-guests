@@ -96,13 +96,17 @@ def read_zkvm_versions() -> dict[str, str]:
 
 
 def read_elf_word_size(elf_path: Path) -> int:
-    """Returns the ELF word size (32 or 64) reported by `file`."""
-    proc = run_command(["file", str(elf_path)], PIPE, STDOUT)
-    if "32-bit" in proc.stdout:
+    """Returns the ELF word size (32 or 64) read from the embedded ELF header."""
+    data = elf_path.read_bytes()
+    magic = data.find(b"\x7fELF")
+    if magic < 0:
+        raise RuntimeError(f"no ELF magic found in {elf_path}")
+    ei_class = data[magic + 4]
+    if ei_class == 1:
         return 32
-    if "64-bit" in proc.stdout:
+    if ei_class == 2:
         return 64
-    raise RuntimeError(f"cannot determine ELF class from `file`: {proc.stdout.strip()}")
+    raise RuntimeError(f"unknown ELF class {ei_class} in {elf_path}")
 
 
 def render_row(guest: Guest, artifacts_dir: Path, release_url: str) -> str | None:
