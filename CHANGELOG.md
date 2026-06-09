@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/eth-act/ere-guests/compare/v0.12.0...v0.12.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* elf word size detection ([#54](https://github.com/eth-act/ere-guests/issues/54)) ([815dd9b](https://github.com/eth-act/ere-guests/commit/815dd9b44aa0b07b4a7e314dbeb286a407fc7327))
+
 ## [0.12.0](https://github.com/eth-act/ere-guests/compare/v0.11.0...v0.12.0) (2026-06-08)
 
 
