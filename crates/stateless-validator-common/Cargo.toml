@@ -9,37 +9,50 @@ license.workspace = true
 workspace = true
 
 [dependencies]
-anyhow.workspace = true
-rkyv = { workspace = true, optional = true }
-serde_with = { workspace = true, optional = true, features = ["macros"] }
-serde = { workspace = true, optional = true, features = [
-    "derive",
-    "alloc",
-], default-features = false }
+anyhow = { workspace = true, optional = true }
+sha2.workspace = true
+thiserror.workspace = true
 
 # ssz
 libssz.workspace = true
-libssz_derive.workspace = true
-libssz_merkle.workspace = true
-libssz_types.workspace = true
+libssz-derive.workspace = true
+libssz-merkle = { workspace = true, features = ["sha2-backend"] }
+libssz-types.workspace = true
 
-#alloy
-alloy-primitives = { workspace = true, optional = true }
+# alloy
+alloy-consensus = { workspace = true, optional = true }
 alloy-eips = { workspace = true, optional = true }
+alloy-genesis = { workspace = true, optional = true }
+alloy-primitives = { workspace = true, optional = true }
 
-# crypto
-sha2.workspace = true
-
-# ere
-ere-platform-core.workspace = true
-ere-codec.workspace = true
+# reth
+reth-chainspec = { workspace = true, optional = true }
+reth-ethereum-primitives = { workspace = true, optional = true }
+reth-evm-ethereum = { workspace = true, optional = true }
+reth-primitives-traits = { workspace = true, optional = true }
+reth-stateless = { workspace = true, optional = true }
+reth-tries = { workspace = true, optional = true }
 
 [features]
 # guest
 default = ["std"]
-std = ["serde"]
-serde = ["dep:serde", "dep:serde_with"]
-rkyv = ["dep:rkyv"]
+std = []
 
 # host
-host = ["std", "dep:alloy-primitives", "dep:alloy-eips"]
+host = ["std"]
+
+# legacy
+legacy = [
+    "host",
+    "dep:anyhow",
+    "dep:alloy-consensus",
+    "dep:alloy-eips",
+    "dep:alloy-genesis",
+    "dep:alloy-primitives",
+    "dep:reth-chainspec",
+    "dep:reth-ethereum-primitives",
+    "dep:reth-evm-ethereum",
+    "dep:reth-primitives-traits",
+    "dep:reth-stateless",
+    "dep:reth-tries",
+]
