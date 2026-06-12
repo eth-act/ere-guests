@@ -65,8 +65,10 @@ zisk = ["zkvm-interface"]
 zkvm-interface = ["dep:zkvm-interface"]
 
 # host
+# NOTE: Need `ethrex-crypto/kzg-rs` to verify KZG proof on native host
 host = [
     "std",
+    "ethrex-crypto/kzg-rs",
     "ethrex-crypto/secp256k1",
     "stateless-validator-common/host",
     "dep:alloy-consensus",
