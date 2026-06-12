@@ -89,7 +89,6 @@ jobs:
           cargo build \
             --no-default-features \
             --target riscv64imac-unknown-none-elf \
-            --package guest \
             --package stateless-validator-reth \
             --package stateless-validator-common
             # --package stateless-validator-ethrex
