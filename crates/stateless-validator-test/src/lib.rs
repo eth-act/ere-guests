@@ -1,4 +1,4 @@
-//! Integration test lib.
+//! Test helpers for the stateless validator guests.
 
 use std::{
     fs::{self, File},
@@ -31,7 +31,7 @@ pub fn workspace() -> PathBuf {
 
 /// Returns path to fixtures dir.
 pub fn fixtures_dir() -> PathBuf {
-    workspace().join("crates/integration-tests/fixtures")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("fixtures")
 }
 
 /// Unpack all fixtures in fixtures dir.

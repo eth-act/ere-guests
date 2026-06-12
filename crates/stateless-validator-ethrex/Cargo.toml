@@ -41,6 +41,16 @@ stateless-validator-reth = { workspace = true, default-features = true, optional
     "host",
 ] }
 
+[dev-dependencies]
+ere-dockerized.workspace = true
+stateless-validator-ethrex = { workspace = true, default-features = true, features = [
+    "host",
+] }
+stateless-validator-reth = { workspace = true, default-features = true, features = [
+    "host",
+] }
+stateless-validator-test.workspace = true
+
 [build-dependencies]
 ere-util-build.workspace = true
 

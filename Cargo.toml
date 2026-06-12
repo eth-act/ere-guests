@@ -9,8 +9,8 @@ members = [
     "crates/stateless-validator-ethrex",
     "crates/stateless-validator-reth",
 
-    # Integration tests
-    "crates/integration-tests",
+    # Test utils
+    "crates/stateless-validator-test",
 
     # Utils
     "crates/downloader",
@@ -126,3 +126,4 @@ guest = { path = "crates/guest", default-features = false }
 stateless-validator-common = { path = "crates/stateless-validator-common", default-features = false }
 stateless-validator-ethrex = { path = "crates/stateless-validator-ethrex", default-features = false }
 stateless-validator-reth = { path = "crates/stateless-validator-reth", default-features = false }
+stateless-validator-test = { path = "crates/stateless-validator-test", default-features = false }

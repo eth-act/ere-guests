@@ -2,9 +2,6 @@
 
 use ere_dockerized::zkVMKind;
 use guest::Guest;
-use integration_tests::{
-    NoopPlatform, TestCase, get_fixtures, stateless_validator::get_stateless_validator_output,
-};
 use stateless_validator_common::new_payload_request::ForkName;
 use stateless_validator_ethrex::{
     guest::StatelessValidatorEthrexGuest,
@@ -13,6 +10,9 @@ use stateless_validator_ethrex::{
 use stateless_validator_reth::{
     guest::{StatelessValidatorRethGuest, StatelessValidatorRethInput},
     host::determine_fork_name,
+};
+use stateless_validator_test::{
+    NoopPlatform, TestCase, get_fixtures, stateless_validator::get_stateless_validator_output,
 };
 
 fn test_execution(zkvm_kind: zkVMKind) {
@@ -55,7 +55,7 @@ fn test_execution(zkvm_kind: zkVMKind) {
                 .output_sha256(),
         )
     });
-    integration_tests::test_execution("stateless-validator-ethrex", zkvm_kind, inputs);
+    stateless_validator_test::test_execution("stateless-validator-ethrex", zkvm_kind, inputs);
 }
 
 #[test]

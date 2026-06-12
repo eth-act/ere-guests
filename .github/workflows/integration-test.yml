@@ -99,7 +99,7 @@ jobs:
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
           OPENVM_RUST_TOOLCHAIN: nightly-2025-10-30
         run: |
-          cargo test --release --test ${{ matrix.guest }} -- ${{ matrix.zkvm }}
+          cargo test --release --package ${{ matrix.guest }} --test ${{ matrix.guest }} -- ${{ matrix.zkvm }}
 
           sudo chown -R $(id -u):$(id -g) bin/${{ matrix.guest }}/${{ matrix.zkvm }}/target || true
 

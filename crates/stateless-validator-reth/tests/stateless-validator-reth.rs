@@ -2,10 +2,10 @@
 
 use ere_dockerized::zkVMKind;
 use guest::Guest;
-use integration_tests::{
+use stateless_validator_reth::guest::{StatelessValidatorRethGuest, StatelessValidatorRethInput};
+use stateless_validator_test::{
     NoopPlatform, TestCase, get_fixtures, stateless_validator::get_stateless_validator_output,
 };
-use stateless_validator_reth::guest::{StatelessValidatorRethGuest, StatelessValidatorRethInput};
 
 fn test_execution(zkvm_kind: zkVMKind) {
     let fixtures = get_fixtures();
@@ -32,7 +32,7 @@ fn test_execution(zkvm_kind: zkVMKind) {
 
         TestCase::new::<StatelessValidatorRethGuest>(fixture.name, input, output).output_sha256()
     });
-    integration_tests::test_execution("stateless-validator-reth", zkvm_kind, inputs);
+    stateless_validator_test::test_execution("stateless-validator-reth", zkvm_kind, inputs);
 }
 
 #[test]

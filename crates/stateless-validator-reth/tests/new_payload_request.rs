@@ -1,11 +1,11 @@
 //! Test for StatelessInput <-> NewPayloadRequest <-> EL block conversions
 use std::sync::Arc;
 
-use integration_tests::get_fixtures;
 use stateless::Genesis;
 use stateless_validator_reth::{
     guest::StatelessValidatorRethInput, new_payload_request::new_payload_request_to_block,
 };
+use stateless_validator_test::get_fixtures;
 
 #[test]
 fn test_new_payload_request_el_block_roundtrip() {
