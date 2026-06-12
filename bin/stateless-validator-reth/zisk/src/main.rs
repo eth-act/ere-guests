@@ -3,14 +3,14 @@
 #![no_main]
 
 use ere_platform_zisk::{ZiskPlatform, ziskos};
-use stateless_validator_reth::guest::{Guest, StatelessValidatorRethGuest, zkvm_interface};
+use stateless_validator_reth::guest::{crypto::zkvm_interface, entrypoint};
 
 ziskos::entrypoint!(main);
 
 fn main() {
     zkvm_interface::install_crypto();
 
-    StatelessValidatorRethGuest::run_output_sha256::<ZiskPlatform>();
+    entrypoint::<ZiskPlatform>();
 }
 
 #[unsafe(no_mangle)]

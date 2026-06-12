@@ -2,13 +2,13 @@
 
 #![no_main]
 
-use ere_platform_airbender::{AirbenderPlatform, entrypoint};
-use stateless_validator_reth::guest::{Guest, StatelessValidatorRethGuest};
+use ere_platform_airbender::AirbenderPlatform;
+use stateless_validator_reth::guest::entrypoint;
 
-entrypoint!(main);
+ere_platform_airbender::entrypoint!(main);
 
 fn main() {
-    StatelessValidatorRethGuest::run_output_sha256::<AirbenderPlatform>();
+    entrypoint::<AirbenderPlatform>();
 }
 
 #[unsafe(no_mangle)]
