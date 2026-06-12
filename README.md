@@ -29,7 +29,7 @@ This repository contains guest programs and libraries designed to run on zkVM pl
 
 Located in `crates/`, these provide reusable functionality for guest programs and host:
 
-- [`guest`](crates/guest) - Core guest utilities and traits for building zkVM programs
+- [`stateless-validator-common`](crates/stateless-validator-common) - Canonical SSZ stateless input and output types shared by both validators
 - [`stateless-validator-ethrex`](crates/stateless-validator-ethrex) - Stateless validation using Ethrex
 - [`stateless-validator-reth`](crates/stateless-validator-reth) - Stateless validation using Reth
 - [`stateless-validator-debug`](crates/stateless-validator-debug) - CLI tool for running stateless validator guest fixtures natively
