@@ -598,16 +598,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2af50177e190e07a26ab74f8b1efbfe2ef87da2116221318cb1c2e82baf7de06"
 
 [[package]]
-name = "bincode"
-version = "2.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36eaf5d7b090263e8150820482d5d93cd964a81e4019913c972f4edcc6edb740"
-dependencies = [
- "serde",
- "unty",
-]
-
-[[package]]
 name = "bitcoin-io"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1151,11 +1141,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "ere-codec"
-version = "0.12.1"
-source = "git+https://github.com/eth-act/ere?tag=v0.12.1#628fa3c49941704d72e7b0e038e7bce5b6d2cd58"
-
-[[package]]
 name = "ere-platform-core"
 version = "0.12.1"
 source = "git+https://github.com/eth-act/ere?tag=v0.12.1#628fa3c49941704d72e7b0e038e7bce5b6d2cd58"
@@ -1325,15 +1310,6 @@ dependencies = [
  "ff",
  "rand_core 0.6.4",
  "subtle",
-]
-
-[[package]]
-name = "guest"
-version = "0.12.1"
-dependencies = [
- "ere-codec",
- "ere-platform-core",
- "sha2",
 ]
 
 [[package]]
@@ -3389,16 +3365,12 @@ dependencies = [
 name = "stateless-validator-common"
 version = "0.12.1"
 dependencies = [
- "anyhow",
- "ere-codec",
- "ere-platform-core",
  "libssz",
  "libssz-derive",
  "libssz-merkle",
  "libssz-types",
- "serde",
- "serde_with",
  "sha2",
+ "thiserror",
 ]
 
 [[package]]
@@ -3409,21 +3381,17 @@ dependencies = [
  "alloy-eips",
  "alloy-genesis",
  "alloy-primitives",
- "alloy-rlp",
  "alloy-rpc-types-engine",
  "anyhow",
- "bincode",
+ "ere-platform-core",
  "ere-util-build",
- "guest",
- "once_cell",
+ "libssz-types",
  "reth-chainspec",
  "reth-ethereum-primitives",
  "reth-evm-ethereum",
  "reth-payload-validator",
  "reth-primitives-traits",
  "revm",
- "serde",
- "serde_with",
  "sha2",
  "stateless",
  "stateless-validator-common",
@@ -3709,12 +3677,6 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
-
-[[package]]
-name = "unty"
-version = "0.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d49784317cd0d1ee7ec5c716dd598ec5b4483ea832a2dced265471cc0f690ae"
 
 [[package]]
 name = "url"
