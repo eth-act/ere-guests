@@ -21,8 +21,6 @@ jobs:
       fail-fast: false
       matrix:
         guest:
-          - empty
-          - panic
           - stateless-validator-ethrex
           - stateless-validator-reth
         zkvm:

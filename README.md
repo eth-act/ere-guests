@@ -38,8 +38,6 @@ Located in `crates/`, these provide reusable functionality for guest programs an
 
 Located in `bin/`, these are executable guest programs for various zkVMs:
 
-- [`empty`](bin/empty) - Minimal empty program for testing
-- [`panic`](bin/panic) - Minimal panic program for testing
 - [`stateless-validator-ethrex`](bin/stateless-validator-ethrex) - Stateless validator using Ethrex
 - [`stateless-validator-reth`](bin/stateless-validator-reth) - Stateless validator using Reth
 
