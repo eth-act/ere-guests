@@ -68,7 +68,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-          targets: riscv32imac-unknown-none-elf
+          targets: riscv64imac-unknown-none-elf
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
@@ -84,11 +84,11 @@ jobs:
 
       # Include the package once the issue is resolved:
       # - `stateless-validator-ethrex` - ethrex is not no_std compatible
-      - name: Compile to target riscv32imac-unknown-none-elf
+      - name: Compile to target riscv64imac-unknown-none-elf
         run: |
           cargo build \
             --no-default-features \
-            --target riscv32imac-unknown-none-elf \
+            --target riscv64imac-unknown-none-elf \
             --package guest \
             --package stateless-validator-reth \
             --package stateless-validator-common
