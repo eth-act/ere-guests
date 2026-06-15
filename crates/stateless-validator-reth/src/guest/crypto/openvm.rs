@@ -1,4 +1,4 @@
-use stateless_validator_common::new_payload_request::Sha256Hasher;
+use stateless_validator_common::Sha256Hasher;
 
 unsafe extern "C" {
     /// Extern function impl https://github.com/openvm-org/openvm/blob/v1.4.3/extensions/sha256/guest/src/lib.rs#L24.

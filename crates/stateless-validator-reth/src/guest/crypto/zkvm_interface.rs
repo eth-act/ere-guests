@@ -9,7 +9,7 @@ use revm::precompile::{
     Crypto, PrecompileHalt,
     bls12_381::{G1Point, G1PointScalar, G2Point, G2PointScalar},
 };
-use stateless_validator_common::new_payload_request::Sha256Hasher;
+use stateless_validator_common::Sha256Hasher;
 use zkvm_interface::{
     zkvm_blake2f_message, zkvm_blake2f_offset, zkvm_blake2f_state, zkvm_bls12_381_fp,
     zkvm_bls12_381_fp2, zkvm_bls12_381_g1_msm_pair, zkvm_bls12_381_g1_point,

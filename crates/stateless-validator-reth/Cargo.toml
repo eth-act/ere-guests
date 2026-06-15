@@ -9,17 +9,13 @@ license.workspace = true
 workspace = true
 
 [dependencies]
-anyhow = { workspace = true }
-once_cell.workspace = true
-serde.workspace = true
-serde_with.workspace = true
+thiserror.workspace = true
 
 # alloy
 alloy-consensus.workspace = true
 alloy-eips.workspace = true
 alloy-genesis.workspace = true
 alloy-primitives.workspace = true
-alloy-rlp.workspace = true
 alloy-rpc-types-engine = { workspace = true, default-features = false, features = [
     "serde",
 ] }
@@ -33,30 +29,20 @@ reth-payload-validator = { workspace = true, default-features = false }
 reth-ethereum-primitives.workspace = true
 reth-evm-ethereum.workspace = true
 reth-primitives-traits.workspace = true
-stateless.workspace = true
-
-# mpt
-tries.workspace = true
+reth-stateless.workspace = true
+reth-tries.workspace = true
 
 # zkvm-standard
 zkvm-interface = { workspace = true, optional = true }
 
 # ere
-bincode = { workspace = true, features = ["alloc", "serde"] }
-ere-prover-core = { workspace = true, optional = true }
-
-# crypto
-sha2.workspace = true
+ere-platform-core.workspace = true
 
 # local
-guest.workspace = true
-stateless-validator-common = { workspace = true, features = ["serde"] }
+stateless-validator-common.workspace = true
 
 [dev-dependencies]
 ere-dockerized.workspace = true
-stateless-validator-reth = { workspace = true, default-features = true, features = [
-    "host",
-] }
 stateless-validator-test.workspace = true
 
 [build-dependencies]
@@ -65,10 +51,10 @@ ere-util-build.workspace = true
 [features]
 # guest
 default = ["std"]
-std = ["once_cell/std", "stateless-validator-common/std"]
+std = ["stateless-validator-common/std"]
 openvm = []
 zisk = ["zkvm-interface"]
 zkvm-interface = ["alloy-consensus/crypto-backend", "dep:zkvm-interface"]
 
 # host
-host = ["std", "stateless-validator-common/host", "dep:ere-prover-core"]
+host = ["std", "stateless-validator-common/host"]

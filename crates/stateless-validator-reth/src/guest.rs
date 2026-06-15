@@ -1,148 +1,86 @@
-//! [`Guest`] implementation for Reth stateless validator.
+//! Reth stateless validator guest program.
 
-use alloc::{format, sync::Arc, vec::Vec};
+use alloc::vec::Vec;
 
-use alloy_genesis::ChainConfig;
-use guest::codec::impl_codec_by_bincode_legacy;
-use reth_chainspec::ChainSpec;
-use reth_evm_ethereum::EthEvmConfig;
-use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
-use stateless::{ExecutionWitness, Genesis, UncompressedPublicKey, stateless_validation_with_trie};
-use stateless_validator_common::new_payload_request::{NewPayloadRequest, Sha256Hasher};
-use tries::zeth::SparseState;
-
-use crate::new_payload_request::new_payload_request_to_block;
-
-#[rustfmt::skip]
-pub use {
-    guest::*,
-    stateless_validator_common::{guest::StatelessValidatorOutput, new_payload_request},
+use ere_platform_core::Platform;
+use reth_stateless::stateless_validation_with_trie;
+use reth_tries::zeth::SparseState;
+use stateless_validator_common::{
+    HashTreeRoot, SszEncode as _,
+    guest::{StatelessInput, StatelessValidationResult},
 };
 
-#[cfg(feature = "openvm")]
-mod openvm;
-#[cfg(feature = "zkvm-interface")]
-pub mod zkvm_interface;
+use crate::guest::{
+    convert::{RethInput, to_reth_input},
+    crypto::{sha256, sha256_hasher},
+};
 
-/// Reth version.
-pub const EL_VERSION: &str = env!("EL_VERSION");
+mod convert;
+pub mod crypto;
+mod error;
 
-/// Input for the stateless validator guest program.
-#[serde_as]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StatelessValidatorRethInput {
-    /// New payload request data.
-    pub new_payload_request: NewPayloadRequest,
-    /// Execution witness for the EL block.
-    pub witness: ExecutionWitness,
-    /// Chain configuration for the stateless validation function
-    #[serde_as(as = "alloy_genesis::serde_bincode_compat::ChainConfig<'_>")]
-    pub chain_config: ChainConfig,
-    /// The recovered signers for the transactions in the block.
-    pub public_keys: Vec<UncompressedPublicKey>,
+pub use crate::guest::error::Error;
+
+/// Runs the stateless guest on the [`Platform`].
+///
+/// The public values written diverge from the spec by hashing the output with
+/// sha256 because some zkVMs only support 32 byte public values.
+pub fn entrypoint<P: Platform>() {
+    let input_bytes = P::cycle_scope("read_input", || P::read_input());
+    let output_bytes = run_stateless_guest::<P>(&input_bytes);
+    let output_digest = P::cycle_scope("sha256_output_bytes", || sha256(&output_bytes));
+    P::cycle_scope("write_output", || P::write_output(&output_digest));
 }
 
-impl_codec_by_bincode_legacy!(StatelessValidatorRethInput);
+/// Runs the stateless guest with serialized input and returns serialized
+/// output, mirroring `run_stateless_guest` in the spec.
+pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
+    let Ok(input) = P::cycle_scope("deserialize_input", || {
+        StatelessInput::from_schema_prefixed_ssz(input_bytes)
+    }) else {
+        return StatelessValidationResult::default().to_ssz();
+    };
 
-/// [`Guest`] implementation for Reth stateless validator.
-#[derive(Debug, Clone)]
-pub struct StatelessValidatorRethGuest;
+    let new_payload_request_root = P::cycle_scope("new_payload_request_root", || {
+        input.new_payload_request.hash_tree_root(&sha256_hasher())
+    });
+    let chain_config = input.chain_config.clone();
 
-impl Guest for StatelessValidatorRethGuest {
-    type Input = StatelessValidatorRethInput;
-    type Output = StatelessValidatorOutput;
+    let successful_validation = verify_stateless_new_payload::<P>(input).is_ok();
 
-    fn compute<P: Platform>(input: Self::Input) -> Self::Output {
-        let new_payload_request_root =
-            P::cycle_scope("new_payload_request_root_calculation", || {
-                input.new_payload_request.tree_hash_root(&sha256_hasher())
-            });
+    let output = StatelessValidationResult::new(
+        new_payload_request_root,
+        successful_validation,
+        chain_config,
+    );
 
-        #[cfg(feature = "std")]
-        {
-            let chain_id = input.chain_config.chain_id;
-
-            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                Self::compute_inner::<P>(input, new_payload_request_root)
-            }));
-
-            match result {
-                Ok(output) => output,
-                Err(_) => {
-                    P::print("Panic occurred during validation\n");
-                    StatelessValidatorOutput::new(new_payload_request_root, false, chain_id)
-                }
-            }
-        }
-
-        #[cfg(not(feature = "std"))]
-        {
-            Self::compute_inner::<P>(input, new_payload_request_root)
-        }
-    }
+    P::cycle_scope("serialize_output", || output.to_ssz())
 }
 
-impl StatelessValidatorRethGuest {
-    fn compute_inner<P: Platform>(
-        input: GuestInput<Self>,
-        new_payload_request_root: [u8; 32],
-    ) -> GuestOutput<Self> {
-        let chain_id = input.chain_config.chain_id;
-        let (chain_spec, evm_config) = P::cycle_scope("misc_preparation", || {
-            let genesis = Genesis {
-                config: input.chain_config.clone(),
-                ..Default::default()
-            };
-            let chain_spec: Arc<ChainSpec> = Arc::new(genesis.into());
-            let evm_config = EthEvmConfig::new(chain_spec.clone());
-            (chain_spec, evm_config)
-        });
+/// Statelessly validates the execution payload, mirroring
+/// `verify_stateless_new_payload` in the spec.
+fn verify_stateless_new_payload<P: Platform>(input: StatelessInput) -> Result<(), Error> {
+    P::cycle_scope("validate_chain_config", || {
+        input.chain_config.validate(&input.new_payload_request)
+    })?;
 
-        let block_result: anyhow::Result<_> =
-            P::cycle_scope("new_payload_request_to_block", || {
-                let sealed_block =
-                    new_payload_request_to_block(input.new_payload_request, chain_spec.clone())?;
-                // TODO: consider asking Reth to have an `stateless_validation_with_trie`
-                // variant which accepts `SealedBlock`. Since this isn't the case today,
-                // `stateless_validator_with_trie` will hash again the block.
-                Ok(sealed_block.into_block())
-            });
+    let reth_input = P::cycle_scope("to_reth_input", || to_reth_input(input))?;
 
-        let block = match block_result {
-            Ok(block) => block,
-            Err(err) => {
-                P::print(&format!("Failed to convert to reth block: {err}\n"));
-                return StatelessValidatorOutput::new(new_payload_request_root, false, chain_id);
-            }
-        };
+    P::cycle_scope("run_validation", || run_validation(reth_input))?;
 
-        let res = P::cycle_scope("stf", || {
-            stateless_validation_with_trie::<SparseState, _, _>(
-                block,
-                input.public_keys,
-                input.witness,
-                chain_spec,
-                evm_config,
-            )
-        });
-
-        match res {
-            Ok(_) => StatelessValidatorOutput::new(new_payload_request_root, true, chain_id),
-            Err(err) => {
-                P::print(&format!("Block validation failed: {err}\n"));
-                StatelessValidatorOutput::new(new_payload_request_root, false, chain_id)
-            }
-        }
-    }
+    Ok(())
 }
 
-#[allow(unreachable_code)]
-fn sha256_hasher() -> impl Sha256Hasher {
-    #[cfg(feature = "openvm")]
-    return openvm::OpenVMSha256Hasher;
-    #[cfg(feature = "zkvm-interface")]
-    return zkvm_interface::sha256_hasher();
-    #[cfg(not(any(feature = "openvm", feature = "zkvm-interface")))]
-    return stateless_validator_common::new_payload_request::NativeSha256Hasher;
+/// Validates the reconstructed payload, reporting a rejected payload as an
+/// error.
+fn run_validation(input: RethInput) -> Result<(), Error> {
+    stateless_validation_with_trie::<SparseState, _, _>(
+        input.block,
+        input.public_keys,
+        input.witness,
+        input.chain_spec,
+        input.evm_config,
+    )
+    .map(|_| ())
+    .map_err(|_| Error::Execution)
 }
