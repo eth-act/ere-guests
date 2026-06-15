@@ -6,7 +6,5 @@ extern crate alloc;
 
 pub mod guest;
 
-#[cfg(feature = "host")]
-pub mod host;
-
-pub mod wire;
+/// Ethrex version.
+pub const EL_VERSION: &str = env!("EL_VERSION");

@@ -9,46 +9,25 @@ license.workspace = true
 workspace = true
 
 [dependencies]
-anyhow.workspace = true
-rkyv.workspace = true
-
-# alloy
-alloy-consensus = { workspace = true, optional = true }
-alloy-eips = { workspace = true, optional = true }
-alloy-genesis = { workspace = true, optional = true }
-alloy-rlp = { workspace = true, optional = true }
+thiserror.workspace = true
+hex-literal.workspace = true
 
 # ethrex
 ethrex-common.workspace = true
 ethrex-crypto.workspace = true
 ethrex-guest-program = { workspace = true, features = ["eip-8025"] }
-ethrex-rpc = { workspace = true, optional = true }
-
-# ssz
-libssz.workspace = true
-libssz_merkle.workspace = true
-
-# reth
-stateless = { workspace = true, optional = true }
 
 # zkvm-standard
 zkvm-interface = { workspace = true, optional = true }
 
+# ere
+ere-platform-core.workspace = true
+
 # local
-guest.workspace = true
 stateless-validator-common.workspace = true
-stateless-validator-reth = { workspace = true, default-features = true, optional = true, features = [
-    "host",
-] }
 
 [dev-dependencies]
 ere-dockerized.workspace = true
-stateless-validator-ethrex = { workspace = true, default-features = true, features = [
-    "host",
-] }
-stateless-validator-reth = { workspace = true, default-features = true, features = [
-    "host",
-] }
 stateless-validator-test.workspace = true
 
 [build-dependencies]
@@ -66,16 +45,4 @@ zkvm-interface = ["dep:zkvm-interface"]
 
 # host
 # NOTE: Need `ethrex-crypto/kzg-rs` to verify KZG proof on native host
-host = [
-    "std",
-    "ethrex-crypto/kzg-rs",
-    "ethrex-crypto/secp256k1",
-    "stateless-validator-common/host",
-    "dep:alloy-consensus",
-    "dep:alloy-eips",
-    "dep:alloy-rlp",
-    "dep:alloy-genesis",
-    "dep:ethrex-rpc",
-    "dep:stateless",
-    "dep:stateless-validator-reth",
-]
+host = ["std", "ethrex-crypto/kzg-rs", "ethrex-crypto/secp256k1", "stateless-validator-common/host"]

@@ -1,61 +1,89 @@
-//! Stateless validator guest program.
+//! Ethrex stateless validator guest program.
 
-use alloc::{sync::Arc, vec::Vec};
+use alloc::vec::Vec;
 
-use ethrex_crypto::Crypto;
-use ethrex_guest_program::execution::execution_program;
-
-#[cfg(feature = "zkvm-interface")]
-mod zkvm_interface;
-
-#[rustfmt::skip]
-pub use {
-    guest::*,
-    stateless_validator_common::guest::StatelessValidatorOutput,
+use ere_platform_core::Platform;
+use ethrex_guest_program::l1::{
+    DecodedEip8025, validate_eip8025_canonical_execution, validate_eip8025_execution,
+};
+use stateless_validator_common::{
+    HashTreeRoot, SszEncode as _,
+    guest::{StatelessInput, StatelessValidationResult},
 };
 
-/// Ethrex version.
-pub const EL_VERSION: &str = env!("EL_VERSION");
+use crate::guest::{
+    convert::to_ethrex_input,
+    crypto::{sha256, sha256_hasher},
+};
 
-/// [`Guest`] implementation for Ethrex stateless validator.
-#[derive(Debug, Clone)]
-pub struct StatelessValidatorEthrexGuest;
+mod convert;
+mod crypto;
+mod error;
 
-impl Guest for StatelessValidatorEthrexGuest {
-    type Input = Vec<u8>;
-    type Output = StatelessValidatorOutput;
+pub use crate::guest::error::Error;
 
-    fn compute<P: Platform>(input_bytes: Self::Input) -> Self::Output {
-        Self::compute_inner::<P>(&input_bytes, crypto())
-    }
+/// Runs the stateless guest on the [`Platform`].
+///
+/// The public values written diverge from the spec by hashing the output with
+/// sha256 because some zkVMs only support 32 byte public values.
+pub fn entrypoint<P: Platform>() {
+    let input_bytes = P::cycle_scope("read_input", || P::read_input());
+    let output_bytes = run_stateless_guest::<P>(&input_bytes);
+    let output_digest = P::cycle_scope("sha256_output_bytes", || sha256(&output_bytes));
+    P::cycle_scope("write_output", || P::write_output(&output_digest));
 }
 
-impl StatelessValidatorEthrexGuest {
-    fn compute_inner<P: Platform>(
-        input_bytes: &[u8],
-        crypto: Arc<dyn Crypto>,
-    ) -> GuestOutput<Self> {
-        let output = P::cycle_scope("run_validation", || {
-            execution_program(input_bytes, crypto)
-                .unwrap_or_else(|err| panic!("invalid EIP-8025 input: {err}"))
-        });
+/// Runs the stateless guest with serialized input and returns serialized
+/// output, mirroring `run_stateless_guest` in the spec.
+pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
+    let Ok(input) = P::cycle_scope("deserialize_input", || {
+        StatelessInput::from_schema_prefixed_ssz(input_bytes)
+    }) else {
+        return StatelessValidationResult::default().to_ssz();
+    };
 
-        StatelessValidatorOutput::new(
-            output.new_payload_request_root,
-            output.valid,
-            output.chain_id,
-        )
-    }
+    let new_payload_request_root = P::cycle_scope("new_payload_request_root", || {
+        input.new_payload_request.hash_tree_root(&sha256_hasher())
+    });
+    let chain_config = input.chain_config.clone();
+
+    let successful_validation = verify_stateless_new_payload::<P>(input).is_ok();
+
+    let output = StatelessValidationResult::new(
+        new_payload_request_root,
+        successful_validation,
+        chain_config,
+    );
+
+    P::cycle_scope("serialize_output", || output.to_ssz())
 }
 
-#[allow(unreachable_code)]
-fn crypto() -> Arc<dyn Crypto> {
-    #[cfg(feature = "zkvm-interface")]
-    return zkvm_interface::crypto();
-    #[cfg(feature = "risc0")]
-    return Arc::new(ethrex_guest_program::crypto::risc0::Risc0Crypto);
-    #[cfg(feature = "sp1")]
-    return Arc::new(ethrex_guest_program::crypto::sp1::Sp1Crypto);
-    #[cfg(not(any(feature = "zkvm-interface", feature = "risc0", feature = "sp1")))]
-    return Arc::new(ethrex_guest_program::crypto::NativeCrypto);
+/// Statelessly validates the execution payload, mirroring
+/// `verify_stateless_new_payload` in the spec.
+fn verify_stateless_new_payload<P: Platform>(input: StatelessInput) -> Result<(), Error> {
+    P::cycle_scope("validate_chain_config", || {
+        input.chain_config.validate(&input.new_payload_request)
+    })?;
+
+    let ethrex_input = P::cycle_scope("to_ethrex_input", || to_ethrex_input(input))?;
+
+    P::cycle_scope("run_validation", || run_validation(ethrex_input))?;
+
+    Ok(())
+}
+
+/// Validates the decoded payload through its canonical or legacy execution
+/// path, reporting a rejected payload as an error.
+fn run_validation(ethrex_input: DecodedEip8025) -> Result<(), Error> {
+    match ethrex_input {
+        DecodedEip8025::Legacy {
+            new_payload_request,
+            execution_witness,
+        } => validate_eip8025_execution(&new_payload_request, execution_witness, crypto::crypto()),
+        DecodedEip8025::Canonical {
+            stateless_input,
+            chain_config,
+        } => validate_eip8025_canonical_execution(stateless_input, chain_config, crypto::crypto()),
+    }
+    .map_err(|_| Error::Execution)
 }
