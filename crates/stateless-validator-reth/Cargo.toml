@@ -9,6 +9,7 @@ license.workspace = true
 workspace = true
 
 [dependencies]
+once_cell.workspace = true
 thiserror.workspace = true
 
 # alloy
@@ -51,7 +52,7 @@ ere-util-build.workspace = true
 [features]
 # guest
 default = ["std"]
-std = ["stateless-validator-common/std"]
+std = ["once_cell/std", "stateless-validator-common/std"]
 openvm = []
 zisk = ["zkvm-interface"]
 zkvm-interface = ["alloy-consensus/crypto-backend", "dep:zkvm-interface"]

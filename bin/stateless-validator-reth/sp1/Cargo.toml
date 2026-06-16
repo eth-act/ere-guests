@@ -17,7 +17,7 @@ revm = { version = "38.0.0", default-features = false, features = ["bn"] }
 kzg-rs = "0.2.8"
 
 # ere
-ere-platform-sp1 = { git = "https://github.com/eth-act/ere", tag = "v0.12.1" }
+ere-platform-sp1 = { git = "https://github.com/eth-act/ere", tag = "v0.12.2" }
 
 # local
 stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
@@ -25,10 +25,29 @@ stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
 [patch.crates-io]
 # Copied from https://github.com/succinctlabs/rsp/blob/6275f93/bin/client/Cargo.toml#L20-L26.
 sha2 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", tag = "patch-sha2-0.10.9-sp1-6.0.0", package = "sha2" }
-sha3 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", tag = "patch-sha3-0.10.8-sp1-6.0.0" }
+sha3 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", tag = "patch-sha3-0.11.0-sp1-6.0.0" }
 bn = { git = "https://github.com/sp1-patches/bn", tag = "patch-0.6.0-sp1-6.0.0-substrate-bn", package = "substrate-bn" }
 k256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-k256-13.4-sp1-6.0.0" }
 p256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-p256-13.2-sp1-6.0.0" }
+
+# reth bal-devnet-7
+revm = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-bytecode = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-context = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-context-interface = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-database = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-database-interface = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-handler = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-inspector = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-interpreter = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-precompile = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+revm-state = { git = "https://github.com/bluealloy/revm", rev = "9ccf9e5800e7308f0a591c0493ae8e0de35317f8" }
+alloy-evm = { git = "https://github.com/alloy-rs/evm", rev = "5b511acf021fd6f6bd6d52a1e98007af3bf07dd6" }
+reth-codecs = { git = "https://github.com/paradigmxyz/reth-core", rev = "032288088069e7e6378f8d4bbac0124db98a77f1" }
+reth-codecs-derive = { git = "https://github.com/paradigmxyz/reth-core", rev = "032288088069e7e6378f8d4bbac0124db98a77f1" }
+reth-primitives-traits = { git = "https://github.com/paradigmxyz/reth-core", rev = "032288088069e7e6378f8d4bbac0124db98a77f1" }
+reth-zstd-compressors = { git = "https://github.com/paradigmxyz/reth-core", rev = "032288088069e7e6378f8d4bbac0124db98a77f1" }
 
 [profile.release]
 codegen-units = 1
