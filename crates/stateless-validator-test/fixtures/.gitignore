@@ -1,4 +1,1 @@
-# Keep only .gitignore and .tar.gz files
-*
-!.gitignore
-!*.tar.gz
+*.json.zst

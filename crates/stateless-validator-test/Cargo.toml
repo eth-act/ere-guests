@@ -9,25 +9,22 @@ version.workspace = true
 workspace = true
 
 [dependencies]
-flate2.workspace = true
 rayon.workspace = true
-sha2.workspace = true
 serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+sha2.workspace = true
 tar.workspace = true
 tracing.workspace = true
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
-tempfile.workspace = true
-serde_json.workspace = true
-
-# reth
-stateless.workspace = true
+walkdir.workspace = true
+zstd.workspace = true
 
 # alloy
 alloy-primitives.workspace = true
 
 # ere
 ere-dockerized.workspace = true
+ere-platform-core.workspace = true
 
 # local
-guest.workspace = true
-stateless-validator-common.workspace = true
+stateless-validator-common = { workspace = true, features = ["host", "legacy"] }
