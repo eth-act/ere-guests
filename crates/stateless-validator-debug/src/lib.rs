@@ -1,26 +1,20 @@
 //! Host-side debug runner for stateless validator guest fixtures.
 
-mod fixtures;
-
 use std::{
-    io::{self, Write},
+    io,
+    io::Write,
     path::{Path, PathBuf},
 };
 
 use anyhow::{Context, bail};
 use clap::{Parser, ValueEnum};
-pub use fixtures::{
-    CanonicalInput, FixtureInput, StatelessValidatorFixture, collect_fixture_paths, load_fixtures,
-};
-use guest::{Guest, Platform};
-use stateless_validator_ethrex::{
-    guest::StatelessValidatorEthrexGuest,
-    host::{Eip8025InputSource, build_eip8025_input},
-};
-use stateless_validator_reth::guest::{
-    StatelessValidatorOutput, StatelessValidatorRethGuest, StatelessValidatorRethInput,
-};
+use ere_platform_core::Platform;
+use stateless_validator_common::{SszDecode, guest::StatelessValidationResult};
 use tracing_subscriber::EnvFilter;
+
+use crate::fixtures::{StatelessValidatorFixture, collect_fixture_paths, load_fixtures};
+
+pub mod fixtures;
 
 /// CLI options for the stateless validator debug runner.
 #[derive(Debug, Clone, PartialEq, Eq, Parser)]
@@ -52,39 +46,25 @@ pub enum GuestKind {
 
 impl GuestKind {
     fn run_fixture(self, fixture: &StatelessValidatorFixture) -> anyhow::Result<RunSummary> {
-        let output: StatelessValidatorOutput = match self {
-            Self::Reth => match &fixture.input {
-                FixtureInput::Legacy(stateless_input) => {
-                    let input = StatelessValidatorRethInput::new(stateless_input, fixture.success)?;
-                    StatelessValidatorRethGuest::compute::<StdoutNoopPlatform>(input)
-                }
-                FixtureInput::Canonical(_) => {
-                    bail!("reth guest does not yet accept EEST canonical SSZ input")
-                }
-            },
-            Self::Ethrex => {
-                let source = match &fixture.input {
-                    FixtureInput::Legacy(stateless_input) => Eip8025InputSource::Legacy {
-                        stateless_input,
-                        valid_block: fixture.success,
-                    },
-                    FixtureInput::Canonical(canonical) => Eip8025InputSource::Canonical {
-                        ssz_input: &canonical.ssz_bytes,
-                        chain_config: &canonical.chain_config,
-                    },
-                };
-                let input = build_eip8025_input(source)?;
-                StatelessValidatorEthrexGuest::compute::<StdoutNoopPlatform>(input)
-            }
-        };
+        let input_bytes = &fixture.input_bytes;
 
-        let actual_output_bytes = output.serialize().to_vec();
+        let actual_output_bytes =
+            match self {
+                Self::Reth => stateless_validator_reth::guest::run_stateless_guest::<
+                    StdoutNoopPlatform,
+                >(input_bytes),
+                Self::Ethrex => stateless_validator_ethrex::guest::run_stateless_guest::<
+                    StdoutNoopPlatform,
+                >(input_bytes),
+            };
+        let output = StatelessValidationResult::from_ssz_bytes(&actual_output_bytes)
+            .map_err(|err| anyhow::anyhow!("failed to decode guest output: {err:?}"))?;
 
         Ok(RunSummary {
             fixture_name: fixture.name.clone(),
             guest: self,
             expected_success: fixture.success,
-            actual_success: output.successful_block_validation,
+            actual_success: output.successful_validation,
             new_payload_request_root: output.new_payload_request_root,
             expected_output_bytes: fixture.expected_output_bytes.clone(),
             actual_output_bytes,

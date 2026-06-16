@@ -7,52 +7,28 @@ use std::{
 };
 
 use alloy_eips::eip7840::BlobParams;
-use alloy_genesis::ChainConfig;
 use anyhow::{Context, bail};
-use ef_tests::models::ForkSpec;
-use reth_chainspec::{Chain, blob_params_to_schedule, create_chain_config};
 use serde::Deserialize;
-use stateless::StatelessInput;
+use stateless_validator_common::guest::StatelessInput;
 
 /// Deserialized JSON fixture supported by the debug runner.
 #[derive(Debug, Clone)]
 pub struct StatelessValidatorFixture {
     /// Human-readable fixture identifier.
     pub name: String,
-    /// Stateless input consumed by the host-side input builders.
-    pub input: FixtureInput,
+    /// Stateless input bytes.
+    pub input_bytes: Vec<u8>,
     /// Expected validation outcome.
     pub success: bool,
     /// Expected serialized guest output, when provided by canonical fixtures.
     pub expected_output_bytes: Option<Vec<u8>>,
 }
 
-/// Either the legacy in-memory `StatelessInput` (existing JSON layout) or
-/// the EEST canonical SSZ payload extracted from a `blockchain_test` JSON.
-#[derive(Debug, Clone)]
-#[allow(clippy::large_enum_variant)]
-pub enum FixtureInput {
-    /// Legacy `{name, stateless_input, success}` fixture.
-    Legacy(StatelessInput),
-    /// EEST blockchain-test canonical SSZ bytes.
-    Canonical(CanonicalInput),
-}
-
-/// EEST canonical-fixture `statelessInputBytes` payload paired with the
-/// [`ChainConfig`] needed to resolve the fork from the embedded timestamp.
-#[derive(Debug, Clone)]
-pub struct CanonicalInput {
-    /// SSZ-encoded `SszStatelessInput` bytes.
-    pub ssz_bytes: Vec<u8>,
-    /// Chain configuration.
-    pub chain_config: ChainConfig,
-}
-
 /// Wire shape for legacy `{name, stateless_input, success}` fixtures.
 #[derive(Debug, Clone, Deserialize)]
 struct LegacyFixture {
     name: String,
-    stateless_input: StatelessInput,
+    stateless_input: reth_stateless::StatelessInput,
     success: bool,
 }
 
@@ -60,6 +36,7 @@ struct LegacyFixture {
 /// debug runner needs.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 struct EestStatelessTest {
     network: String,
     config: EestConfig,
@@ -67,6 +44,7 @@ struct EestStatelessTest {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 struct EestConfig {
     #[serde(rename = "chainid", deserialize_with = "deserialize_hex_u64")]
     chain_id: u64,
@@ -189,12 +167,13 @@ pub fn load_fixtures(path: &Path) -> anyhow::Result<Vec<StatelessValidatorFixtur
 
     if value.get("stateless_input").is_some() {
         // Legacy shape.
-        let wire: LegacyFixture = serde_json::from_value(value)
+        let legacy: LegacyFixture = serde_json::from_value(value)
             .with_context(|| format!("failed to deserialize legacy fixture {}", path.display()))?;
         return Ok(vec![StatelessValidatorFixture {
-            name: wire.name,
-            input: FixtureInput::Legacy(wire.stateless_input),
-            success: wire.success,
+            name: legacy.name,
+            input_bytes: StatelessInput::try_from_reth(&legacy.stateless_input)?
+                .to_schema_prefixed_ssz(),
+            success: legacy.success,
             expected_output_bytes: None,
         }]);
     }
@@ -209,31 +188,16 @@ pub fn load_fixtures(path: &Path) -> anyhow::Result<Vec<StatelessValidatorFixtur
 
     let mut out = Vec::new();
     for (test_name, case) in map {
-        let chain_config = chain_config_for_test(
-            &case.network,
-            case.config.chain_id,
-            &case.config.blob_schedule,
-        )
-        .with_context(|| {
-            format!(
-                "failed to build chain config for {} (network={})",
-                path.display(),
-                case.network,
-            )
-        })?;
         for (idx, block) in case.blocks.iter().enumerate() {
-            let Some(bytes) = &block.stateless_input_bytes else {
+            let Some(input_bytes) = &block.stateless_input_bytes else {
                 continue;
             };
-            if bytes.is_empty() {
+            if input_bytes.is_empty() {
                 continue;
             }
             out.push(StatelessValidatorFixture {
                 name: format!("{test_name}#block{idx}"),
-                input: FixtureInput::Canonical(CanonicalInput {
-                    ssz_bytes: bytes.to_vec(),
-                    chain_config: chain_config.clone(),
-                }),
+                input_bytes: input_bytes.to_vec(),
                 success: block.expect_exception.is_none(),
                 expected_output_bytes: block
                     .stateless_output_bytes
@@ -250,81 +214,4 @@ pub fn load_fixtures(path: &Path) -> anyhow::Result<Vec<StatelessValidatorFixtur
         );
     }
     Ok(out)
-}
-
-/// Builds an `alloy_genesis::ChainConfig` for a fixture's `network` field.
-fn chain_config_for_test(
-    network: &str,
-    chain_id: u64,
-    blob_schedule: &BTreeMap<String, EestBlobParams>,
-) -> anyhow::Result<alloy_genesis::ChainConfig> {
-    // Construct Amsterdam chain config manually since Reth stateless crate
-    // doesn't have Amsterdam support in the main branch. To avoid being
-    // blocked by this, construct it manually. Eventually we can remove this.
-    if network == "Amsterdam" {
-        return Ok(amsterdam_chain_config(chain_id, blob_schedule));
-    }
-
-    let fork: ForkSpec = serde_json::from_value(serde_json::Value::String(network.to_string()))
-        .with_context(|| format!("unknown fork {network:?}"))?;
-    let spec = fork.to_chain_spec();
-    let mut cfg = create_chain_config(
-        Some(Chain::from_id(chain_id)),
-        &spec.hardforks,
-        spec.deposit_contract.map(|dc| dc.address),
-        blob_params_to_schedule(&spec.blob_params, &spec.hardforks),
-    );
-    // `Chain::from_id` for a known id (e.g. 1) makes `create_chain_config`
-    // copy mainnet's id; force the fixture's value verbatim.
-    cfg.chain_id = chain_id;
-    Ok(cfg)
-}
-
-/// Manually constructs an Amsterdam `alloy_genesis::ChainConfig`. All
-/// pre-Amsterdam fork transitions are activated at block/timestamp 0. The
-/// blob schedule is lifted verbatim from the fixture (with keys lowercased to
-/// match the `to_ethrex_chain_config` lookup convention in `host.rs`).
-fn amsterdam_chain_config(
-    chain_id: u64,
-    blob_schedule: &BTreeMap<String, EestBlobParams>,
-) -> alloy_genesis::ChainConfig {
-    let blob_schedule = blob_schedule
-        .iter()
-        .map(|(name, params)| (name.to_ascii_lowercase(), BlobParams::from(params)))
-        .collect();
-
-    alloy_genesis::ChainConfig {
-        chain_id,
-        homestead_block: Some(0),
-        dao_fork_block: None,
-        dao_fork_support: false,
-        eip150_block: Some(0),
-        eip155_block: Some(0),
-        eip158_block: Some(0),
-        byzantium_block: Some(0),
-        constantinople_block: Some(0),
-        petersburg_block: Some(0),
-        istanbul_block: Some(0),
-        muir_glacier_block: Some(0),
-        berlin_block: Some(0),
-        london_block: Some(0),
-        arrow_glacier_block: Some(0),
-        gray_glacier_block: Some(0),
-        merge_netsplit_block: Some(0),
-        shanghai_time: Some(0),
-        cancun_time: Some(0),
-        prague_time: Some(0),
-        osaka_time: Some(0),
-        bpo1_time: Some(0),
-        bpo2_time: Some(0),
-        bpo3_time: None,
-        bpo4_time: None,
-        bpo5_time: None,
-        amsterdam_time: Some(0),
-        terminal_total_difficulty: Some(alloy_primitives::U256::ZERO),
-        terminal_total_difficulty_passed: true,
-        blob_schedule,
-        deposit_contract_address: None,
-        ..Default::default()
-    }
 }
