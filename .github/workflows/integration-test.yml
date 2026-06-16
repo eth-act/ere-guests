@@ -44,7 +44,7 @@ jobs:
           - zkvm: sp1
             threads: 2
           - zkvm: zisk
-            threads: 1
+            threads: 12
           - guest: stateless-validator-ethrex
             zkvm: zisk
             ere_profile: ethrex
