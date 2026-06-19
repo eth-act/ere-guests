@@ -42,7 +42,7 @@ jobs:
           - zkvm: risc0
             threads: 12
           - zkvm: sp1
-            threads: 2
+            threads: 1
           - zkvm: zisk
             threads: 12
           - guest: stateless-validator-ethrex
@@ -99,7 +99,7 @@ jobs:
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
           OPENVM_RUST_TOOLCHAIN: nightly-2025-10-30
         run: |
-          cargo test --release --package ${{ matrix.guest }} --test zkvm_execution -- ${{ matrix.zkvm }}
+          cargo test --release --package ${{ matrix.guest }} --test zkvm_execution -- ${{ matrix.zkvm }} --test-threads=1
 
           sudo chown -R $(id -u):$(id -g) bin/${{ matrix.guest }}/${{ matrix.zkvm }}/target || true
 
