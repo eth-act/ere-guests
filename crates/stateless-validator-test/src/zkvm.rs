@@ -19,7 +19,7 @@ use stateless_validator_common::{
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
-use crate::fixture::get_fixtures;
+use crate::fixture::{Fork, get_fixtures};
 
 /// Returns path to the workspace root.
 fn workspace() -> PathBuf {
@@ -48,13 +48,14 @@ pub fn compile_and_init_zkvm(guest: &str, zkvm_kind: zkVMKind) -> DockerizedzkVM
 }
 
 /// Compiles the given stateless validator guest and asserts the zkVM
-/// execution over the fixtures.
+/// execution over the fixtures of `fork`.
 pub fn test_stateless_validator_execution(
+    fork: Fork,
     guest: &str,
     zkvm_kind: zkVMKind,
     execute_on_host: impl Fn(&[u8]) -> Vec<u8> + Sync,
 ) {
-    let inputs = get_fixtures()
+    let inputs = get_fixtures(fork)
         .into_par_iter()
         .map(|fixture| {
             let output_bytes = if let Some(bytes) = &fixture.expected_output_bytes {
@@ -74,14 +75,14 @@ pub fn test_stateless_validator_execution(
             TestCase::new(&fixture.name, fixture.input_bytes, output_bytes).output_sha256()
         })
         .collect::<Vec<_>>();
-    test_execution(guest, zkvm_kind, inputs);
+    test_execution(inputs, guest, zkvm_kind);
 }
 
 /// Compiles guest program and runs execution, then check output are expected.
 pub fn test_execution(
+    test_cases: impl IntoIterator<Item = TestCase>,
     guest: &str,
     zkvm_kind: zkVMKind,
-    test_cases: impl IntoIterator<Item = TestCase>,
 ) {
     let _ = tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())

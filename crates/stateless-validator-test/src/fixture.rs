@@ -7,7 +7,32 @@ use std::{
 
 use serde::Deserialize;
 use tar::Archive;
+use tracing::info;
 use walkdir::WalkDir;
+
+/// Base URL of the GitHub release hosting the per-fork fixture archives.
+const FIXTURES_BASE_URL: &str =
+    "https://github.com/han0110/ere-guests/releases/download/tests-zkevm@v0.4.1";
+
+/// Ethereum fork a fixture set targets.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Fork {
+    /// Fusaka (mainnet) fixtures.
+    Fusaka,
+    /// Glamsterdam devnet-5 fixtures.
+    Glamsterdam,
+}
+
+impl Fork {
+    /// Subdirectory under `fixtures/` holding this fork's data, which is also
+    /// the stem of its release archive (`<subdir>.tar.zst`).
+    pub fn subdir(self) -> &'static str {
+        match self {
+            Fork::Fusaka => "fusaka",
+            Fork::Glamsterdam => "glamsterdam-devnet-5",
+        }
+    }
+}
 
 /// A fixture normalized to canonical schema-prefixed SSZ input bytes.
 #[derive(Debug, Clone)]
@@ -22,48 +47,43 @@ pub struct StatelessValidatorFixture {
     pub expected_output_bytes: Option<Vec<u8>>,
 }
 
-/// Reads every stateless validator fixture.
-pub fn get_fixtures() -> Vec<StatelessValidatorFixture> {
-    let mut fixtures = untar_fixtures()
-        .into_iter()
-        .flat_map(load_fixtures_from_dir)
-        .collect::<Vec<_>>();
+/// Reads every stateless validator fixture for `fork`, downloading and
+/// extracting the fork's archive on demand when it is not already present.
+pub fn get_fixtures(fork: Fork) -> Vec<StatelessValidatorFixture> {
+    let mut fixtures = load_fixtures_from_dir(ensure_fixtures(fork));
     fixtures.sort_by(|a, b| a.name.cmp(&b.name));
     fixtures
 }
 
-/// Extracts every `.tar.zst` archive under the fixtures dir into a sibling
-/// directory named after the archive.
-fn untar_fixtures() -> Vec<PathBuf> {
-    let fixtures_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("fixtures");
-    let archives = WalkDir::new(fixtures_dir)
-        .max_depth(2)
-        .into_iter()
-        .filter_map(|entry| entry.ok())
-        .filter(|entry| {
-            entry.file_type().is_file()
-                && entry
-                    .file_name()
-                    .to_str()
-                    .is_some_and(|name| name.ends_with(".tar.zst"))
-        })
-        .map(walkdir::DirEntry::into_path);
-
-    let mut extracted = Vec::new();
-    for archive in archives {
-        let stem = archive
-            .file_name()
-            .and_then(|name| name.to_str())
-            .map(|name| name.trim_end_matches(".tar.zst"))
-            .unwrap();
-        let target = archive.parent().unwrap().join(stem);
-        fs::create_dir_all(&target).unwrap();
-        let decoder = zstd::stream::read::Decoder::new(File::open(&archive).unwrap()).unwrap();
-        Archive::new(decoder).unpack(&target).unwrap();
-        extracted.push(target);
+/// Ensures the extracted fixture directory for `fork` exists, downloading and
+/// unpacking the release archive when it is missing. Returns the directory.
+fn ensure_fixtures(fork: Fork) -> PathBuf {
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("fixtures")
+        .join(fork.subdir());
+    if !dir.exists() {
+        download_fixtures(fork, &dir);
     }
+    dir
+}
 
-    extracted
+/// Downloads the fork's release archive and unpacks it into `dir`.
+fn download_fixtures(fork: Fork, dir: &Path) {
+    let url = format!("{FIXTURES_BASE_URL}/{}.tar.zst", fork.subdir());
+
+    info!("Downloading fixture archive {url}");
+
+    let resp = reqwest::blocking::get(url.as_str()).unwrap();
+    let bytes = resp.error_for_status().unwrap().bytes().unwrap();
+
+    let tempdir = tempfile::tempdir_in(dir.parent().unwrap()).unwrap();
+    let archive = tempdir.path().join(format!("{}.tar.zst", fork.subdir()));
+    fs::write(&archive, &bytes).unwrap();
+
+    let decoder = zstd::stream::read::Decoder::new(File::open(&archive).unwrap()).unwrap();
+    Archive::new(decoder).unpack(tempdir.path()).unwrap();
+
+    fs::rename(tempdir.path().join(fork.subdir()), dir).unwrap();
 }
 
 /// Loads every fixture found under a directory or a single fixture file.
