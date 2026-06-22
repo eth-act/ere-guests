@@ -9,7 +9,7 @@ pub enum Error {
     /// The input is shorter than the schema identifier prefix.
     #[error("stateless input is missing the schema id")]
     MissingSchemaId,
-    /// The schema identifier is not the supported Amsterdam schema.
+    /// The schema identifier prefix does not match the supported schema id.
     #[error("unsupported stateless input schema id {0:#06x}")]
     UnsupportedSchemaId(u16),
     /// The SSZ body failed to decode.

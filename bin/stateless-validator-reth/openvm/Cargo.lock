@@ -3402,6 +3402,7 @@ dependencies = [
 name = "stateless-validator-common"
 version = "0.12.1"
 dependencies = [
+ "const-hex",
  "libssz",
  "libssz-derive",
  "libssz-merkle",

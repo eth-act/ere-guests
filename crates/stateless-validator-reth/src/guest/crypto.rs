@@ -1,5 +1,8 @@
 //! Crypto provider selection for the guest.
 
+#[cfg(all(feature = "openvm", feature = "zkvm-interface"))]
+compile_error!("enable at most one of the openvm and zkvm-interface features");
+
 #[cfg(feature = "openvm")]
 pub(crate) mod openvm;
 #[cfg(feature = "zkvm-interface")]

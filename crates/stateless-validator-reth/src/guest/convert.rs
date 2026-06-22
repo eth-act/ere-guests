@@ -10,7 +10,7 @@ use alloc::{
 use core::cmp::Ordering;
 
 use alloy_consensus::Block;
-use alloy_eips::{eip4844::BLOB_TX_MIN_BLOB_GASPRICE, eip7840::BlobParams};
+use alloy_eips::eip7840::BlobParams;
 use alloy_primitives::{Address, B256, Bloom, Bytes, U256};
 use alloy_rpc_types_engine::{
     CancunPayloadFields, ExecutionData, ExecutionPayloadSidecar, PayloadError,
@@ -140,13 +140,16 @@ fn active_fork_blob_schedule(
         return Ok(BTreeMap::new());
     }
     let blob_schedule = blob_schedule.ok_or(Error::MissingBlobSchedule)?;
+    let base = match fork {
+        ProtocolFork::Cancun => BlobParams::cancun(),
+        ProtocolFork::Prague => BlobParams::prague(),
+        _ => BlobParams::osaka(),
+    };
     let params = BlobParams {
         target_blob_count: blob_schedule.target,
         max_blob_count: blob_schedule.max,
         update_fraction: u128::from(blob_schedule.base_fee_update_fraction),
-        min_blob_fee: BLOB_TX_MIN_BLOB_GASPRICE,
-        max_blobs_per_tx: blob_schedule.max,
-        blob_base_cost: 0,
+        ..base
     };
     let key = match fork {
         ProtocolFork::Cancun => "cancun",
@@ -323,7 +326,7 @@ fn prague_fields(
 /// type followed by the concatenated SSZ-encoded requests. Deposit, withdrawal,
 /// and consolidation requests use the types 0x00, 0x01, and 0x02 respectively.
 ///
-/// [`requests.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/requests.py
+/// [`requests.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/requests.py
 fn compute_requests_hash(requests: &ExecutionRequests, hasher: &impl Sha256Hasher) -> [u8; 32] {
     let mut outer_bytes = Vec::new();
 

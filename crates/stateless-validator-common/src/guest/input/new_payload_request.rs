@@ -5,9 +5,9 @@
 //! execution-apis, because a multi-fork crate needs distinct names while each execution-specs
 //! fork module defines a single `ExecutionPayload` shape.
 //!
-//! [`types.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/execution_engine/types.py
-//! [`requests.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/execution_engine/requests.py
-//! [`blocks.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/blocks.py
+//! [`types.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/execution_engine/types.py
+//! [`requests.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/execution_engine/requests.py
+//! [`blocks.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/blocks.py
 
 #![allow(missing_docs)]
 
@@ -320,10 +320,10 @@ impl SszDecode for NewPayloadRequest {
     }
 
     /// Decodes by attempting each container shape from the newest fork to the
-    /// oldest and returning the first success. [`matches_fork`] checks the decoded
-    /// shape against a known fork.
+    /// oldest and returning the first success. [`matches_payload`] checks the
+    /// decoded shape against a known fork.
     ///
-    /// [`matches_fork`]: NewPayloadRequest::matches_fork
+    /// [`matches_payload`]: crate::guest::input::ProtocolFork::matches_payload
     fn from_ssz_bytes(bytes: &[u8]) -> Result<Self, DecodeError> {
         NewPayloadRequestGloas::from_ssz_bytes(bytes)
             .map(Self::Gloas)

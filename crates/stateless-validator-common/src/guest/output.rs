@@ -3,22 +3,18 @@
 //! The types mirror `StatelessValidationResult` in [`stateless.py`] and its SSZ schema in
 //! [`stateless_ssz.py`]. The serialized form is the plain SSZ encoding without a schema prefix.
 //!
-//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/stateless.py
-//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/stateless_ssz.py
+//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless.py
+//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless_ssz.py
 
 use alloc::vec::Vec;
+use core::fmt::{self, Debug};
 
 use libssz_derive::{SszDecode, SszEncode};
 
 use crate::guest::input::{ChainConfig, ForkActivation, ForkConfig, ProtocolFork};
 
 /// Canonical result returned by stateless validation.
-///
-/// The [`Default`] value is the sentinel result for undecodable input, mirroring
-/// `_default_failed_stateless_output` in [`stateless_guest.py`].
-///
-/// [`stateless_guest.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/stateless_guest.py
-#[derive(Debug, Clone, PartialEq, Eq, SszEncode, SszDecode)]
+#[derive(Clone, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct StatelessValidationResult {
     /// The SSZ hash tree root of the validated payload request.
     pub new_payload_request_root: [u8; 32],
@@ -57,5 +53,18 @@ impl Default for StatelessValidationResult {
                 ),
             },
         )
+    }
+}
+
+impl Debug for StatelessValidationResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("StatelessValidationResult")
+            .field(
+                "new_payload_request_root",
+                &const_hex::encode_prefixed(self.new_payload_request_root),
+            )
+            .field("successful_validation", &self.successful_validation)
+            .field("chain_config", &self.chain_config)
+            .finish()
     }
 }

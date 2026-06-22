@@ -316,19 +316,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bls12_381"
-version = "0.8.0"
-source = "git+https://github.com/lambdaclass/bls12_381?branch=expose-affine-constructors#78cad0378b17fc3157b83f514be192bf46edf9a1"
-dependencies = [
- "digest",
- "ff",
- "group",
- "pairing",
- "rand_core 0.6.4",
- "subtle",
-]
-
-[[package]]
 name = "blst"
 version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -488,6 +475,18 @@ dependencies = [
  "glob",
  "libc",
  "libloading",
+]
+
+[[package]]
+name = "const-hex"
+version = "1.19.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33e2a781ebdf4467d1428dc4593067825fb646f6871475098d8577421af73558"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "proptest",
+ "serde_core",
 ]
 
 [[package]]
@@ -856,8 +855,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-common"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "crc32fast",
@@ -888,15 +887,13 @@ dependencies = [
 
 [[package]]
 name = "ethrex-crypto"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "ark-bn254",
  "ark-ec",
  "ark-ff",
- "bls12_381",
  "ethereum-types",
- "ff",
  "hex-literal 0.4.1",
  "k256",
  "num-bigint",
@@ -909,8 +906,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-guest-program"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -932,8 +929,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-l2-common"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -950,8 +947,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-levm"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "derive_more",
@@ -967,8 +964,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-rlp"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -977,8 +974,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-trie"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "anyhow",
  "bytes",
@@ -996,8 +993,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-vm"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "derive_more",
@@ -1018,7 +1015,6 @@ version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0b50bfb653653f9ca9095b427bed08ab8d75a137839d9ad64eb11810d5b6393"
 dependencies = [
- "bitvec",
  "rand_core 0.6.4",
  "subtle",
 ]
@@ -1737,15 +1733,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pairing"
-version = "0.23.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81fec4625e73cf41ef4bb6846cafa6d44736525f442ba45e407c4a000a13996f"
-dependencies = [
- "group",
-]
-
-[[package]]
 name = "parity-scale-codec"
 version = "3.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1890,6 +1877,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "proptest"
+version = "1.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b45fcc2344c680f5025fe57779faef368840d0bd1f42f216291f0dc4ace4744"
+dependencies = [
+ "bitflags",
+ "num-traits",
+ "rand 0.9.4",
+ "rand_chacha 0.9.0",
+ "rand_xorshift",
+ "unarray",
+]
+
+[[package]]
 name = "ptr_meta"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1996,6 +1997,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "76afc826de14238e6e8c374ddcc1fa19e374fd8dd986b0d2af0d02377261d83c"
 dependencies = [
  "getrandom 0.3.4",
+]
+
+[[package]]
+name = "rand_xorshift"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "513962919efc330f829edb2535844d1b912b0fbe2ca165d613e4e8788bb05a5a"
+dependencies = [
+ "rand_core 0.9.5",
 ]
 
 [[package]]
@@ -2401,6 +2411,7 @@ dependencies = [
 name = "stateless-validator-common"
 version = "0.12.1"
 dependencies = [
+ "const-hex",
  "libssz",
  "libssz-derive",
  "libssz-merkle",
@@ -2651,6 +2662,12 @@ dependencies = [
  "hex",
  "static_assertions",
 ]
+
+[[package]]
+name = "unarray"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eaea85b334db583fe3274d12b4cd1880032beab409c0d774be044d4480ab9a94"
 
 [[package]]
 name = "unicode-ident"

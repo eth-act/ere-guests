@@ -232,8 +232,8 @@ fn schedule_key(fork: ProtocolFork) -> Option<&'static str> {
 
 /// Converts a [`reth_stateless::StatelessInput`] to the [`NewPayloadRequest`]
 /// container shape of the given protocol fork, following the partition of
-/// [`NewPayloadRequest::matches_fork`]. Forks before Paris have no canonical
-/// payload representation and fail the conversion.
+/// [`crate::guest::input::ProtocolFork::matches_payload`]. Forks before Paris
+/// have no canonical payload representation and fail the conversion.
 fn to_new_payload_request(
     stateless_input: &reth_stateless::StatelessInput,
     requests: Requests,

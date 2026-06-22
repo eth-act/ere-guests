@@ -94,7 +94,7 @@ jobs:
 
       - name: Test
         env:
-          RUST_LOG: info
+          RUST_LOG: info,ere_server=error
           RAYON_NUM_THREADS: ${{ matrix.threads }}
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
           OPENVM_RUST_TOOLCHAIN: nightly-2025-10-30

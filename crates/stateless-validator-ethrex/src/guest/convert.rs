@@ -39,7 +39,7 @@ use crate::guest::{crypto, error::Error};
 const MAINNET_DEPOSIT_CONTRACT_ADDRESS: [u8; 20] = hex!("00000000219ab540356cbb839cbe05303d7705fa");
 
 /// Converts the decoded canonical stateless input into the ethrex program
-/// input consumed by `execute_decoded`..
+/// input consumed by `execute_decoded`.
 pub(crate) fn to_ethrex_input(input: StatelessInput) -> Result<DecodedEip8025, Error> {
     let chain_config = to_ethrex_chain_config(&input.chain_config)?;
     Ok(match input.new_payload_request {

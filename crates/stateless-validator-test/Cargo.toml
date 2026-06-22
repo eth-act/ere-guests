@@ -9,6 +9,9 @@ version.workspace = true
 workspace = true
 
 [dependencies]
+anyhow.workspace = true
+flate2.workspace = true
+const-hex.workspace = true
 rayon.workspace = true
 reqwest = { workspace = true, features = ["blocking"] }
 serde = { workspace = true, features = ["derive"] }
@@ -30,3 +33,6 @@ ere-platform-core.workspace = true
 
 # local
 stateless-validator-common = { workspace = true, features = ["host", "legacy"] }
+
+[dev-dependencies]
+paste.workspace = true

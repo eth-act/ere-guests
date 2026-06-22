@@ -34,7 +34,7 @@ pub(crate) fn sha256_hasher() -> impl Sha256Hasher {
     CryptoSha256Hasher(crypto())
 }
 
-/// SHA256 hashes the data using the [`sha256_hasher`].
+/// Returns the SHA256 digest of the data using the active [`crypto`] provider.
 pub(crate) fn sha256(data: &[u8]) -> [u8; 32] {
     crypto().sha256(data)
 }

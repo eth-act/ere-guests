@@ -27,6 +27,7 @@ ere-platform-core.workspace = true
 stateless-validator-common.workspace = true
 
 [dev-dependencies]
+paste.workspace = true
 ere-dockerized.workspace = true
 stateless-validator-test.workspace = true
 
@@ -44,5 +45,5 @@ zisk = ["zkvm-interface"]
 zkvm-interface = ["dep:zkvm-interface"]
 
 # host
-# NOTE: Need `ethrex-crypto/kzg-rs` to verify KZG proof on native host
-host = ["std", "ethrex-crypto/kzg-rs", "ethrex-crypto/secp256k1", "stateless-validator-common/host"]
+# NOTE: Need `ethrex-crypto/blst` and `ethrex-crypto/kzg-rs` for execution on host.
+host = ["std", "ethrex-crypto/blst", "ethrex-crypto/kzg-rs", "ethrex-crypto/secp256k1", "stateless-validator-common/host"]

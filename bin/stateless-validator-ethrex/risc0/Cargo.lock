@@ -567,6 +567,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "const-hex"
+version = "1.19.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33e2a781ebdf4467d1428dc4593067825fb646f6871475098d8577421af73558"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "proptest",
+ "serde_core",
+]
+
+[[package]]
 name = "const-oid"
 version = "0.9.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1011,8 +1023,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-common"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "crc32fast",
@@ -1043,16 +1055,14 @@ dependencies = [
 
 [[package]]
 name = "ethrex-crypto"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "ark-bn254",
  "ark-ec",
  "ark-ff",
- "bls12_381",
  "c-kzg",
  "ethereum-types",
- "ff",
  "hex-literal 0.4.1",
  "k256",
  "malachite",
@@ -1066,9 +1076,10 @@ dependencies = [
 
 [[package]]
 name = "ethrex-guest-program"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
+ "bls12_381",
  "bytes",
  "ethereum-types",
  "ethrex-common",
@@ -1076,6 +1087,7 @@ dependencies = [
  "ethrex-l2-common",
  "ethrex-rlp",
  "ethrex-vm",
+ "ff",
  "hex",
  "k256",
  "libssz",
@@ -1091,8 +1103,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-l2-common"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -1110,8 +1122,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-levm"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "derive_more 1.0.0",
@@ -1127,8 +1139,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-rlp"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -1137,8 +1149,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-trie"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "anyhow",
  "bytes",
@@ -1156,8 +1168,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-vm"
-version = "16.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#86e843af0efaeb69a47b4182a70e697fd84b73b3"
+version = "17.0.0"
+source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
 dependencies = [
  "bytes",
  "derive_more 1.0.0",
@@ -2766,6 +2778,7 @@ dependencies = [
 name = "stateless-validator-common"
 version = "0.12.1"
 dependencies = [
+ "const-hex",
  "libssz",
  "libssz-derive",
  "libssz-merkle",

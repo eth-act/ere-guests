@@ -142,7 +142,7 @@ def compiled_guests() -> list[Guest]:
 
 def republished_guests(artifact_registry: Path) -> list[Guest]:
     """Returns the guests listed in the artifact registry, ordered by key."""
-    registry = json.loads(artifact_registry.read_text())["stateless-validator-elf"]
+    registry = json.loads(artifact_registry.read_text())["stateless_validator_elf"]
     guests = []
     for key, entry in sorted(registry.items()):
         el, zkvm = key.rsplit("-", 1)

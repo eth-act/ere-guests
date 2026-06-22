@@ -4,12 +4,13 @@
 //! format is a 2-byte big-endian schema identifier followed by the SSZ-encoded `StatelessInput`
 //! container.
 //!
-//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/stateless.py
-//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/stateless_ssz.py
+//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless.py
+//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless_ssz.py
 
 #![allow(missing_docs)]
 
 use alloc::vec::Vec;
+use core::fmt::{self, Debug};
 
 use libssz::{DecodeError, SszDecode, SszEncode};
 use libssz_derive::{SszDecode, SszEncode};
@@ -181,7 +182,7 @@ impl SszDecode for ProtocolFork {
 ///
 /// The spec models both fields as optional values where at least one must be
 /// set. The SSZ schema encodes each as a list holding zero or one element.
-#[derive(Debug, Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
+#[derive(Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct ForkActivation {
     pub block_number: SszList<u64, MAX_OPTIONAL_FORK_ACTIVATION_VALUES>,
     pub timestamp: SszList<u64, MAX_OPTIONAL_FORK_ACTIVATION_VALUES>,
@@ -228,6 +229,15 @@ impl ForkActivation {
     }
 }
 
+impl Debug for ForkActivation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ForkActivation")
+            .field("block_number", &self.block_number.first())
+            .field("timestamp", &self.timestamp.first())
+            .finish()
+    }
+}
+
 /// Effective blob parameters for a protocol fork.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct BlobSchedule {
@@ -237,7 +247,7 @@ pub struct BlobSchedule {
 }
 
 /// Per-fork configuration needed to interpret stateless inputs.
-#[derive(Debug, Clone, PartialEq, Eq, SszEncode, SszDecode)]
+#[derive(Clone, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct ForkConfig {
     pub fork: ProtocolFork,
     pub activation: ForkActivation,
@@ -262,6 +272,16 @@ impl ForkConfig {
     /// Returns the blob schedule when present.
     pub fn blob_schedule(&self) -> Option<&BlobSchedule> {
         self.blob_schedule.first()
+    }
+}
+
+impl Debug for ForkConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ForkConfig")
+            .field("fork", &self.fork)
+            .field("activation", &self.activation)
+            .field("blob_schedule", &self.blob_schedule.first())
+            .finish()
     }
 }
 
@@ -313,7 +333,7 @@ impl StatelessInput {
     /// Serializes to schema-prefixed SSZ bytes, mirroring
     /// `serialize_stateless_input` in [`stateless_host.py`].
     ///
-    /// [`stateless_host.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/stateless_host.py
+    /// [`stateless_host.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless_host.py
     pub fn to_schema_prefixed_ssz(&self) -> Vec<u8> {
         let mut out = Vec::with_capacity(STATELESS_INPUT_SCHEMA_ID_SIZE + self.encoded_len());
         out.extend_from_slice(&STATELESS_INPUT_SCHEMA_ID.to_be_bytes());
@@ -324,7 +344,7 @@ impl StatelessInput {
     /// Deserializes from schema-prefixed SSZ bytes, mirroring
     /// `deserialize_stateless_input` in [`stateless_guest.py`].
     ///
-    /// [`stateless_guest.py`]: https://github.com/ethereum/execution-specs/blob/projects/zkevm/src/ethereum/forks/amsterdam/stateless_guest.py
+    /// [`stateless_guest.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless_guest.py
     pub fn from_schema_prefixed_ssz(bytes: &[u8]) -> Result<Self, Error> {
         let (schema_id, body) = bytes
             .split_first_chunk::<STATELESS_INPUT_SCHEMA_ID_SIZE>()
