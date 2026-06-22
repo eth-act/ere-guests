@@ -129,10 +129,9 @@ def render_row(guest: Guest, artifacts_dir: Path, release_url: str) -> str | Non
     )
 
 
-def compiled_guests() -> list[Guest]:
+def compiled_guests(zkvm_versions: dict[str, str]) -> list[Guest]:
     """Returns the COMPILED_ELS x ZKVMS guests, with versions from the build scripts."""
     el_versions = {el: read_compiled_el_version(el) for el in COMPILED_ELS}
-    zkvm_versions = read_zkvm_versions()
     return [
         Guest(el, el_versions[el], zkvm, zkvm_versions[zkvm])
         for el in COMPILED_ELS
@@ -140,32 +139,40 @@ def compiled_guests() -> list[Guest]:
     ]
 
 
-def republished_guests(artifact_registry: Path) -> list[Guest]:
-    """Returns the guests listed in the artifact registry, ordered by key."""
+def republished_guests(
+    artifact_registry: Path, zkvm_versions: dict[str, str]
+) -> list[Guest]:
+    """Returns the registry guests, ordered by key, with zkVM versions from the SDK."""
     registry = json.loads(artifact_registry.read_text())["stateless_validator_elf"]
     guests = []
     for key, entry in sorted(registry.items()):
         el, zkvm = key.rsplit("-", 1)
         guests.append(
-            Guest(el, entry["el_version"], zkvm, entry["zkvm_version"], entry["url"])
+            Guest(el, entry["el_version"], zkvm, zkvm_versions[zkvm], entry["url"])
         )
     return guests
 
 
-def compiled_rows(artifacts_dir: Path, release_url: str) -> list[str]:
+def compiled_rows(
+    artifacts_dir: Path, release_url: str, zkvm_versions: dict[str, str]
+) -> list[str]:
     """Returns rows for compiled guests, skipping any whose artifacts are absent."""
     rendered = (
-        render_row(guest, artifacts_dir, release_url) for guest in compiled_guests()
+        render_row(guest, artifacts_dir, release_url)
+        for guest in compiled_guests(zkvm_versions)
     )
     return [row for row in rendered if row is not None]
 
 
 def republished_rows(
-    artifacts_dir: Path, artifact_registry: Path, release_url: str
+    artifacts_dir: Path,
+    artifact_registry: Path,
+    release_url: str,
+    zkvm_versions: dict[str, str],
 ) -> list[str]:
     """Returns rows for registry guests, requiring every artifact to be present."""
     rows = []
-    for guest in republished_guests(artifact_registry):
+    for guest in republished_guests(artifact_registry, zkvm_versions):
         row = render_row(guest, artifacts_dir, release_url)
         if row is None:
             raise RuntimeError(
@@ -180,8 +187,11 @@ def render_release_body(tag: str, artifacts_dir: Path, artifact_registry: Path) 
     release_url = f"https://github.com/{REPOSITORY}/releases/download/{tag}"
 
     ere_version = read_ere_version()
-    compiled = compiled_rows(artifacts_dir, release_url)
-    republished = republished_rows(artifacts_dir, artifact_registry, release_url)
+    zkvm_versions = read_zkvm_versions()
+    compiled = compiled_rows(artifacts_dir, release_url, zkvm_versions)
+    republished = republished_rows(
+        artifacts_dir, artifact_registry, release_url, zkvm_versions
+    )
 
     body = [
         "## Compiled guest programs",

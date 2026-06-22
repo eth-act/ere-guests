@@ -113,6 +113,72 @@ jobs:
             output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
           if-no-files-found: error
 
+  republish:
+    name: Republish stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - el: zesu
+            zkvm: zisk
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        if: matrix.zkvm == 'zisk'
+        run: bash .github/scripts/free-up-disk-space.sh
+
+      - name: Get Ere tag
+        id: get_ere_tag
+        run: |
+          ERE_TAG=$(cargo tree -p ere-platform-core | head -n 1 | sed -E -e 's/.*\?rev=(.{7}).*/\1/' -e 's/.*\?tag=v([0-9.]+).*/\1/')
+          echo "ere_tag=${ERE_TAG}" >> $GITHUB_OUTPUT
+          echo "Ere tag: ${ERE_TAG}"
+
+      - name: Pull Ere images
+        run: |
+          docker pull ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
+
+      - name: Download ELF
+        env:
+          ENTRY_KEY: ${{ matrix.el }}-${{ matrix.zkvm }}
+        run: |
+          mkdir -p "$PWD/output"
+          ELF_URL=$(jq -r --arg key "$ENTRY_KEY" '.stateless_validator_elf[$key].url // empty' artifact-registry.json)
+          ELF_SHA=$(jq -r --arg key "$ENTRY_KEY" '.stateless_validator_elf[$key].sha256 // empty' artifact-registry.json)
+          if [ -z "$ELF_URL" ]; then
+            echo "::error::No url for stateless_validator_elf.${ENTRY_KEY} in artifact-registry.json"
+            exit 1
+          fi
+          if [ -z "$ELF_SHA" ]; then
+            echo "::error::No sha256 for stateless_validator_elf.${ENTRY_KEY} in artifact-registry.json"
+            exit 1
+          fi
+          OUT="$PWD/output/stateless-validator-${ENTRY_KEY}.elf"
+          curl -fsSL --proto '=https' --tlsv1.2 --max-redirs 3 --retry 3 "$ELF_URL" -o "$OUT"
+          echo "${ELF_SHA} ${OUT}" | sha256sum -c -
+
+      - name: Generate program VK
+        run: |
+          docker run \
+            -e RUST_LOG=info \
+            -v $PWD/output:/output \
+            ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
+            --elf-path /output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.elf \
+            keygen \
+            --program-vk-path /output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
+          path: |
+            output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}*.elf
+            output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
+          if-no-files-found: error
+
   check-git-tag:
     name: Check whether git tag exists
     needs: compile
@@ -131,7 +197,7 @@ jobs:
 
   update-release-with-artifacts:
     name: Update release with artifacts
-    needs: [compile, check-git-tag]
+    needs: [compile, republish, check-git-tag]
     if: needs.check-git-tag.outputs.exists == 'true'
     runs-on: ubuntu-latest
     steps:
