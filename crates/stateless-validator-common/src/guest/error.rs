@@ -15,13 +15,17 @@ pub enum Error {
     /// The SSZ body failed to decode.
     #[error("SSZ decode error {0:?}")]
     Ssz(DecodeError),
-    /// The fork activation does not have either block_number or timestamp set.
+    /// The fork activation has neither block_number nor timestamp set, mirroring the spec
+    /// `InvalidForkActivationError`.
     #[error("Fork activation must set block_number or timestamp")]
     InvalidForkActivation,
-    /// The fork is not activated for the payload.
+    /// The configured active fork is not active for the payload, mirroring the spec
+    /// `InactiveForkConfigError`.
     #[error("ChainConfig active_fork is not active for the target payload")]
-    ForkNotActivated,
-    /// The fork is not matching the payload.
+    InactiveForkConfig,
+    /// The configured active fork does not match the payload shape. The spec executes only
+    /// Amsterdam and so has no counterpart; this replaces the spec `UnsupportedForkConfigError`
+    /// for multi-fork inputs.
     #[error("ChainConfig active_fork is not matching the target payload version")]
     ForkNotMatchingPayload,
 }

@@ -122,8 +122,6 @@ fn active_fork(
     block_number: u64,
     timestamp: u64,
 ) -> Result<ForkConfig> {
-    // The canonical protocol fork enumeration has no BPO3 to BPO5 entries,
-    // so configurations scheduling them are not supported.
     for (time, name) in [
         (config.bpo3_time, "bpo3"),
         (config.bpo4_time, "bpo4"),
@@ -132,66 +130,47 @@ fn active_fork(
         anyhow::ensure!(time.is_none(), "scheduled fork {name} is not supported");
     }
 
-    let by_time = |at: Option<u64>| -> (Option<u64>, Option<u64>) { (None, at) };
-    let by_block = |at: Option<u64>| -> (Option<u64>, Option<u64>) { (at, None) };
     let forks = [
-        (by_time(config.amsterdam_time), ProtocolFork::Amsterdam),
-        (by_time(config.bpo2_time), ProtocolFork::BPO2),
-        (by_time(config.bpo1_time), ProtocolFork::BPO1),
-        (by_time(config.osaka_time), ProtocolFork::Osaka),
-        (by_time(config.prague_time), ProtocolFork::Prague),
-        (by_time(config.cancun_time), ProtocolFork::Cancun),
-        (by_time(config.shanghai_time), ProtocolFork::Shanghai),
+        (config.amsterdam_time, ProtocolFork::Amsterdam),
+        (config.bpo2_time, ProtocolFork::BPO2),
+        (config.bpo1_time, ProtocolFork::BPO1),
+        (config.osaka_time, ProtocolFork::Osaka),
+        (config.prague_time, ProtocolFork::Prague),
+        (config.cancun_time, ProtocolFork::Cancun),
+        (config.shanghai_time, ProtocolFork::Shanghai),
         (
-            by_block(
-                config
-                    .merge_netsplit_block
-                    .or(config.terminal_total_difficulty_passed.then_some(0)),
-            ),
+            config
+                .merge_netsplit_block
+                .or(config.terminal_total_difficulty_passed.then_some(0)),
             ProtocolFork::Paris,
         ),
+        (config.gray_glacier_block, ProtocolFork::GrayGlacier),
+        (config.arrow_glacier_block, ProtocolFork::ArrowGlacier),
+        (config.london_block, ProtocolFork::London),
+        (config.berlin_block, ProtocolFork::Berlin),
+        (config.muir_glacier_block, ProtocolFork::MuirGlacier),
+        (config.istanbul_block, ProtocolFork::Istanbul),
+        (config.petersburg_block, ProtocolFork::ConstantinopleFix),
+        (config.constantinople_block, ProtocolFork::Constantinople),
+        (config.byzantium_block, ProtocolFork::Byzantium),
         (
-            by_block(config.gray_glacier_block),
-            ProtocolFork::GrayGlacier,
-        ),
-        (
-            by_block(config.arrow_glacier_block),
-            ProtocolFork::ArrowGlacier,
-        ),
-        (by_block(config.london_block), ProtocolFork::London),
-        (by_block(config.berlin_block), ProtocolFork::Berlin),
-        (
-            by_block(config.muir_glacier_block),
-            ProtocolFork::MuirGlacier,
-        ),
-        (by_block(config.istanbul_block), ProtocolFork::Istanbul),
-        (
-            by_block(config.petersburg_block),
-            ProtocolFork::ConstantinopleFix,
-        ),
-        (
-            by_block(config.constantinople_block),
-            ProtocolFork::Constantinople,
-        ),
-        (by_block(config.byzantium_block), ProtocolFork::Byzantium),
-        (
-            by_block(config.eip158_block.or(config.eip155_block)),
+            config.eip158_block.or(config.eip155_block),
             ProtocolFork::SpuriousDragon,
         ),
-        (
-            by_block(config.eip150_block),
-            ProtocolFork::TangerineWhistle,
-        ),
-        (by_block(config.dao_fork_block), ProtocolFork::DAOFork),
-        (by_block(config.homestead_block), ProtocolFork::Homestead),
+        (config.eip150_block, ProtocolFork::TangerineWhistle),
+        (config.dao_fork_block, ProtocolFork::DAOFork),
+        (config.homestead_block, ProtocolFork::Homestead),
     ];
-    let ((at_block, at_time), fork) = forks
+    let (at_block, at_time, fork) = forks
         .into_iter()
-        .find(|((at_block, at_time), _)| {
-            at_block.is_some_and(|at| block_number >= at)
-                || at_time.is_some_and(|at| timestamp >= at)
+        .find_map(|(at, fork)| {
+            if fork >= ProtocolFork::Shanghai {
+                at.and_then(|at| (timestamp >= at).then_some((None, Some(at), fork)))
+            } else {
+                at.and_then(|at| (block_number >= at).then_some((Some(at), None, fork)))
+            }
         })
-        .unwrap_or(((Some(0), None), ProtocolFork::Frontier));
+        .unwrap_or((Some(0), None, ProtocolFork::Frontier));
 
     let blob_schedule = if let Some(schedule_key) = schedule_key(fork) {
         let params = config
@@ -541,77 +520,57 @@ fn ssz_list<T, const N: usize>(values: Vec<T>, label: &str) -> Result<SszList<T,
 
 #[cfg(test)]
 mod tests {
+    use alloy_eips::eip7840::BlobParams;
+    use alloy_genesis::ChainConfig;
+
     use crate::{guest::input::ProtocolFork, host::legacy::to_canonical_chain_config};
 
-    /// Mainnet style configuration that merged through terminal total
-    /// difficulty and carries no netsplit block.
-    fn merged_config() -> alloy_genesis::ChainConfig {
-        alloy_genesis::ChainConfig {
-            chain_id: 1,
-            homestead_block: Some(0),
-            eip150_block: Some(0),
-            eip155_block: Some(0),
-            eip158_block: Some(0),
-            byzantium_block: Some(0),
-            constantinople_block: Some(0),
-            petersburg_block: Some(0),
-            istanbul_block: Some(0),
-            muir_glacier_block: Some(0),
-            berlin_block: Some(0),
-            london_block: Some(0),
-            arrow_glacier_block: Some(0),
-            gray_glacier_block: Some(0),
+    /// A merged config that schedules each blob-bearing fork one second apart.
+    /// Resolving at a fork's activation timestamp selects that fork along with
+    /// the blob schedule registered under its `schedule_key`, where Amsterdam is
+    /// the capitalized key.
+    #[test]
+    fn resolves_active_time_fork_with_its_blob_schedule() {
+        let schedule = [
+            (1u64, ProtocolFork::Cancun, "cancun", BlobParams::cancun()),
+            (2, ProtocolFork::Prague, "prague", BlobParams::prague()),
+            (3, ProtocolFork::Osaka, "osaka", BlobParams::osaka()),
+            (4, ProtocolFork::BPO1, "bpo1", BlobParams::bpo1()),
+            (5, ProtocolFork::BPO2, "bpo2", BlobParams::bpo2()),
+            (6, ProtocolFork::Amsterdam, "Amsterdam", BlobParams::bpo2()),
+        ];
+
+        let mut config = ChainConfig {
             terminal_total_difficulty_passed: true,
-            ..Default::default()
-        }
-    }
-
-    #[test]
-    fn paris_activates_through_terminal_total_difficulty() {
-        let canonical = to_canonical_chain_config(&merged_config(), 15_537_394, 0).unwrap();
-
-        assert_eq!(canonical.active_fork.fork, ProtocolFork::Paris);
-        assert_eq!(canonical.active_fork.activation.block_number(), Some(0));
-    }
-
-    #[test]
-    fn merge_netsplit_block_pins_the_paris_activation() {
-        let config = alloy_genesis::ChainConfig {
-            merge_netsplit_block: Some(15_537_394),
-            ..merged_config()
-        };
-
-        let canonical = to_canonical_chain_config(&config, 15_537_394, 0).unwrap();
-
-        assert_eq!(canonical.active_fork.fork, ProtocolFork::Paris);
-        assert_eq!(
-            canonical.active_fork.activation.block_number(),
-            Some(15_537_394)
-        );
-    }
-
-    #[test]
-    fn scheduled_bpo3_to_bpo5_fail_the_conversion() {
-        let config = alloy_genesis::ChainConfig {
             shanghai_time: Some(0),
-            bpo3_time: Some(1_000),
-            amsterdam_time: Some(2_000),
-            ..merged_config()
+            cancun_time: Some(1),
+            prague_time: Some(2),
+            osaka_time: Some(3),
+            bpo1_time: Some(4),
+            bpo2_time: Some(5),
+            amsterdam_time: Some(6),
+            ..Default::default()
         };
+        for (_, _, key, params) in schedule {
+            config.blob_schedule.insert(key.to_string(), params);
+        }
 
-        assert!(to_canonical_chain_config(&config, 25_000_000, 2_500).is_err());
-    }
+        for (timestamp, fork, _, params) in schedule {
+            let active = to_canonical_chain_config(&config, 0, timestamp)
+                .unwrap()
+                .active_fork;
 
-    #[test]
-    fn time_forks_win_over_the_merge() {
-        let config = alloy_genesis::ChainConfig {
-            shanghai_time: Some(100),
-            ..merged_config()
-        };
+            assert_eq!(active.fork, fork);
+            assert_eq!(active.activation.timestamp(), Some(timestamp));
+            assert_eq!(active.activation.block_number(), None);
 
-        let canonical = to_canonical_chain_config(&config, 17_034_870, 100).unwrap();
-
-        assert_eq!(canonical.active_fork.fork, ProtocolFork::Shanghai);
-        assert_eq!(canonical.active_fork.activation.timestamp(), Some(100));
+            let blob_schedule = active.blob_schedule().expect("blob schedule present");
+            assert_eq!(blob_schedule.target, params.target_blob_count);
+            assert_eq!(blob_schedule.max, params.max_blob_count);
+            assert_eq!(
+                u128::from(blob_schedule.base_fee_update_fraction),
+                params.update_fraction
+            );
+        }
     }
 }

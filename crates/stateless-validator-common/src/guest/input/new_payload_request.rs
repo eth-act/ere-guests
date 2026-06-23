@@ -50,11 +50,12 @@ pub type WithdrawalRequests = SszList<WithdrawalRequest, MAX_WITHDRAWAL_REQUESTS
 pub type ConsolidationRequests =
     SszList<ConsolidationRequest, MAX_CONSOLIDATION_REQUESTS_PER_PAYLOAD>;
 
-/// Transfer of ETH from the consensus layer to the execution layer, as
-/// validated by the consensus layer.
+/// Withdrawals represent a transfer of ETH from the consensus layer (beacon chain) to the
+/// execution layer, as validated by the consensus layer. Each withdrawal is listed in the block's
+/// list of withdrawals.
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
 pub struct Withdrawal {
-    /// The unique index of the withdrawal.
+    /// The unique index of the withdrawal, incremented for each withdrawal processed.
     pub index: u64,
     /// The index of the validator on the consensus layer that is withdrawing.
     pub validator_index: u64,
@@ -91,6 +92,8 @@ pub struct ConsolidationRequest {
 }
 
 /// Typed engine-API container of execution-layer triggered requests.
+///
+/// Mirrors the consensus-layer `ExecutionRequests` Container.
 #[derive(Debug, Clone, Default, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
 pub struct ExecutionRequests {
     pub deposits: DepositRequests,
@@ -524,7 +527,7 @@ mod tests {
             (electra_fulu(), ELECTRA_FULU_FORKS),
             (gloas(), [ProtocolFork::Amsterdam].as_slice()),
         ] {
-            for value in 0..=20 {
+            for value in 0..=ProtocolFork::Amsterdam.as_u64() {
                 let fork = ProtocolFork::from_u64(value).unwrap();
                 assert_eq!(fork.matches_payload(&request), matching.contains(&fork));
             }

@@ -856,7 +856,7 @@ dependencies = [
 [[package]]
 name = "ethrex-common"
 version = "17.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=b52aaea7c4b4e360a9d2e36aa624a4d1f4016011#b52aaea7c4b4e360a9d2e36aa624a4d1f4016011"
 dependencies = [
  "bytes",
  "crc32fast",
@@ -888,7 +888,7 @@ dependencies = [
 [[package]]
 name = "ethrex-crypto"
 version = "17.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=b52aaea7c4b4e360a9d2e36aa624a4d1f4016011#b52aaea7c4b4e360a9d2e36aa624a4d1f4016011"
 dependencies = [
  "ark-bn254",
  "ark-ec",
@@ -907,7 +907,7 @@ dependencies = [
 [[package]]
 name = "ethrex-guest-program"
 version = "17.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=b52aaea7c4b4e360a9d2e36aa624a4d1f4016011#b52aaea7c4b4e360a9d2e36aa624a4d1f4016011"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -930,7 +930,7 @@ dependencies = [
 [[package]]
 name = "ethrex-l2-common"
 version = "17.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=b52aaea7c4b4e360a9d2e36aa624a4d1f4016011#b52aaea7c4b4e360a9d2e36aa624a4d1f4016011"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -948,7 +948,7 @@ dependencies = [
 [[package]]
 name = "ethrex-levm"
 version = "17.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=b52aaea7c4b4e360a9d2e36aa624a4d1f4016011#b52aaea7c4b4e360a9d2e36aa624a4d1f4016011"
 dependencies = [
  "bytes",
  "derive_more",
@@ -965,7 +965,7 @@ dependencies = [
 [[package]]
 name = "ethrex-rlp"
 version = "17.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=b52aaea7c4b4e360a9d2e36aa624a4d1f4016011#b52aaea7c4b4e360a9d2e36aa624a4d1f4016011"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -975,7 +975,7 @@ dependencies = [
 [[package]]
 name = "ethrex-trie"
 version = "17.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=b52aaea7c4b4e360a9d2e36aa624a4d1f4016011#b52aaea7c4b4e360a9d2e36aa624a4d1f4016011"
 dependencies = [
  "anyhow",
  "bytes",
@@ -994,7 +994,7 @@ dependencies = [
 [[package]]
 name = "ethrex-vm"
 version = "17.0.0"
-source = "git+https://github.com/han0110/ethrex.git?branch=perf%2Feip8025-witness-dedup#396b8912f88c9957b99b7d440af15595c6bfdefb"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=b52aaea7c4b4e360a9d2e36aa624a4d1f4016011#b52aaea7c4b4e360a9d2e36aa624a4d1f4016011"
 dependencies = [
  "bytes",
  "derive_more",

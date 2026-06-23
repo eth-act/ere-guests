@@ -44,15 +44,19 @@ pub const PUBLIC_KEY_BYTES: usize = 65;
 /// Execution witness data for stateless validation.
 #[derive(Debug, Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct ExecutionWitness {
+    /// Hashed trie-node preimages needed during execution and state-root recomputation.
     pub state: SszList<SszList<u8, MAX_BYTES_PER_WITNESS_NODE>, MAX_WITNESS_NODES>,
+    /// Contract-code preimages (created or accessed) needed during execution.
     pub codes: SszList<SszList<u8, MAX_BYTES_PER_CODE>, MAX_WITNESS_CODES>,
+    /// RLP-encoded block headers used for pre-state and `BLOCKHASH` correctness proofs. This may
+    /// trend toward empty EIP-7709.
     pub headers: SszList<SszList<u8, MAX_BYTES_PER_HEADER>, MAX_WITNESS_HEADERS>,
 }
 
-/// Semantic execution-layer fork understood by canonical stateless inputs.
+/// Semantic execution-layer fork names understood by stateless inputs.
 ///
 /// The discriminants are the SSZ enum values, which the spec derives from the declaration order
-/// of `ProtocolFork` in the spec.
+/// of `ProtocolFork`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u64)]
 pub enum ProtocolFork {
@@ -211,8 +215,10 @@ impl ForkActivation {
         self.timestamp.first().copied()
     }
 
-    /// Returns whether this activation point is active for a payload, mirroring
-    /// `_is_activation_active` in the spec.
+    /// Returns whether this activation point is active for a payload, applying the block-number
+    /// and timestamp comparisons of `_is_activation_active` in the spec. The both-unset case, on
+    /// which the spec raises, is rejected earlier by [`ChainConfig::validate`] and yields `false`
+    /// here.
     pub fn is_active_at(&self, block_number: u64, timestamp: u64) -> bool {
         let activation_block_number = self.block_number();
         let activation_timestamp = self.timestamp();
@@ -293,8 +299,11 @@ pub struct ChainConfig {
 }
 
 impl ChainConfig {
-    /// Returns whether the chain configuration is usable for the target payload,
-    /// mirroring `validate_chain_config` in the spec.
+    /// Validates that the chain configuration is usable for the target payload, following
+    /// `validate_chain_config` in the spec with two deliberate differences. The spec's
+    /// blob-schedule equality check is performed by the verifier against the result public values
+    /// instead of here, and the spec's `fork != Amsterdam` rejection is generalized to a
+    /// payload-shape match through [`ProtocolFork::matches_payload`] for multi-fork inputs.
     pub fn validate(&self, new_payload_request: &NewPayloadRequest) -> Result<(), Error> {
         if self.active_fork.activation.block_number().is_none()
             && self.active_fork.activation.timestamp().is_none()
@@ -306,7 +315,7 @@ impl ChainConfig {
             new_payload_request.block_number(),
             new_payload_request.timestamp(),
         ) {
-            return Err(Error::ForkNotActivated);
+            return Err(Error::InactiveForkConfig);
         }
 
         if !self.active_fork.fork.matches_payload(new_payload_request) {
@@ -323,9 +332,15 @@ impl ChainConfig {
 /// match the active fork during chain configuration validation.
 #[derive(Debug, Clone, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct StatelessInput {
+    /// Consensus-layer payload request to validate statelessly. See [`NewPayloadRequest`] for
+    /// structure and links to consensus-specs.
     pub new_payload_request: NewPayloadRequest,
+    /// Execution witness material required to re-execute the core state transition function
+    /// statelessly.
     pub witness: ExecutionWitness,
+    /// Chain configuration values needed during stateless validation.
     pub chain_config: ChainConfig,
+    /// 65-byte uncompressed transaction public keys, in payload order.
     pub public_keys: SszList<[u8; PUBLIC_KEY_BYTES], MAX_PUBLIC_KEYS>,
 }
 
