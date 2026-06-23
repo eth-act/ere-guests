@@ -14,15 +14,16 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test:
-    name: Test execution of ${{ matrix.guest }} on ${{ matrix.zkvm }}
+  test_zkvm_execution:
+    name: Test zkVM execution of ${{ matrix.guest }} on ${{ matrix.zkvm }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         guest:
-          - stateless-validator-ethrex
-          - stateless-validator-reth
+          - ethrex
+          - reth
+          - zesu
         zkvm:
           - airbender
           - openvm
@@ -30,24 +31,18 @@ jobs:
           - sp1
           - zisk
         exclude:
-          - guest: stateless-validator-ethrex
-            zkvm: airbender
-          - guest: stateless-validator-ethrex
-            zkvm: openvm
+          - { guest: ethrex, zkvm: airbender }
+          - { guest: ethrex, zkvm: openvm }
+          - { guest: zesu, zkvm: airbender }
+          - { guest: zesu, zkvm: openvm }
+          - { guest: zesu, zkvm: risc0 }
+          - { guest: zesu, zkvm: sp1 }
         include:
-          - zkvm: airbender
-            threads: 12
-          - zkvm: openvm
-            threads: 1
-          - zkvm: risc0
-            threads: 12
-          - zkvm: sp1
-            threads: 1
-          - zkvm: zisk
-            threads: 12
-          - guest: stateless-validator-ethrex
-            zkvm: zisk
-            ere_profile: ethrex
+          - { zkvm: openvm, threads: 1 }
+          - { zkvm: sp1, threads: 1 }
+          - { zkvm: zisk, eest: true }
+          - { guest: zesu, external: true }
+          - { guest: ethrex, zkvm: zisk, ere_profile: ethrex }
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -79,12 +74,19 @@ jobs:
             ${{ runner.os }}-cargo-registry-
 
       - name: Cache bin target
+        if: matrix.external != true
         uses: actions/cache@v4
         with:
-          path: bin/${{ matrix.guest }}/${{ matrix.zkvm }}/target
-          key: ${{ runner.os }}-bin-${{ matrix.guest }}-${{ matrix.zkvm }}-${{ hashFiles('bin/${{ matrix.guest }}/${{ matrix.zkvm }}/Cargo.lock') }}
+          path: bin/stateless-validator-${{ matrix.guest }}/${{ matrix.zkvm }}/target
+          key: ${{ format('{0}-bin-{1}-{2}-{3}', runner.os, matrix.guest, matrix.zkvm, hashFiles(format('bin/stateless-validator-{0}/{1}/Cargo.lock', matrix.guest, matrix.zkvm))) }}
           restore-keys: |
             ${{ runner.os }}-bin-${{ matrix.guest }}-${{ matrix.zkvm }}-
+
+      - name: Set rayon threads
+        if: matrix.threads != ''
+        env:
+          RAYON_NUM_THREADS: ${{ matrix.threads }}
+        run: echo "RAYON_NUM_THREADS=$RAYON_NUM_THREADS" >> "$GITHUB_ENV"
 
       - name: Enable Ere profile
         if: matrix.ere_profile != ''
@@ -92,16 +94,70 @@ jobs:
           ERE_PROFILE: ${{ matrix.ere_profile }}
         run: echo "ERE_PROFILE=$ERE_PROFILE" >> "$GITHUB_ENV"
 
-      - name: Test
+      - name: Test zkVM execution (RPC fixtures)
         env:
           RUST_LOG: info,ere_server=error
-          RAYON_NUM_THREADS: ${{ matrix.threads }}
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
           OPENVM_RUST_TOOLCHAIN: nightly-2025-10-30
         run: |
-          cargo test --release --package ${{ matrix.guest }} --test zkvm_execution -- ${{ matrix.zkvm }} --test-threads=1
+          cargo test --release --package stateless-validator-test --test zkvm_execution -- ${{ matrix.guest }}_${{ matrix.zkvm }}_rpc --test-threads=1
 
-          sudo chown -R $(id -u):$(id -g) bin/${{ matrix.guest }}/${{ matrix.zkvm }}/target || true
+      - name: Test zkVM execution (EEST fixtures)
+        if: matrix.eest == true
+        env:
+          RUST_LOG: info,ere_server=error
+          ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
+          OPENVM_RUST_TOOLCHAIN: nightly-2025-10-30
+        run: |
+          cargo test --release --package stateless-validator-test --test zkvm_execution -- ${{ matrix.guest }}_${{ matrix.zkvm }}_eest --test-threads=1
+
+      - name: Chown
+        if: matrix.external != true
+        run: |
+          sudo chown -R $(id -u):$(id -g) bin/stateless-validator-${{ matrix.guest }}/${{ matrix.zkvm }}/target || true
+
+      - name: Run sccache stat for check
+        shell: bash
+        run: ${SCCACHE_PATH} --show-stats
+
+  test_host_execution:
+    name: Test host execution of ${{ matrix.guest }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        guest:
+          - ethrex
+          - reth
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup sccache
+        uses: mozilla/sccache-action@v0.0.9
+
+      - name: Configure sccache
+        run: |
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Test host execution
+        run: |
+          cargo test --release --package stateless-validator-${{ matrix.guest }} --features host --test host_execution -- --test-threads=1
 
       - name: Run sccache stat for check
         shell: bash
