@@ -1,5 +1,7 @@
 //! Errors for the stateless input guest.
 
+use alloy_rpc_types_engine::PayloadError;
+use reth_stateless::validation::StatelessValidationError;
 use thiserror::Error;
 
 /// Errors for the stateless input guest. Each variant tags the point at which
@@ -13,9 +15,9 @@ pub enum Error {
     #[error("missing blob schedule")]
     MissingBlobSchedule,
     /// The payload was not well formed.
-    #[error("payload validation failed")]
-    PayloadValidation,
+    #[error(transparent)]
+    PayloadError(#[from] PayloadError),
     /// The reth execution path rejected the payload.
-    #[error("execution failed")]
-    Execution,
+    #[error(transparent)]
+    StatelessValidationError(#[from] StatelessValidationError),
 }

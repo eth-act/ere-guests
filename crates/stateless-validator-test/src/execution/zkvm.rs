@@ -1,11 +1,12 @@
 //! Helpers for compiling guest programs and asserting their zkVM execution.
 
-use std::{fs, path::PathBuf};
+use std::{collections::BTreeMap, fs, path::PathBuf};
 
 use ere_dockerized::{
     Compiler, CompilerKind, DockerizedCompiler, DockerizedzkVM, DockerizedzkVMConfig, Elf, Input,
     ProverResource, zkVMKind,
 };
+use serde::Deserialize;
 
 use crate::{
     execution::{ExecutionFailure, ExecutionOutput, GuestKind, run_execution},
@@ -35,15 +36,26 @@ pub fn compile_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
 
 /// Downloads the prebuilt guest ELF listed in `artifact-registry.json`.
 pub fn download_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
-    assert!(matches!(guest_kind, GuestKind::Zesu));
-    let artifact_registry: serde_json::Value =
-        serde_json::from_slice(&fs::read(workspace().join("artifact-registry.json")).unwrap())
-            .unwrap();
+    #[derive(Deserialize)]
+    struct ArtifactRegistry {
+        stateless_validator_elf: BTreeMap<String, GuestSoure>,
+    }
+
+    #[derive(Deserialize)]
+    struct GuestSoure {
+        url: String,
+    }
+
+    let registry = {
+        let json = fs::read(workspace().join("artifact-registry.json")).unwrap();
+        serde_json::from_slice::<ArtifactRegistry>(&json).unwrap()
+    };
     let guest = format!("{}-{}", guest_kind.as_str(), zkvm_kind.as_str());
-    let url: String =
-        serde_json::from_value(artifact_registry["stateless_validator_elf"][guest]["url"].clone())
-            .unwrap();
-    Elf(reqwest::blocking::get(url)
+    let source = &registry
+        .stateless_validator_elf
+        .get(&guest)
+        .unwrap_or_else(|| panic!("{guest} not found in artifact-registry.json"));
+    Elf(reqwest::blocking::get(&source.url)
         .unwrap()
         .error_for_status()
         .unwrap()

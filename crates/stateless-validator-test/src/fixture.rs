@@ -19,7 +19,7 @@ const EEST_FIXTURES_BASE_URL: &str =
     "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v0.4.1";
 /// Release hosting the RPC-derived fixtures from `witness-generator-spec-cli`.
 const RPC_FIXTURES_BASE_URL: &str =
-    "https://github.com/han0110/ere-guests/releases/download/tests-zkevm@v0.4.1";
+    "https://github.com/han0110/ere-guests/releases/download/rpc-fixtures@v0.1.0";
 
 /// A preset fixture set identifying both its source archive and its format.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

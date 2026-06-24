@@ -14,7 +14,7 @@ resolver = "2"
 [workspace.package]
 edition = "2024"
 license = "MIT OR Apache-2.0"
-rust-version = "1.88"
+rust-version = "1.93"
 version = "0.12.1"
 
 [workspace.lints.rust]
@@ -62,29 +62,29 @@ walkdir = "2.5.0"
 zstd = "0.13.3"
 
 # alloy
-alloy-consensus = { version = "2.0.0", default-features = false }
-alloy-eips = { version = "2.0.0", default-features = false }
-alloy-genesis = { version = "2.0.0", default-features = false, features = [
+alloy-consensus = { version = "2.0.5", default-features = false }
+alloy-eips = { version = "2.0.5", default-features = false }
+alloy-genesis = { version = "2.0.5", default-features = false, features = [
     "serde-bincode-compat",
 ] }
-alloy-rpc-types-engine = { version = "2.0.0", default-features = false }
-alloy-primitives = { version = "1.5.6", default-features = false, features = [
+alloy-rpc-types-engine = { version = "2.0.5", default-features = false }
+alloy-primitives = { version = "1.6.0", default-features = false, features = [
     "map-foldhash",
     "map-indexmap",
 ] }
-alloy-rlp = { version = "0.3", default-features = false }
+alloy-rlp = { version = "0.3.13", default-features = false }
 
 # revm
-revm = { version = "38.0.0", default-features = false }
+revm = { version = "40.0.3", default-features = false }
 
 # reth
-reth-chainspec = { git = "https://github.com/paradigmxyz/reth", tag = "v2.1.0", default-features = false }
-reth-ethereum-primitives = { git = "https://github.com/paradigmxyz/reth", tag = "v2.1.0", default-features = false }
-reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", tag = "v2.1.0", default-features = false }
-reth-primitives-traits = { version = "0.3.0", default-features = false }
-reth-payload-validator = { git = "https://github.com/paradigmxyz/reth", tag = "v2.1.0", default-features = false }
-reth-stateless = { git = "https://github.com/paradigmxyz/stateless", rev = "e5480e71a8031641ff471cad9dc482a7a14b32d5", default-features = false, package = "stateless" }
-reth-tries = { git = "https://github.com/paradigmxyz/stateless", rev = "e5480e71a8031641ff471cad9dc482a7a14b32d5", default-features = false, package = "tries" }
+reth-chainspec = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
+reth-ethereum-primitives = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
+reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
+reth-primitives-traits = { version = "0.4.1", default-features = false }
+reth-payload-validator = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
+reth-stateless = { git = "https://github.com/han0110/stateless", branch = "feature/v2.3.0", default-features = false, package = "stateless" }
+reth-tries = { git = "https://github.com/han0110/stateless", branch = "feature/v2.3.0", default-features = false, package = "tries" }
 
 # ethrex
 ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", rev = "b52aaea7c4b4e360a9d2e36aa624a4d1f4016011", default-features = false }

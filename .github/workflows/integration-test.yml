@@ -156,6 +156,8 @@ jobs:
             ${{ runner.os }}-cargo-registry-
 
       - name: Test host execution
+        env:
+          RUST_LOG: info
         run: |
           cargo test --release --package stateless-validator-${{ matrix.guest }} --features host --test host_execution -- --test-threads=1
 

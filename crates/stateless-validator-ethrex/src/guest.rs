@@ -3,8 +3,9 @@
 use alloc::vec::Vec;
 
 use ere_platform_core::Platform;
-use ethrex_guest_program::l1::{
-    DecodedEip8025, validate_eip8025_canonical_execution, validate_eip8025_execution,
+use ethrex_guest_program::{
+    common::ExecutionError,
+    l1::{DecodedEip8025, validate_eip8025_canonical_execution, validate_eip8025_execution},
 };
 use stateless_validator_common::{
     HashTreeRoot, SszEncode as _,
@@ -65,16 +66,26 @@ fn verify_stateless_new_payload<P: Platform>(input: StatelessInput) -> Result<()
         input.chain_config.validate(&input.new_payload_request)
     })?;
 
-    let ethrex_input = P::cycle_scope("to_ethrex_input", || to_ethrex_input(input))?;
+    let ethrex_input = P::cycle_scope("to_ethrex_input", || {
+        to_ethrex_input(input).map_err(|err| {
+            P::print(&format!("Input conversion failed: {err}\n"));
+            err
+        })
+    })?;
 
-    P::cycle_scope("run_validation", || run_validation(ethrex_input))?;
+    P::cycle_scope("run_validation", || {
+        run_validation(ethrex_input).map_err(|err| {
+            P::print(&format!("Validation failed: {err}\n"));
+            err
+        })
+    })?;
 
     Ok(())
 }
 
 /// Validates the decoded payload through its canonical or legacy execution
 /// path, reporting a rejected payload as an error.
-fn run_validation(ethrex_input: DecodedEip8025) -> Result<(), Error> {
+fn run_validation(ethrex_input: DecodedEip8025) -> Result<(), ExecutionError> {
     match ethrex_input {
         DecodedEip8025::Legacy {
             new_payload_request,
@@ -85,5 +96,4 @@ fn run_validation(ethrex_input: DecodedEip8025) -> Result<(), Error> {
             chain_config,
         } => validate_eip8025_canonical_execution(stateless_input, chain_config, crypto::crypto()),
     }
-    .map_err(|_| Error::Execution)
 }

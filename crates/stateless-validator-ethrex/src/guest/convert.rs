@@ -94,8 +94,7 @@ fn to_ethrex_new_payload_request(
         withdrawals: to_ethrex_withdrawals(payload.withdrawals),
         blob_gas_used: payload.blob_gas_used,
         excess_blob_gas: payload.excess_blob_gas,
-        block_access_list: rebound_ssz_list(payload.block_access_list)
-            .ok_or(Error::BlockAccessListOutOfBounds)?,
+        block_access_list: payload.block_access_list,
         slot_number: payload.slot_number,
     };
     Ok(eip8025_ssz::NewPayloadRequestAmsterdam {
@@ -150,8 +149,8 @@ fn to_ethrex_execution_requests(requests: ExecutionRequests) -> eip8025_ssz::Exe
 /// Converts the execution witness into the ethrex container.
 fn to_ethrex_witness(witness: ExecutionWitness) -> Result<CanonicalExecutionWitness, Error> {
     Ok(CanonicalExecutionWitness {
-        state: rebound_nested_ssz_list(witness.state).ok_or(Error::WitnessStateOutOfBounds)?,
-        codes: rebound_nested_ssz_list(witness.codes).ok_or(Error::WitnessCodesOutOfBounds)?,
+        state: witness.state,
+        codes: witness.codes,
         headers: witness.headers,
     })
 }
@@ -164,8 +163,8 @@ fn to_ethrex_canonical_chain_config(config: &ChainConfig) -> CanonicalChainConfi
         active_fork: CanonicalForkConfig {
             fork: config.active_fork.fork.as_u64(),
             activation: CanonicalForkActivation {
-                block_number: option_to_ssz_list(config.active_fork.activation.block_number()),
-                timestamp: option_to_ssz_list(config.active_fork.activation.timestamp()),
+                block_number: config.active_fork.activation.block_number.clone(),
+                timestamp: config.active_fork.activation.timestamp.clone(),
             },
             blob_schedule: option_to_ssz_list(config.active_fork.blob_schedule().map(
                 |blob_schedule| CanonicalBlobSchedule {
@@ -320,35 +319,14 @@ fn to_ethrex_legacy_witness(
         codes: to_bytes_vec(witness.codes),
         headers: to_bytes_vec(witness.headers),
     };
-    let decoded_headers =
-        decode_witness_headers(&rpc_witness.headers).map_err(|_| Error::WitnessHeadersDecode)?;
-    validate_witness_headers_chain(&decoded_headers, crypto)
-        .map_err(|_| Error::WitnessHeadersChain)?;
-    rpc_witness
-        .into_execution_witness(chain_config, first_block_number, &decoded_headers, crypto)
-        .map_err(|_| Error::WitnessBuild)
-}
-
-fn rebound_nested_ssz_list<
-    T,
-    const M1: usize,
-    const M2: usize,
-    const N1: usize,
-    const N2: usize,
->(
-    items: SszList<SszList<T, M1>, M2>,
-) -> Option<SszList<SszList<T, N1>, N2>> {
-    let items = items
-        .into_iter()
-        .map(rebound_ssz_list)
-        .collect::<Option<Vec<_>>>()?;
-    SszList::try_from(items).ok()
-}
-
-fn rebound_ssz_list<T, const M: usize, const N: usize>(
-    items: SszList<T, M>,
-) -> Option<SszList<T, N>> {
-    SszList::try_from(items.into_inner()).ok()
+    let decoded_headers = decode_witness_headers(&rpc_witness.headers)?;
+    validate_witness_headers_chain(&decoded_headers, crypto)?;
+    Ok(rpc_witness.into_execution_witness(
+        chain_config,
+        first_block_number,
+        &decoded_headers,
+        crypto,
+    )?)
 }
 
 fn array_to_ssz_vec<T: Clone, const N: usize>(array: [T; N]) -> SszVector<T, N> {

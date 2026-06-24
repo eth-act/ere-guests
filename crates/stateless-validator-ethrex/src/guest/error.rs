@@ -1,5 +1,7 @@
 //! Errors for the stateless input guest.
 
+use ethrex_common::types::block_execution_witness::GuestProgramStateError;
+use ethrex_guest_program::common::ExecutionError;
 use thiserror::Error;
 
 /// Errors for the stateless input guest. Each variant tags the point at which
@@ -21,25 +23,10 @@ pub enum Error {
     /// The payload variant has no ethrex execution path.
     #[error("unsupported payload")]
     UnsupportedPayload,
-    /// The block access list exceeded the ethrex bound.
-    #[error("block access list out of bounds")]
-    BlockAccessListOutOfBounds,
-    /// The witness state exceeded the ethrex bounds.
-    #[error("witness state out of bounds")]
-    WitnessStateOutOfBounds,
-    /// The witness codes exceeded the ethrex bounds.
-    #[error("witness codes out of bounds")]
-    WitnessCodesOutOfBounds,
-    /// The witness headers did not decode.
-    #[error("witness headers decode failed")]
-    WitnessHeadersDecode,
-    /// The witness headers did not form a chain.
-    #[error("witness headers chain invalid")]
-    WitnessHeadersChain,
     /// The witness did not build into the state tries.
-    #[error("witness build failed")]
-    WitnessBuild,
+    #[error(transparent)]
+    GuestProgramStateError(#[from] GuestProgramStateError),
     /// The ethrex execution path rejected the payload.
-    #[error("execution failed")]
-    Execution,
+    #[error(transparent)]
+    ExecutionError(#[from] ExecutionError),
 }

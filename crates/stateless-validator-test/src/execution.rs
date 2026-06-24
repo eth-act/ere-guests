@@ -20,16 +20,16 @@ pub mod zkvm;
 /// A stateless validator guest program.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GuestKind {
-    /// The ethrex guest, built from source.
+    /// The ethrex guest.
     Ethrex,
-    /// The reth guest, built from source.
+    /// The reth guest.
     Reth,
-    /// The zesu guest, a prebuilt ELF.
+    /// The zesu guest.
     Zesu,
 }
 
 impl GuestKind {
-    /// Returns the guest's lower-case name.
+    /// Returns the guest name in lower-case.
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Ethrex => "ethrex",
@@ -39,10 +39,10 @@ impl GuestKind {
     }
 }
 
-/// The public output written by a guest execution.
+/// The public values written by a guest execution.
 #[derive(Debug, Clone)]
 pub enum ExecutionOutput {
-    /// The stateless output bytes written verbatim.
+    /// The stateless output bytes.
     Bytes(Vec<u8>),
     /// The sha256 digest of the stateless output bytes.
     Hash(Vec<u8>),

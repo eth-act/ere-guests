@@ -3,7 +3,7 @@
 use alloc::vec::Vec;
 
 use ere_platform_core::Platform;
-use reth_stateless::stateless_validation_with_trie;
+use reth_stateless::{stateless_validation_with_trie, validation::StatelessValidationError};
 use reth_tries::zeth::SparseState;
 use stateless_validator_common::{
     HashTreeRoot, SszEncode as _,
@@ -64,23 +64,32 @@ fn verify_stateless_new_payload<P: Platform>(input: StatelessInput) -> Result<()
         input.chain_config.validate(&input.new_payload_request)
     })?;
 
-    let reth_input = P::cycle_scope("to_reth_input", || to_reth_input(input))?;
+    let reth_input = P::cycle_scope("to_reth_input", || {
+        to_reth_input(input).map_err(|err| {
+            P::print(&format!("Input conversion failed: {err}\n"));
+            err
+        })
+    })?;
 
-    P::cycle_scope("run_validation", || run_validation(reth_input))?;
+    P::cycle_scope("run_validation", || {
+        run_validation(reth_input).map_err(|err| {
+            P::print(&format!("Validation failed: {err}\n"));
+            err
+        })
+    })?;
 
     Ok(())
 }
 
 /// Validates the reconstructed payload, reporting a rejected payload as an
 /// error.
-fn run_validation(input: RethInput) -> Result<(), Error> {
+fn run_validation(input: RethInput) -> Result<(), StatelessValidationError> {
     stateless_validation_with_trie::<SparseState, _, _>(
         input.block,
         input.public_keys,
         input.witness,
         input.chain_spec,
         input.evm_config,
-    )
-    .map(|_| ())
-    .map_err(|_| Error::Execution)
+    )?;
+    Ok(())
 }

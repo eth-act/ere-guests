@@ -363,7 +363,7 @@ fn to_reth_block(
     chain_spec: Arc<ChainSpec>,
 ) -> Result<SealedBlock<Block<reth_ethereum_primitives::TransactionSigned>>, Error> {
     let execution_data = new_payload_request_to_execution_data(new_payload_request);
-    ensure_well_formed_payload(chain_spec, execution_data).map_err(|_| Error::PayloadValidation)
+    ensure_well_formed_payload(chain_spec, execution_data)
 }
 
 /// Validates payload well-formedness, copied from [`validator.rs`] in the reth
@@ -375,7 +375,7 @@ fn to_reth_block(
 fn ensure_well_formed_payload<ChainSpec, T>(
     chain_spec: ChainSpec,
     payload: ExecutionData,
-) -> Result<SealedBlock<Block<T>>, PayloadError>
+) -> Result<SealedBlock<Block<T>>, Error>
 where
     ChainSpec: EthereumHardforks,
     T: SignedTransaction,
@@ -391,7 +391,7 @@ where
         return Err(PayloadError::BlockHash {
             execution: sealed_block.hash(),
             consensus: expected_hash,
-        });
+        })?;
     }
 
     shanghai::ensure_well_formed_fields(
