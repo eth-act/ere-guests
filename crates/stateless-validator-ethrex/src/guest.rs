@@ -1,6 +1,6 @@
 //! Ethrex stateless validator guest program.
 
-use alloc::vec::Vec;
+use alloc::{format, vec::Vec};
 
 use ere_platform_core::Platform;
 use ethrex_guest_program::{

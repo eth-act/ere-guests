@@ -388,7 +388,7 @@ where
 
     // The hash included in the payload must match the computed block hash.
     if expected_hash != sealed_block.hash() {
-        return Err(PayloadError::BlockHash {
+        Err(PayloadError::BlockHash {
             execution: sealed_block.hash(),
             consensus: expected_hash,
         })?;

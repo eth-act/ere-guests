@@ -1,6 +1,6 @@
 //! Reth stateless validator guest program.
 
-use alloc::vec::Vec;
+use alloc::{format, vec::Vec};
 
 use ere_platform_core::Platform;
 use reth_stateless::{stateless_validation_with_trie, validation::StatelessValidationError};

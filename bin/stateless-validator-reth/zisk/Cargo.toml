@@ -7,14 +7,14 @@ edition = "2024"
 
 [dependencies]
 # enable features
-alloy-consensus = { version = "2.0.0", default-features = false, features = [
+alloy-consensus = { version = "2.0.5", default-features = false, features = [
     "crypto-backend",
 ] }
-alloy-primitives = { version = "1.5", default-features = false, features = [
+alloy-primitives = { version = "1.6.0", default-features = false, features = [
     "map-foldhash",
     "native-keccak",
 ] }
-revm = { version = "38.0.0", default-features = false }
+revm = { version = "40.0.3", default-features = false }
 
 # ere
 # NOTE: Using `default-features = false, features = ["inputcpy"]` mainly to disable the other
