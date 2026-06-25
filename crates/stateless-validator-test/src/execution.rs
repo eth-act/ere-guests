@@ -18,7 +18,7 @@ pub mod host;
 pub mod zkvm;
 
 /// A stateless validator guest program.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum GuestKind {
     /// The ethrex guest.
     Ethrex,

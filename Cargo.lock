@@ -5351,6 +5351,7 @@ dependencies = [
  "alloy-primitives",
  "anyhow",
  "const-hex",
+ "dashmap",
  "ere-dockerized",
  "ere-platform-core",
  "flate2",

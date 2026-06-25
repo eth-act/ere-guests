@@ -10,6 +10,7 @@ workspace = true
 
 [dependencies]
 anyhow.workspace = true
+dashmap.workspace = true
 flate2.workspace = true
 const-hex.workspace = true
 rayon.workspace = true

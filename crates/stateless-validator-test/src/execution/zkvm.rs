@@ -1,7 +1,8 @@
 //! Helpers for compiling guest programs and asserting their zkVM execution.
 
-use std::{collections::BTreeMap, fs, path::PathBuf};
+use std::{collections::BTreeMap, fs, path::PathBuf, sync::LazyLock};
 
+use dashmap::DashMap;
 use ere_dockerized::{
     Compiler, CompilerKind, DockerizedCompiler, DockerizedzkVM, DockerizedzkVMConfig, Elf, Input,
     ProverResource, zkVMKind,
@@ -19,6 +20,19 @@ fn workspace() -> PathBuf {
     path.pop();
     path.pop();
     path
+}
+
+/// Resolves and caches guest ELF by compiling (ethrex, reth) or downloading (zesu).
+pub fn resolve_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
+    static GUEST_ELF_CACHE: LazyLock<DashMap<(GuestKind, zkVMKind), Elf>> =
+        LazyLock::new(DashMap::new);
+    GUEST_ELF_CACHE
+        .entry((guest_kind, zkvm_kind))
+        .or_insert_with(|| match guest_kind {
+            GuestKind::Ethrex | GuestKind::Reth => compile_guest(guest_kind, zkvm_kind),
+            GuestKind::Zesu => download_guest(guest_kind, zkvm_kind),
+        })
+        .clone()
 }
 
 /// Compiles the guest program for `zkvm_kind` into an ELF.
@@ -82,10 +96,7 @@ pub fn run_stateless_validator_execution(
     zkvm_kind: zkVMKind,
     preset: FixturePreset,
 ) -> Vec<ExecutionFailure> {
-    let elf = match guest_kind {
-        GuestKind::Ethrex | GuestKind::Reth => compile_guest(guest_kind, zkvm_kind),
-        GuestKind::Zesu => download_guest(guest_kind, zkvm_kind),
-    };
+    let elf = resolve_guest(guest_kind, zkvm_kind);
     let zkvm = init_zkvm(zkvm_kind, elf);
     run_execution(preset_fixtures(preset), &|input| {
         let output = zkvm.execute(&Input::new().with_stdin(input))?.0.to_vec();
