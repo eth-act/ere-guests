@@ -38,7 +38,7 @@ openvm-keccak256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v1
 aurora-engine-modexp = { version = "1.2.0", default-features = false }
 
 # ere
-ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.12.2", features = [
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "2505e96eb9821b7aa561b56eeeddc145baa138fd", features = [
     "std",
 ] }
 
