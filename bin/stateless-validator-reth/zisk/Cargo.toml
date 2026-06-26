@@ -14,7 +14,6 @@ alloy-primitives = { version = "1.6.0", default-features = false, features = [
     "map-foldhash",
     "native-keccak",
 ] }
-revm = { version = "40.0.3", default-features = false }
 
 # ere
 # NOTE: Using `default-features = false, features = ["inputcpy"]` mainly to disable the other
