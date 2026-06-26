@@ -3157,7 +3157,6 @@ dependencies = [
  "alloy-consensus",
  "alloy-primitives",
  "ere-platform-zisk",
- "revm",
  "stateless-validator-reth",
 ]
 
