@@ -113,15 +113,29 @@ jobs:
             output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
           if-no-files-found: error
 
+  republish-setup:
+    name: Resolve republish matrix from artifact-registry.json
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build matrix from artifact-registry.json
+        id: set-matrix
+        run: |
+          MATRIX=$(jq -c '{ include: [.stateless_validator_elf | keys[] | (. / "-") as $p | { el: ($p[:-1] | join("-")), zkvm: $p[-1] }] }' artifact-registry.json)
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+          echo "Matrix: ${MATRIX}"
+
   republish:
     name: Republish stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
+    needs: republish-setup
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - el: zesu
-            zkvm: zisk
+      matrix: ${{ fromJson(needs.republish-setup.outputs.matrix) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -142,23 +156,7 @@ jobs:
           docker pull ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
 
       - name: Download ELF
-        env:
-          ENTRY_KEY: ${{ matrix.el }}-${{ matrix.zkvm }}
-        run: |
-          mkdir -p "$PWD/output"
-          ELF_URL=$(jq -r --arg key "$ENTRY_KEY" '.stateless_validator_elf[$key].url // empty' artifact-registry.json)
-          ELF_SHA=$(jq -r --arg key "$ENTRY_KEY" '.stateless_validator_elf[$key].sha256 // empty' artifact-registry.json)
-          if [ -z "$ELF_URL" ]; then
-            echo "::error::No url for stateless_validator_elf.${ENTRY_KEY} in artifact-registry.json"
-            exit 1
-          fi
-          if [ -z "$ELF_SHA" ]; then
-            echo "::error::No sha256 for stateless_validator_elf.${ENTRY_KEY} in artifact-registry.json"
-            exit 1
-          fi
-          OUT="$PWD/output/stateless-validator-${ENTRY_KEY}.elf"
-          curl -fsSL --proto '=https' --tlsv1.2 --max-redirs 3 --retry 3 "$ELF_URL" -o "$OUT"
-          echo "${ELF_SHA} ${OUT}" | sha256sum -c -
+        run: bash .github/scripts/fetch-elf-for-republish.sh ${{ matrix.el }}-${{ matrix.zkvm }}
 
       - name: Generate program VK
         run: |

@@ -1,9 +1,15 @@
 {
     "stateless_validator_elf": {
         "zesu-zisk": {
-            "el_version": "bal-devnet-7-2026-06-12",
-            "url": "https://github.com/Consensys/zesu-zkvm/releases/download/bal-devnet-7-2026-06-12/stateless-validator-zesu-zisk.elf",
-            "sha256": "9d0db3d31f3f2342dce04dd87e31ae3efae40cb8ab03b911e581eae09cc7b4de"
+            "el_version": "bal-devnet-7-2026-06-24",
+            "url": "https://github.com/Consensys/zesu-zkvm/releases/download/bal-devnet-7-2026-06-24/stateless-validator-zesu-zisk.elf",
+            "sha256": "3ed03dce984ca476ee18fa96a4102176931c9863a01496b4a7e46fd601824dfc"
+        },
+        "nethermind-zisk": {
+            "el_version": "zisk-guest-r7",
+            "url": "https://github.com/NethermindEth/nethermind/releases/download/zisk-guest-r7/nethermind-guest-zisk-r7.tar.gz",
+            "sha256": "15a6f5078ea5be9d35666e161969e44dda6d689775813cf417e781892ae70dd0",
+            "archive_elf_path": "nethermind"
         }
     },
     "stateless_validator_static_library": {},

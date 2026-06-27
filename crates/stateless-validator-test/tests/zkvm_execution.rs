@@ -63,3 +63,9 @@ declare_test!(Reth, Zisk, RpcGlamsterdamDevnet5);
 declare_test!(Zesu, Zisk, EestBalDevnet7, should_panic);
 // FIXME: Check why Zesu doesn't pass RpcGlamsterdamDevnet5.
 // declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet5);
+
+// Nethermind
+
+declare_test!(Nethermind, Zisk, RpcBpo2);
+declare_test!(Nethermind, Zisk, RpcGlamsterdamDevnet5);
+declare_test!(Nethermind, Zisk, EestBalDevnet7, should_panic);

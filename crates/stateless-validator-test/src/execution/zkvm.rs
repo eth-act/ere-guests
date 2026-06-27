@@ -1,6 +1,6 @@
 //! Helpers for compiling guest programs and asserting their zkVM execution.
 
-use std::{collections::BTreeMap, fs, path::PathBuf, sync::LazyLock};
+use std::{collections::BTreeMap, fs, io::Read, path::PathBuf, sync::LazyLock};
 
 use dashmap::DashMap;
 use ere_dockerized::{
@@ -8,6 +8,9 @@ use ere_dockerized::{
     ProverResource, zkVMKind,
 };
 use serde::Deserialize;
+use stateless_validator_common::guest::{
+    StatelessInput, input::new_payload_request::NewPayloadRequest,
+};
 
 use crate::{
     execution::{ExecutionFailure, ExecutionOutput, GuestKind, run_execution},
@@ -28,7 +31,7 @@ pub fn resolve_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
     ELF.entry((guest_kind, zkvm_kind))
         .or_insert_with(|| match guest_kind {
             GuestKind::Ethrex | GuestKind::Reth => compile_guest(guest_kind, zkvm_kind),
-            GuestKind::Zesu => download_guest(guest_kind, zkvm_kind),
+            GuestKind::Zesu | GuestKind::Nethermind => download_guest(guest_kind, zkvm_kind),
         })
         .clone()
 }
@@ -67,13 +70,35 @@ pub fn download_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
         .stateless_validator_elf
         .get(&guest)
         .unwrap_or_else(|| panic!("{guest} not found in artifact-registry.json"));
-    Elf(reqwest::blocking::get(&source.url)
+    let bytes = reqwest::blocking::get(&source.url)
         .unwrap()
         .error_for_status()
         .unwrap()
         .bytes()
         .unwrap()
-        .to_vec())
+        .to_vec();
+    if source.url.ends_with(".tar.gz") || source.url.ends_with(".tgz") {
+        Elf(extract_elf_from_tar_gz(&bytes))
+    } else {
+        Elf(bytes)
+    }
+}
+
+/// Extracts the first ELF entry (one whose contents begin with the `\x7fELF`
+/// magic) from a gzip-compressed tar archive. Some prebuilt guests, such as the
+/// nethermind ZisK release, distribute the ELF inside a `.tar.gz` under an
+/// extensionless name, so the entry is selected by magic rather than filename.
+fn extract_elf_from_tar_gz(bytes: &[u8]) -> Vec<u8> {
+    let mut archive = tar::Archive::new(flate2::read::GzDecoder::new(bytes));
+    for entry in archive.entries().unwrap() {
+        let mut entry = entry.unwrap();
+        let mut buf = Vec::new();
+        entry.read_to_end(&mut buf).unwrap();
+        if buf.starts_with(b"\x7fELF") {
+            return buf;
+        }
+    }
+    panic!("no ELF entry found in archive")
 }
 
 /// Initializes a CPU-backed zkVM for `elf`.
@@ -97,10 +122,32 @@ pub fn run_stateless_validator_execution(
     let elf = resolve_guest(guest_kind, zkvm_kind);
     let zkvm = init_zkvm(zkvm_kind, elf);
     run_execution(preset_fixtures(preset), &|input| {
+        let input = match guest_kind {
+            GuestKind::Nethermind => nethermind_input(input)?,
+            _ => input,
+        };
         let output = zkvm.execute(&Input::new().with_stdin(input))?.0.to_vec();
         Ok(match guest_kind {
             GuestKind::Ethrex | GuestKind::Reth => ExecutionOutput::Hash(output),
-            GuestKind::Zesu => ExecutionOutput::Bytes(output),
+            GuestKind::Zesu | GuestKind::Nethermind => ExecutionOutput::Bytes(output),
         })
     })
+}
+
+/// Rewrites the canonical 2-byte schema prefix into nethermind's r7 payload
+/// selector. ere-guests always prefixes `0x0001`, whereas the r7 guest selects
+/// the payload type from `0x0000` for `ElectraFulu` (V3) and `0x0001` for
+/// `Gloas` (V4). The SSZ bodies are byte-identical, so only the prefix is
+/// rewritten after recovering the variant.
+fn nethermind_input(input: Vec<u8>) -> anyhow::Result<Vec<u8>> {
+    let canonical = StatelessInput::from_schema_prefixed_ssz(&input)
+        .map_err(|err| anyhow::anyhow!("decode stateless input: {err:?}"))?;
+    let schema_id = match &canonical.new_payload_request {
+        NewPayloadRequest::ElectraFulu(_) => [0x00, 0x00],
+        NewPayloadRequest::Gloas(_) => [0x00, 0x01],
+        _ => anyhow::bail!("nethermind r7 supports only ElectraFulu (V3) and Gloas (V4) payloads"),
+    };
+    let mut input = input;
+    input[0..2].copy_from_slice(&schema_id);
+    Ok(input)
 }
