@@ -61,8 +61,8 @@ declare_test!(Reth, Zisk, RpcGlamsterdamDevnet5);
 
 // NOTE: `should_panic` should be unnecessary when upgraded to `zisk@v1.0.0-beta`
 declare_test!(Zesu, Zisk, EestBalDevnet7, should_panic);
-// FIXME: Check why Zesu doesn't pass RpcGlamsterdamDevnet5.
-// declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet5);
+// NOTE: `should_panic` should be unnecessary if `zesu` is released with the fix in https://github.com/Consensys/zesu/pull/70.
+declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet5, should_panic);
 
 // Nethermind
 
