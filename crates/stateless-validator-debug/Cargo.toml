@@ -20,9 +20,6 @@ tracing-subscriber = { workspace = true, features = ["env-filter"] }
 alloy-eips.workspace = true
 alloy-primitives = { workspace = true, features = ["serde"] }
 
-# reth
-reth-stateless.workspace = true
-
 # ere
 ere-platform-core.workspace = true
 

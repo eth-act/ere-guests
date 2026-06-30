@@ -15,7 +15,7 @@ env:
 
 jobs:
   test_zkvm_execution:
-    name: Test zkVM execution of ${{ matrix.guest }} on ${{ matrix.zkvm }}
+    name: ${{ matrix.guest }} on ${{ matrix.zkvm }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -23,7 +23,6 @@ jobs:
         guest:
           - ethrex
           - reth
-          - zesu
         zkvm:
           - airbender
           - openvm
@@ -33,16 +32,13 @@ jobs:
         exclude:
           - { guest: ethrex, zkvm: airbender }
           - { guest: ethrex, zkvm: openvm }
-          - { guest: zesu, zkvm: airbender }
-          - { guest: zesu, zkvm: openvm }
-          - { guest: zesu, zkvm: risc0 }
-          - { guest: zesu, zkvm: sp1 }
         include:
           - { zkvm: openvm, eest: true }
-          - { zkvm: sp1, eest: true }
-          - { zkvm: zisk, eest: true }
-          - { guest: zesu, external: true }
-          - { guest: ethrex, zkvm: zisk, ere_profile: ethrex }
+          - { zkvm: sp1,    eest: true }
+          - { zkvm: zisk,   eest: true }
+          - { zkvm: zisk, eest: true, external: true, guest: nethermind }
+          - { zkvm: zisk, eest: true, external: true, guest: zesu }
+          - { zkvm: zisk, guest: ethrex, ere_profile: ethrex }
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -121,7 +117,7 @@ jobs:
         run: ${SCCACHE_PATH} --show-stats
 
   test_host_execution:
-    name: Test host execution of ${{ matrix.guest }}
+    name: ${{ matrix.guest }} on host
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

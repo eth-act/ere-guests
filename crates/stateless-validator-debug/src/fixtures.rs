@@ -9,7 +9,6 @@ use std::{
 use alloy_eips::eip7840::BlobParams;
 use anyhow::{Context, bail};
 use serde::Deserialize;
-use stateless_validator_common::guest::StatelessInput;
 
 /// Deserialized JSON fixture supported by the debug runner.
 #[derive(Debug, Clone)]
@@ -22,14 +21,6 @@ pub struct StatelessValidatorFixture {
     pub success: bool,
     /// Expected serialized guest output, when provided by canonical fixtures.
     pub expected_output_bytes: Option<Vec<u8>>,
-}
-
-/// Wire shape for legacy `{name, stateless_input, success}` fixtures.
-#[derive(Debug, Clone, Deserialize)]
-struct LegacyFixture {
-    name: String,
-    stateless_input: reth_stateless::StatelessInput,
-    success: bool,
 }
 
 /// Minimal projection of an EEST `blockchain_test` body — only the fields the
@@ -164,19 +155,6 @@ pub fn load_fixtures(path: &Path) -> anyhow::Result<Vec<StatelessValidatorFixtur
         fs::read(path).with_context(|| format!("failed to read fixture {}", path.display()))?;
     let value: serde_json::Value = serde_json::from_slice(&bytes)
         .with_context(|| format!("failed to parse fixture JSON {}", path.display()))?;
-
-    if value.get("stateless_input").is_some() {
-        // Legacy shape.
-        let legacy: LegacyFixture = serde_json::from_value(value)
-            .with_context(|| format!("failed to deserialize legacy fixture {}", path.display()))?;
-        return Ok(vec![StatelessValidatorFixture {
-            name: legacy.name,
-            input_bytes: StatelessInput::try_from_reth(&legacy.stateless_input)?
-                .to_schema_prefixed_ssz(),
-            success: legacy.success,
-            expected_output_bytes: None,
-        }]);
-    }
 
     let map: BTreeMap<String, EestStatelessTest> =
         serde_json::from_value(value).with_context(|| {

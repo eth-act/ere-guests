@@ -1,6 +1,12 @@
 //! Helpers for compiling guest programs and asserting their zkVM execution.
 
-use std::{collections::BTreeMap, fs, io::Read, path::PathBuf, sync::LazyLock};
+use std::{
+    collections::BTreeMap,
+    fs,
+    io::Read,
+    path::{Path, PathBuf},
+    sync::LazyLock,
+};
 
 use dashmap::DashMap;
 use ere_dockerized::{
@@ -59,6 +65,7 @@ pub fn download_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
     #[derive(Deserialize)]
     struct GuestSoure {
         url: String,
+        archive_elf_path: Option<String>,
     }
 
     let registry = {
@@ -77,28 +84,27 @@ pub fn download_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
         .bytes()
         .unwrap()
         .to_vec();
-    if source.url.ends_with(".tar.gz") || source.url.ends_with(".tgz") {
-        Elf(extract_elf_from_tar_gz(&bytes))
-    } else {
-        Elf(bytes)
+    match &source.archive_elf_path {
+        Some(archive_elf_path) => Elf(extract_elf_from_tar_gz(&bytes, archive_elf_path)),
+        None => Elf(bytes),
     }
 }
 
-/// Extracts the first ELF entry (one whose contents begin with the `\x7fELF`
-/// magic) from a gzip-compressed tar archive. Some prebuilt guests, such as the
-/// nethermind ZisK release, distribute the ELF inside a `.tar.gz` under an
-/// extensionless name, so the entry is selected by magic rather than filename.
-fn extract_elf_from_tar_gz(bytes: &[u8]) -> Vec<u8> {
+/// Extracts the entry at `archive_elf_path` from a gzip-compressed tar archive.
+/// Some prebuilt guests, such as the nethermind ZisK release, distribute the ELF
+/// inside a `.tar.gz` under an extensionless name recorded as `archive_elf_path`
+/// in the registry.
+fn extract_elf_from_tar_gz(bytes: &[u8], archive_elf_path: &str) -> Vec<u8> {
     let mut archive = tar::Archive::new(flate2::read::GzDecoder::new(bytes));
     for entry in archive.entries().unwrap() {
         let mut entry = entry.unwrap();
-        let mut buf = Vec::new();
-        entry.read_to_end(&mut buf).unwrap();
-        if buf.starts_with(b"\x7fELF") {
+        if entry.path().unwrap().as_ref() == Path::new(archive_elf_path) {
+            let mut buf = Vec::new();
+            entry.read_to_end(&mut buf).unwrap();
             return buf;
         }
     }
-    panic!("no ELF entry found in archive")
+    panic!("{archive_elf_path} not found in archive")
 }
 
 /// Initializes a CPU-backed zkVM for `elf`.
