@@ -38,8 +38,8 @@ jobs:
           - { guest: zesu, zkvm: risc0 }
           - { guest: zesu, zkvm: sp1 }
         include:
-          - { zkvm: openvm, threads: 1 }
-          - { zkvm: sp1, threads: 1 }
+          - { zkvm: openvm, eest: true }
+          - { zkvm: sp1, eest: true }
           - { zkvm: zisk, eest: true }
           - { guest: zesu, external: true }
           - { guest: ethrex, zkvm: zisk, ere_profile: ethrex }
