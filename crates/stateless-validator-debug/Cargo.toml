@@ -18,7 +18,7 @@ tracing-subscriber = { workspace = true, features = ["env-filter"] }
 
 # alloy
 alloy-eips.workspace = true
-alloy-primitives.workspace = true
+alloy-primitives = { workspace = true, features = ["serde"] }
 
 # reth
 reth-stateless.workspace = true
@@ -27,7 +27,7 @@ reth-stateless.workspace = true
 ere-platform-core.workspace = true
 
 # local
-stateless-validator-common = { workspace = true, features = ["legacy"] }
+stateless-validator-common = { workspace = true, features = ["host"] }
 stateless-validator-ethrex = { workspace = true, default-features = true, features = [
     "host",
 ] }

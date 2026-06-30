@@ -26,9 +26,9 @@ revm.workspace = true
 
 # reth
 reth-chainspec.workspace = true
-reth-payload-validator = { workspace = true, default-features = false }
 reth-ethereum-primitives.workspace = true
 reth-evm-ethereum.workspace = true
+reth-payload-validator = { workspace = true, default-features = false }
 reth-primitives-traits.workspace = true
 reth-stateless.workspace = true
 reth-tries.workspace = true

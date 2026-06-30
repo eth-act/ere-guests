@@ -5263,20 +5263,15 @@ dependencies = [
  "alloy-eips",
  "alloy-genesis",
  "alloy-primitives",
+ "alloy-rpc-types-debug",
  "anyhow",
  "const-hex",
  "libssz",
  "libssz-derive",
  "libssz-merkle",
  "libssz-types",
- "reth-chainspec",
- "reth-ethereum-primitives",
- "reth-evm-ethereum",
- "reth-primitives-traits",
  "sha2",
- "stateless",
  "thiserror",
- "tries",
 ]
 
 [[package]]

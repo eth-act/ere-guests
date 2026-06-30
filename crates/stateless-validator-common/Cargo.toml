@@ -25,14 +25,7 @@ alloy-consensus = { workspace = true, optional = true }
 alloy-eips = { workspace = true, optional = true }
 alloy-genesis = { workspace = true, optional = true }
 alloy-primitives = { workspace = true, optional = true }
-
-# reth
-reth-chainspec = { workspace = true, optional = true }
-reth-ethereum-primitives = { workspace = true, optional = true }
-reth-evm-ethereum = { workspace = true, optional = true }
-reth-primitives-traits = { workspace = true, optional = true }
-reth-stateless = { workspace = true, optional = true }
-reth-tries = { workspace = true, optional = true }
+alloy-rpc-types-debug = { workspace = true, optional = true }
 
 [features]
 # guest
@@ -42,18 +35,14 @@ std = []
 # host
 host = ["std"]
 
-# legacy
-legacy = [
+# alloy
+alloy = [
     "host",
+    "alloy-primitives/k256",
     "dep:anyhow",
     "dep:alloy-consensus",
     "dep:alloy-eips",
     "dep:alloy-genesis",
     "dep:alloy-primitives",
-    "dep:reth-chainspec",
-    "dep:reth-ethereum-primitives",
-    "dep:reth-evm-ethereum",
-    "dep:reth-primitives-traits",
-    "dep:reth-stateless",
-    "dep:reth-tries",
+    "dep:alloy-rpc-types-debug",
 ]
