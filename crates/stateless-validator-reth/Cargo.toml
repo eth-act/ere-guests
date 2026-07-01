@@ -15,11 +15,9 @@ thiserror.workspace = true
 # alloy
 alloy-consensus.workspace = true
 alloy-eips.workspace = true
-alloy-genesis.workspace = true
-alloy-primitives.workspace = true
-alloy-rpc-types-engine = { workspace = true, default-features = false, features = [
-    "serde",
-] }
+alloy-genesis = { workspace = true, features = ["serde-bincode-compat"] }
+alloy-primitives = { workspace = true, features = ["map-foldhash", "map-indexmap"] }
+alloy-rpc-types-engine = { workspace = true, features = ["serde"] }
 
 # revm
 revm.workspace = true
@@ -28,7 +26,7 @@ revm.workspace = true
 reth-chainspec.workspace = true
 reth-ethereum-primitives.workspace = true
 reth-evm-ethereum.workspace = true
-reth-payload-validator = { workspace = true, default-features = false }
+reth-payload-validator.workspace = true
 reth-primitives-traits.workspace = true
 reth-stateless.workspace = true
 reth-tries.workspace = true

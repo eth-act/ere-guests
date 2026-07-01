@@ -269,6 +269,17 @@ impl NewPayloadRequest {
             Self::Gloas(request) => request.execution_payload.block_hash,
         }
     }
+
+    /// Returns the transactions of the execution payload.
+    pub fn transactions(&self) -> &Transactions {
+        match self {
+            Self::Bellatrix(request) => &request.execution_payload.transactions,
+            Self::Capella(request) => &request.execution_payload.transactions,
+            Self::Deneb(request) => &request.execution_payload.transactions,
+            Self::ElectraFulu(request) => &request.execution_payload.transactions,
+            Self::Gloas(request) => &request.execution_payload.transactions,
+        }
+    }
 }
 
 impl HashTreeRoot for NewPayloadRequest {

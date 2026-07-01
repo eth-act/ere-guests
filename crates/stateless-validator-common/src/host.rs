@@ -6,9 +6,6 @@ use sha2::{Digest, Sha256};
 
 use crate::guest::StatelessValidationResult;
 
-#[cfg(feature = "alloy")]
-pub mod alloy;
-
 impl StatelessValidationResult {
     /// Returns the SHA-256 digest of the serialized result.
     pub fn sha256(&self) -> [u8; 32] {

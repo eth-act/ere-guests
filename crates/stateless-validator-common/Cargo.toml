@@ -20,13 +20,6 @@ libssz-derive.workspace = true
 libssz-merkle = { workspace = true, features = ["sha2-backend"] }
 libssz-types.workspace = true
 
-# alloy
-alloy-consensus = { workspace = true, optional = true }
-alloy-eips = { workspace = true, optional = true }
-alloy-genesis = { workspace = true, optional = true }
-alloy-primitives = { workspace = true, optional = true }
-alloy-rpc-types-debug = { workspace = true, optional = true }
-
 [features]
 # guest
 default = ["std"]
@@ -34,15 +27,3 @@ std = []
 
 # host
 host = ["std"]
-
-# alloy
-alloy = [
-    "host",
-    "alloy-primitives/k256",
-    "dep:anyhow",
-    "dep:alloy-consensus",
-    "dep:alloy-eips",
-    "dep:alloy-genesis",
-    "dep:alloy-primitives",
-    "dep:alloy-rpc-types-debug",
-]

@@ -5259,11 +5259,6 @@ dependencies = [
 name = "stateless-validator-common"
 version = "0.12.1"
 dependencies = [
- "alloy-consensus",
- "alloy-eips",
- "alloy-genesis",
- "alloy-primitives",
- "alloy-rpc-types-debug",
  "anyhow",
  "const-hex",
  "libssz",
