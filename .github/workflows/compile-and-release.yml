@@ -32,9 +32,6 @@ jobs:
           - openvm
           - sp1
           - zisk
-        exclude:
-          - el: ethrex
-            zkvm: openvm
         include:
           - el: ethrex
             zkvm: zisk

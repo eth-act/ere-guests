@@ -82,15 +82,27 @@ reth-stateless = { git = "https://github.com/paradigmxyz/stateless", rev = "2236
 reth-tries = { git = "https://github.com/paradigmxyz/stateless", rev = "2236845a84c3a7515312214e8a507e4731d73bb5", default-features = false, package = "tries" }
 
 # ethrex
-ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", rev = "b52aaea7c4b4e360a9d2e36aa624a4d1f4016011", default-features = false }
-ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", rev = "b52aaea7c4b4e360a9d2e36aa624a4d1f4016011", default-features = false }
-ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", rev = "b52aaea7c4b4e360a9d2e36aa624a4d1f4016011", default-features = false }
+ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
+ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
+ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
 
 # ssz
 libssz = { version = "0.2.2", default-features = false, features = ["alloc"] }
 libssz-derive = { version = "0.2.2" }
 libssz-merkle = { version = "0.2.2", default-features = false, features = ["alloc"] }
 libssz-types = { version = "0.2.2", default-features = false, features = ["alloc"] }
+
+# openvm
+
+openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3" }
+openvm-sha2 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3" }
+openvm-pairing = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3" }
+openvm-k256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3", package = "k256" }
+openvm-p256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3", package = "p256" }
+openvm-keccak256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3" }
+openvm-curve-utils = { git = "https://github.com/axiom-crypto/openvm-eth", branch = "develop-v2.0.0-rc.3" }
+openvm-kzg = { git = "https://github.com/axiom-crypto/openvm-eth", branch = "develop-v2.0.0-rc.3" }
+bls12_381 = { git = "https://github.com/zkcrypto/bls12_381", rev = "6bb96951d5c2035caf4989b6e4a018435379590f", default-features = false }
 
 # zkvm-standard
 zkvm-interface = { git = "https://github.com/eth-act/zkvm-standards", rev = "282cd356c3a0498416bb0619f9c8a347ce9933fb" }

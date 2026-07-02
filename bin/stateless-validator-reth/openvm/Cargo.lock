@@ -2124,6 +2124,7 @@ version = "2.0.0-beta.2"
 source = "git+https://github.com/openvm-org//openvm.git?tag=v2.0.0-rc.3#fa209f898baa38ddfdcb73b95d2cb3ff3d428c36"
 dependencies = [
  "openvm-sha2-guest",
+ "sha2",
 ]
 
 [[package]]

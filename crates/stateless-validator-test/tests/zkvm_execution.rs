@@ -33,6 +33,10 @@ macro_rules! declare_test {
 
 // Ethrex
 
+declare_test!(Ethrex, OpenVM, RpcBpo2);
+declare_test!(Ethrex, OpenVM, RpcGlamsterdamDevnet5);
+// NOTE: `should_panic` due to arithmetic overflow on 32-bit targets and calldata allocation OOM.
+declare_test!(Ethrex, OpenVM, EestBalDevnet7, should_panic);
 declare_test!(Ethrex, SP1, RpcBpo2);
 declare_test!(Ethrex, SP1, RpcGlamsterdamDevnet5);
 declare_test!(Ethrex, SP1, EestBalDevnet7);

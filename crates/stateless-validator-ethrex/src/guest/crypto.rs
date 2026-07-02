@@ -1,5 +1,7 @@
 //! Crypto provider selection for the guest.
 
+#[cfg(feature = "openvm")]
+mod openvm;
 #[cfg(feature = "zkvm-interface")]
 mod zkvm_interface;
 
@@ -13,9 +15,11 @@ use stateless_validator_common::Sha256Hasher;
 pub(crate) fn crypto() -> Arc<dyn Crypto> {
     #[cfg(feature = "zkvm-interface")]
     return zkvm_interface::crypto();
+    #[cfg(feature = "openvm")]
+    return openvm::crypto();
     #[cfg(feature = "sp1")]
     return Arc::new(ethrex_guest_program::crypto::sp1::Sp1Crypto);
-    #[cfg(not(any(feature = "zkvm-interface", feature = "sp1")))]
+    #[cfg(not(any(feature = "zkvm-interface", feature = "openvm", feature = "sp1")))]
     return Arc::new(ethrex_guest_program::crypto::NativeCrypto);
 }
 

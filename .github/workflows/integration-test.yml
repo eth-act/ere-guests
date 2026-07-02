@@ -27,8 +27,6 @@ jobs:
           - openvm
           - sp1
           - zisk
-        exclude:
-          - { guest: ethrex, zkvm: openvm }
         include:
           - { zkvm: zisk, external: true, guest: nethermind }
           - { zkvm: zisk, external: true, guest: zesu }

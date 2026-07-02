@@ -3,7 +3,9 @@
 //! This module provides OpenVM-optimized implementations of cryptographic operations
 //! for both transaction validation (via Alloy crypto provider) and precompile execution.
 
-use std::{sync::Arc, vec::Vec};
+extern crate alloc;
+
+use alloc::{sync::Arc, vec::Vec};
 
 use alloy_consensus::crypto::{
     backend::{install_default_provider, CryptoProvider},
@@ -26,7 +28,7 @@ use openvm_pairing::{
     bn254::{self as bn, Bn254},
     PairingCheck,
 };
-use openvm_sha2::Sha256;
+use openvm_sha2::{Digest, Sha256};
 use revm::{
     install_crypto,
     precompile::{
