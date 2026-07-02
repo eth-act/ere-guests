@@ -1797,20 +1797,6 @@ dependencies = [
 [[package]]
 name = "kzg-rs"
 version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee8b4f55c3dedcfaa8668de1dfc8469e7a32d441c28edf225ed1f566fb32977d"
-dependencies = [
- "ff",
- "hex",
- "serde_arrays",
- "sha2 0.10.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "sp1_bls12_381",
- "spin",
-]
-
-[[package]]
-name = "kzg-rs"
-version = "0.2.8"
 source = "git+https://github.com/succinctlabs/kzg-rs?tag=v0.2.8-sp1-6.2.0#2d48f8b948746d5cfa62ce7421369278a1c2e405"
 dependencies = [
  "bls12_381",
@@ -1900,13 +1886,13 @@ source = "git+https://github.com/han0110/sp1?rev=8564a70ea1952826fc0926eba5a3ce6
 dependencies = [
  "bls12_381",
  "k256 0.13.4 (git+https://github.com/sp1-patches/elliptic-curves?tag=patch-k256-13.4-sp1-6.2.0)",
- "kzg-rs 0.2.8 (git+https://github.com/succinctlabs/kzg-rs?tag=v0.2.8-sp1-6.2.0)",
+ "kzg-rs",
  "num-bigint-dig",
  "p256 0.13.2 (git+https://github.com/sp1-patches/elliptic-curves?tag=patch-p256-13.2-sp1-6.2.0)",
  "ripemd",
  "sha2 0.10.9 (git+https://github.com/sp1-patches/RustCrypto-hashes?tag=patch-sha2-0.10.9-sp1-6.2.0)",
  "sp1-zkvm",
- "substrate-bn 0.6.0 (git+https://github.com/sp1-patches/bn?tag=patch-0.6.0-sp1-6.2.0-substrate-bn)",
+ "substrate-bn",
  "tiny-keccak",
 ]
 
@@ -3174,7 +3160,6 @@ dependencies = [
  "revm-primitives",
  "ripemd",
  "sha2 0.10.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "substrate-bn 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -3635,21 +3620,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp1_bls12_381"
-version = "0.8.0-sp1-6.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f23e41cd36168cc2e51e5d3e35ff0c34b204d945769a65591a76286d04b51e43"
-dependencies = [
- "cfg-if",
- "ff",
- "group",
- "pairing",
- "rand_core 0.6.4",
- "sp1-lib",
- "subtle",
-]
-
-[[package]]
 name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3742,8 +3712,6 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "ere-platform-sp1",
- "kzg-rs 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "revm",
  "stateless-validator-reth",
 ]
 
@@ -3778,19 +3746,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.118",
-]
-
-[[package]]
-name = "substrate-bn"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72b5bbfa79abbae15dd642ea8176a21a635ff3c00059961d1ea27ad04e5b441c"
-dependencies = [
- "byteorder",
- "crunchy",
- "lazy_static",
- "rand 0.8.6",
- "rustc-hex",
 ]
 
 [[package]]

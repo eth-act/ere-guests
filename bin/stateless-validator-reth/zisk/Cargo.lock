@@ -3144,7 +3144,6 @@ dependencies = [
 name = "stateless-validator-reth-zisk"
 version = "0.1.0"
 dependencies = [
- "alloy-consensus",
  "alloy-primitives",
  "ere-platform-zisk",
  "stateless-validator-reth",

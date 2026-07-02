@@ -9,12 +9,8 @@ edition = "2024"
 # enable features
 alloy-primitives = { version = "1.6.0", default-features = false, features = [
     "map-foldhash",
-    "sha3-keccak",
+    "native-keccak",
 ] }
-revm = { version = "40.0.3", default-features = false, features = ["bn"] }
-
-# crypto backend
-kzg-rs = "0.2.8"
 
 # ere
 ere-platform-sp1 = { git = "https://github.com/eth-act/ere", rev = "968d72e1ca55e8744ff3517460f0bbd3ee88bd4b" }

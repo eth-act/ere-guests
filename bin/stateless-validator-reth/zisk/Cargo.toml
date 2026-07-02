@@ -7,9 +7,6 @@ edition = "2024"
 
 [dependencies]
 # enable features
-alloy-consensus = { version = "2.0.5", default-features = false, features = [
-    "crypto-backend",
-] }
 alloy-primitives = { version = "1.6.0", default-features = false, features = [
     "map-foldhash",
     "native-keccak",

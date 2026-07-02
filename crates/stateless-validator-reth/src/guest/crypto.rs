@@ -2,6 +2,8 @@
 
 #[cfg(feature = "openvm")]
 pub(crate) mod openvm;
+#[cfg(feature = "sp1")]
+pub(crate) mod sp1;
 #[cfg(feature = "zkvm-interface")]
 pub mod zkvm_interface;
 
