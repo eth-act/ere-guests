@@ -6,7 +6,7 @@ use std::{
     time::Instant,
 };
 
-use anyhow::{Context, bail};
+use anyhow::{anyhow, bail};
 use rayon::prelude::*;
 use stateless_validator_common::{SszDecode, guest::StatelessValidationResult};
 use tracing::{debug, info};
@@ -126,9 +126,9 @@ fn matches_output(got_bytes: Vec<u8>, expectecd_bytes: Vec<u8>) -> anyhow::Resul
     };
 
     let got = StatelessValidationResult::from_ssz_bytes(got_bytes)
-        .context("Decode execute output bytes failure")?;
+        .map_err(|err| anyhow!("Decode execute output bytes failure: {err:?}"))?;
     let expected = StatelessValidationResult::from_ssz_bytes(&expectecd_bytes)
-        .context("Decode fixture output bytes failure")?;
+        .map_err(|err| anyhow!("Decode fixture output bytes failure: {err:?}"))?;
 
     match (
         expected.new_payload_request_root == got.new_payload_request_root,
