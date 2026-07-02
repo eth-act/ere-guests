@@ -38,8 +38,6 @@ ere-util-build.workspace = true
 # guest
 default = ["std"]
 std = ["stateless-validator-common/std"]
-# NOTE: Need additional `ethrex-crypto/risc0` to make `KZG_PRECOMPUTE = 0`
-risc0 = ["ethrex-guest-program/risc0", "ethrex-guest-program/c-kzg", "ethrex-crypto/risc0"]
 sp1 = ["ethrex-guest-program/sp1", "ethrex-guest-program/secp256k1"]
 zisk = ["zkvm-interface"]
 zkvm-interface = ["dep:zkvm-interface"]

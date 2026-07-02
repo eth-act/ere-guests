@@ -33,9 +33,6 @@ macro_rules! declare_test {
 
 // Ethrex
 
-declare_test!(Ethrex, Risc0, RpcBpo2);
-declare_test!(Ethrex, Risc0, RpcGlamsterdamDevnet5);
-declare_test!(Ethrex, Risc0, EestBalDevnet7);
 declare_test!(Ethrex, SP1, RpcBpo2);
 declare_test!(Ethrex, SP1, RpcGlamsterdamDevnet5);
 declare_test!(Ethrex, SP1, EestBalDevnet7);
@@ -44,18 +41,17 @@ declare_test!(Ethrex, Zisk, RpcGlamsterdamDevnet5);
 // NOTE: `should_panic` should be unnecessary when upgraded to `zisk@v1.0.0-beta`
 declare_test!(Ethrex, Zisk, EestBalDevnet7, should_panic);
 
-// Reth (EEST is skipped)
+// Reth
 
-declare_test!(Reth, Airbender, RpcBpo2);
-declare_test!(Reth, Airbender, RpcGlamsterdamDevnet5);
 declare_test!(Reth, OpenVM, RpcBpo2);
 declare_test!(Reth, OpenVM, RpcGlamsterdamDevnet5);
-declare_test!(Reth, Risc0, RpcBpo2);
-declare_test!(Reth, Risc0, RpcGlamsterdamDevnet5);
+declare_test!(Reth, OpenVM, EestBalDevnet7, should_panic);
 declare_test!(Reth, SP1, RpcBpo2);
 declare_test!(Reth, SP1, RpcGlamsterdamDevnet5);
+declare_test!(Reth, SP1, EestBalDevnet7, should_panic);
 declare_test!(Reth, Zisk, RpcBpo2);
 declare_test!(Reth, Zisk, RpcGlamsterdamDevnet5);
+declare_test!(Reth, Zisk, EestBalDevnet7, should_panic);
 
 // Zesu (only bal-devnet-7)
 

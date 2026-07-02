@@ -24,20 +24,14 @@ jobs:
           - ethrex
           - reth
         zkvm:
-          - airbender
           - openvm
-          - risc0
           - sp1
           - zisk
         exclude:
-          - { guest: ethrex, zkvm: airbender }
           - { guest: ethrex, zkvm: openvm }
         include:
-          - { zkvm: openvm, eest: true }
-          - { zkvm: sp1,    eest: true }
-          - { zkvm: zisk,   eest: true }
-          - { zkvm: zisk, eest: true, external: true, guest: nethermind }
-          - { zkvm: zisk, eest: true, external: true, guest: zesu }
+          - { zkvm: zisk, external: true, guest: nethermind }
+          - { zkvm: zisk, external: true, guest: zesu }
           - { zkvm: zisk, guest: ethrex, ere_profile: ethrex }
     steps:
       - name: Checkout code
@@ -99,7 +93,6 @@ jobs:
           cargo test --release --package stateless-validator-test --test zkvm_execution -- ${{ matrix.guest }}_${{ matrix.zkvm }}_rpc --test-threads=1
 
       - name: Test zkVM execution (EEST fixtures)
-        if: matrix.eest == true
         env:
           RUST_LOG: info,ere_server=error
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere

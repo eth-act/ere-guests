@@ -17,7 +17,7 @@ TARGET_DIR = ROOT / "target"
 REPOSITORY = "eth-act/ere-guests"
 GUEST_PREFIX = "stateless-validator-"
 COMPILED_ELS = ("ethrex", "reth")
-ZKVMS = ("airbender", "openvm", "risc0", "sp1", "zisk")
+ZKVMS = ("openvm", "sp1", "zisk")
 
 TABLE_HEADER = (
     "| EL | EL Version | zkVM | zkVM Version | Target | ELF | Program VK |",

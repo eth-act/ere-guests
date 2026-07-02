@@ -13,11 +13,9 @@ use stateless_validator_common::Sha256Hasher;
 pub(crate) fn crypto() -> Arc<dyn Crypto> {
     #[cfg(feature = "zkvm-interface")]
     return zkvm_interface::crypto();
-    #[cfg(feature = "risc0")]
-    return Arc::new(ethrex_guest_program::crypto::risc0::Risc0Crypto);
     #[cfg(feature = "sp1")]
     return Arc::new(ethrex_guest_program::crypto::sp1::Sp1Crypto);
-    #[cfg(not(any(feature = "zkvm-interface", feature = "risc0", feature = "sp1")))]
+    #[cfg(not(any(feature = "zkvm-interface", feature = "sp1")))]
     return Arc::new(ethrex_guest_program::crypto::NativeCrypto);
 }
 

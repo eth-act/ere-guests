@@ -54,7 +54,7 @@ jobs:
         shell: bash
         run: |
           .github/scripts/check-duplicate-pkg.sh \
-            --include '^(ere|ethrex|alloy|revm|reth|stateless|openvm|risc0|sp1|zisk)'
+            --include '^(ere|ethrex|alloy|revm|reth|stateless|openvm|sp1|zisk)'
 
   test:
     name: Test and clippy workspace crates
