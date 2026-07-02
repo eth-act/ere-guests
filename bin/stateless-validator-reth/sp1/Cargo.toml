@@ -17,18 +17,21 @@ revm = { version = "40.0.3", default-features = false, features = ["bn"] }
 kzg-rs = "0.2.8"
 
 # ere
-ere-platform-sp1 = { git = "https://github.com/eth-act/ere", rev = "cb148727f0a0606f16e91106b7fba9b7a462ef04" }
+ere-platform-sp1 = { git = "https://github.com/eth-act/ere", rev = "968d72e1ca55e8744ff3517460f0bbd3ee88bd4b" }
 
 # local
-stateless-validator-reth = { path = "../../../crates/stateless-validator-reth" }
+stateless-validator-reth = { path = "../../../crates/stateless-validator-reth", features = [
+    "sp1",
+] }
 
 [patch.crates-io]
-# Copied from https://github.com/succinctlabs/rsp/blob/6275f93/bin/client/Cargo.toml#L20-L26.
-sha2 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", tag = "patch-sha2-0.10.9-sp1-6.0.0", package = "sha2" }
-sha3 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", tag = "patch-sha3-0.11.0-sp1-6.0.0" }
-bn = { git = "https://github.com/sp1-patches/bn", tag = "patch-0.6.0-sp1-6.0.0-substrate-bn", package = "substrate-bn" }
-k256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-k256-13.4-sp1-6.0.0" }
-p256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-p256-13.2-sp1-6.0.0" }
+sp1-lib = { git = "https://github.com/han0110/sp1", rev = "8564a70ea1952826fc0926eba5a3ce62af53ffac" }
+
+[patch."https://github.com/succinctlabs/sp1.git"]
+sp1-lib = { git = "https://github.com/han0110/sp1", rev = "8564a70ea1952826fc0926eba5a3ce62af53ffac" }
+sp1-primitives = { git = "https://github.com/han0110/sp1", rev = "8564a70ea1952826fc0926eba5a3ce62af53ffac" }
+sp1-zkvm = { git = "https://github.com/han0110/sp1", rev = "8564a70ea1952826fc0926eba5a3ce62af53ffac" }
+sp1-libzkevm = { git = "https://github.com/han0110/sp1", rev = "8564a70ea1952826fc0926eba5a3ce62af53ffac", package = "libzkevm" }
 
 [profile.release]
 codegen-units = 1

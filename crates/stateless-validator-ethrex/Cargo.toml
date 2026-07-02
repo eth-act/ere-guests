@@ -61,7 +61,7 @@ openvm = [
     "dep:openvm-kzg",
     "dep:bls12_381",
 ]
-sp1 = ["ethrex-guest-program/sp1", "ethrex-guest-program/secp256k1"]
+sp1 = ["zkvm-interface"]
 zisk = ["zkvm-interface"]
 zkvm-interface = ["dep:zkvm-interface"]
 

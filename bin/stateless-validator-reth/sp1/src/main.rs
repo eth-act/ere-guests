@@ -3,13 +3,11 @@
 #![no_main]
 
 use ere_platform_sp1::{SP1Platform, sp1_zkvm};
-use stateless_validator_reth::guest::entrypoint;
-
-mod crypto;
+use stateless_validator_reth::guest::{crypto::zkvm_interface, entrypoint};
 
 sp1_zkvm::entrypoint!(main);
 
 fn main() {
-    crypto::install_crypto();
+    zkvm_interface::install_crypto();
     entrypoint::<SP1Platform>();
 }

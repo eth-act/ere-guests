@@ -13,13 +13,11 @@ use stateless_validator_common::Sha256Hasher;
 /// Returns the [`Crypto`] implementation for the active zkVM feature.
 #[allow(unreachable_code)]
 pub(crate) fn crypto() -> Arc<dyn Crypto> {
-    #[cfg(feature = "zkvm-interface")]
-    return zkvm_interface::crypto();
     #[cfg(feature = "openvm")]
     return openvm::crypto();
-    #[cfg(feature = "sp1")]
-    return Arc::new(ethrex_guest_program::crypto::sp1::Sp1Crypto);
-    #[cfg(not(any(feature = "zkvm-interface", feature = "openvm", feature = "sp1")))]
+    #[cfg(feature = "zkvm-interface")]
+    return zkvm_interface::crypto();
+    #[cfg(not(any(feature = "openvm", feature = "zkvm-interface")))]
     return Arc::new(ethrex_guest_program::crypto::NativeCrypto);
 }
 

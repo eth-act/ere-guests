@@ -56,6 +56,7 @@ ere-util-build.workspace = true
 default = ["std"]
 std = ["once_cell/std", "stateless-validator-common/std"]
 openvm = ["dep:openvm-sha2"]
+sp1 = ["zkvm-interface"]
 zisk = ["zkvm-interface"]
 zkvm-interface = ["alloy-consensus/crypto-backend", "dep:zkvm-interface"]
 

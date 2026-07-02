@@ -10,7 +10,7 @@ version = "0.1.0"
 # NOTE: Using `default-features = false, features = ["inputcpy"]` mainly to disable the other
 #       feature enabled by default `user-hints`, which this binary doesn't use but introduces lots
 #       of dependencies.
-ere-platform-zisk = { git = "https://github.com/eth-act/ere", rev = "cb148727f0a0606f16e91106b7fba9b7a462ef04", default-features = false, features = ["inputcpy"] }
+ere-platform-zisk = { git = "https://github.com/eth-act/ere", rev = "968d72e1ca55e8744ff3517460f0bbd3ee88bd4b", default-features = false, features = ["inputcpy"] }
 
 # local
 stateless-validator-ethrex = { path = "../../../crates/stateless-validator-ethrex", features = [

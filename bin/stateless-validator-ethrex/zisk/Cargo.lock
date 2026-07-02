@@ -806,12 +806,12 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 [[package]]
 name = "ere-platform-core"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
+source = "git+https://github.com/eth-act/ere?rev=968d72e1ca55e8744ff3517460f0bbd3ee88bd4b#968d72e1ca55e8744ff3517460f0bbd3ee88bd4b"
 
 [[package]]
 name = "ere-platform-zisk"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
+source = "git+https://github.com/eth-act/ere?rev=968d72e1ca55e8744ff3517460f0bbd3ee88bd4b#968d72e1ca55e8744ff3517460f0bbd3ee88bd4b"
 dependencies = [
  "ere-platform-core",
  "ziskos",
@@ -820,7 +820,7 @@ dependencies = [
 [[package]]
 name = "ere-util-build"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
+source = "git+https://github.com/eth-act/ere?rev=968d72e1ca55e8744ff3517460f0bbd3ee88bd4b#968d72e1ca55e8744ff3517460f0bbd3ee88bd4b"
 dependencies = [
  "cargo_metadata",
 ]

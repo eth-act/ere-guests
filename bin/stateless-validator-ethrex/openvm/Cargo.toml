@@ -14,7 +14,7 @@ openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", tag =
 openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3" }
 
 # ere
-ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "cb148727f0a0606f16e91106b7fba9b7a462ef04", features = [
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "968d72e1ca55e8744ff3517460f0bbd3ee88bd4b", features = [
     "std",
 ] }
 
