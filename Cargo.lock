@@ -1602,7 +1602,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 [[package]]
 name = "ere-catalog"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "ere-util-build",
  "serde",
@@ -1612,12 +1612,12 @@ dependencies = [
 [[package]]
 name = "ere-codec"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 
 [[package]]
 name = "ere-compiler-core"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "serde",
 ]
@@ -1625,7 +1625,7 @@ dependencies = [
 [[package]]
 name = "ere-dockerized"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "anyhow",
  "ere-catalog",
@@ -1642,12 +1642,12 @@ dependencies = [
 [[package]]
 name = "ere-platform-core"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 
 [[package]]
 name = "ere-prover-core"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "anyhow",
  "auto_impl",
@@ -1664,7 +1664,7 @@ dependencies = [
 [[package]]
 name = "ere-server-api"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "prost",
  "serde",
@@ -1674,7 +1674,7 @@ dependencies = [
 [[package]]
 name = "ere-server-client"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "bincode 2.0.1",
  "ere-prover-core",
@@ -1686,7 +1686,7 @@ dependencies = [
 [[package]]
 name = "ere-util-build"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "cargo_metadata",
 ]
@@ -1694,7 +1694,7 @@ dependencies = [
 [[package]]
 name = "ere-util-tokio"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "tokio",
 ]
@@ -1702,7 +1702,7 @@ dependencies = [
 [[package]]
 name = "ere-verifier-core"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "auto_impl",
  "ere-codec",
@@ -1789,7 +1789,6 @@ dependencies = [
  "ark-ec",
  "ark-ff",
  "blst",
- "c-kzg",
  "ethereum-types",
  "hex-literal 0.4.1",
  "k256",
@@ -3315,6 +3314,50 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "openvm-custom-insn"
+version = "0.1.0"
+source = "git+https://github.com/openvm-org/openvm.git?tag=v2.0.0-rc.3#fa209f898baa38ddfdcb73b95d2cb3ff3d428c36"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.118",
+]
+
+[[package]]
+name = "openvm-platform"
+version = "2.0.0-beta.2"
+source = "git+https://github.com/openvm-org/openvm.git?tag=v2.0.0-rc.3#fa209f898baa38ddfdcb73b95d2cb3ff3d428c36"
+dependencies = [
+ "openvm-custom-insn",
+ "openvm-rv32im-guest",
+]
+
+[[package]]
+name = "openvm-rv32im-guest"
+version = "2.0.0-beta.2"
+source = "git+https://github.com/openvm-org/openvm.git?tag=v2.0.0-rc.3#fa209f898baa38ddfdcb73b95d2cb3ff3d428c36"
+dependencies = [
+ "openvm-custom-insn",
+ "strum_macros 0.26.4",
+]
+
+[[package]]
+name = "openvm-sha2"
+version = "2.0.0-beta.2"
+source = "git+https://github.com/openvm-org/openvm.git?tag=v2.0.0-rc.3#fa209f898baa38ddfdcb73b95d2cb3ff3d428c36"
+dependencies = [
+ "openvm-sha2-guest",
+]
+
+[[package]]
+name = "openvm-sha2-guest"
+version = "2.0.0-beta.2"
+source = "git+https://github.com/openvm-org/openvm.git?tag=v2.0.0-rc.3#fa209f898baa38ddfdcb73b95d2cb3ff3d428c36"
+dependencies = [
+ "openvm-platform",
 ]
 
 [[package]]
@@ -5318,6 +5361,7 @@ dependencies = [
  "ere-platform-core",
  "ere-util-build",
  "once_cell",
+ "openvm-sha2",
  "paste",
  "reth-chainspec",
  "reth-ethereum-primitives",
@@ -5377,7 +5421,20 @@ version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af23d6f6c1a224baef9d3f61e287d2761385a5b88fdab4eb4c6f11aeb54c4bcf"
 dependencies = [
- "strum_macros",
+ "strum_macros 0.27.2",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.26.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "rustversion",
+ "syn 2.0.118",
 ]
 
 [[package]]

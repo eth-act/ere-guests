@@ -1197,12 +1197,12 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 [[package]]
 name = "ere-platform-core"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 
 [[package]]
 name = "ere-platform-sp1"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "ere-platform-core",
  "sp1-zkvm",
@@ -1211,7 +1211,7 @@ dependencies = [
 [[package]]
 name = "ere-util-build"
 version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=2505e96eb9821b7aa561b56eeeddc145baa138fd#2505e96eb9821b7aa561b56eeeddc145baa138fd"
+source = "git+https://github.com/eth-act/ere?rev=cb148727f0a0606f16e91106b7fba9b7a462ef04#cb148727f0a0606f16e91106b7fba9b7a462ef04"
 dependencies = [
  "cargo_metadata",
 ]
@@ -3452,7 +3452,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 [[package]]
 name = "stateless"
 version = "0.1.0"
-source = "git+https://github.com/han0110/stateless?branch=feature%2Fv2.3.0#81f662b467ec6c25c323b3429c5ab4305a3088ac"
+source = "git+https://github.com/paradigmxyz/stateless?rev=2236845a84c3a7515312214e8a507e4731d73bb5#2236845a84c3a7515312214e8a507e4731d73bb5"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -3750,7 +3750,7 @@ dependencies = [
 [[package]]
 name = "tries"
 version = "0.1.0"
-source = "git+https://github.com/han0110/stateless?branch=feature%2Fv2.3.0#81f662b467ec6c25c323b3429c5ab4305a3088ac"
+source = "git+https://github.com/paradigmxyz/stateless?rev=2236845a84c3a7515312214e8a507e4731d73bb5#2236845a84c3a7515312214e8a507e4731d73bb5"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",
@@ -3992,7 +3992,7 @@ dependencies = [
 [[package]]
 name = "zeth-mpt"
 version = "0.1.0"
-source = "git+https://github.com/han0110/stateless?branch=feature%2Fv2.3.0#81f662b467ec6c25c323b3429c5ab4305a3088ac"
+source = "git+https://github.com/paradigmxyz/stateless?rev=2236845a84c3a7515312214e8a507e4731d73bb5#2236845a84c3a7515312214e8a507e4731d73bb5"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",
