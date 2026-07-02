@@ -5,7 +5,7 @@ use std::io::{self, Write};
 use ere_platform_core::Platform;
 
 use crate::{
-    execution::{ExecutionFailures, ExecutionOutput, run_execution},
+    execution::{ExecutionFailures, run_execution},
     fixture::{FixturePreset, preset_fixtures},
 };
 
@@ -32,10 +32,7 @@ impl Platform for HostPlatform {
 
 /// Test execution on host.
 pub fn test_host_execution(preset: FixturePreset, execute: fn(&[u8]) -> Vec<u8>) {
-    let failures = run_execution(preset_fixtures(preset), &|input| {
-        let output = execute(&input);
-        Ok(ExecutionOutput::Bytes(output))
-    });
+    let failures = run_execution(preset_fixtures(preset), &|input| Ok(execute(&input)));
     assert!(failures.is_empty(), "{}", ExecutionFailures(&failures));
 }
 

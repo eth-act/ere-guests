@@ -19,7 +19,7 @@ alloy-primitives = { version = "1.6.0", default-features = false, features = [
 # NOTE: Using `default-features = false, features = ["inputcpy"]` mainly to disable the other
 #       feature enabled by default `user-hints`, which this binary doesn't use but introduces lots
 #       of dependencies.
-ere-platform-zisk = { git = "https://github.com/eth-act/ere", rev = "2505e96eb9821b7aa561b56eeeddc145baa138fd", default-features = false, features = [
+ere-platform-zisk = { git = "https://github.com/eth-act/ere", rev = "cb148727f0a0606f16e91106b7fba9b7a462ef04", default-features = false, features = [
     "inputcpy",
 ] }
 

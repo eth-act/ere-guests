@@ -20,8 +20,3 @@ pub(crate) fn sha256_hasher() -> impl Sha256Hasher {
     #[cfg(not(any(feature = "openvm", feature = "zkvm-interface")))]
     return stateless_validator_common::Sha2Hasher;
 }
-
-/// SHA256 hashes the data using the [`sha256_hasher`].
-pub(crate) fn sha256(data: &[u8]) -> [u8; 32] {
-    sha256_hasher().hash(data)
-}

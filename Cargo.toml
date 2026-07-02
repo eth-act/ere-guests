@@ -96,9 +96,9 @@ libssz-types = { version = "0.2.2", default-features = false, features = ["alloc
 zkvm-interface = { git = "https://github.com/eth-act/zkvm-standards", rev = "282cd356c3a0498416bb0619f9c8a347ce9933fb" }
 
 # ere
-ere-dockerized = { git = "https://github.com/eth-act/ere", rev = "2505e96eb9821b7aa561b56eeeddc145baa138fd" }
-ere-platform-core = { git = "https://github.com/eth-act/ere", rev = "2505e96eb9821b7aa561b56eeeddc145baa138fd" }
-ere-util-build = { git = "https://github.com/eth-act/ere", rev = "2505e96eb9821b7aa561b56eeeddc145baa138fd" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", rev = "cb148727f0a0606f16e91106b7fba9b7a462ef04" }
+ere-platform-core = { git = "https://github.com/eth-act/ere", rev = "cb148727f0a0606f16e91106b7fba9b7a462ef04" }
+ere-util-build = { git = "https://github.com/eth-act/ere", rev = "cb148727f0a0606f16e91106b7fba9b7a462ef04" }
 
 # local
 stateless-validator-common = { path = "crates/stateless-validator-common", default-features = false }

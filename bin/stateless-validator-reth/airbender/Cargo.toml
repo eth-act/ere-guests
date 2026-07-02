@@ -14,7 +14,7 @@ alloy-primitives = { version = "1.6.0", default-features = false, features = [
 revm = { version = "40.0.3", default-features = false, features = ["bn"] }
 
 # ere
-ere-platform-airbender = { git = "https://github.com/eth-act/ere", rev = "2505e96eb9821b7aa561b56eeeddc145baa138fd", features = [
+ere-platform-airbender = { git = "https://github.com/eth-act/ere", rev = "cb148727f0a0606f16e91106b7fba9b7a462ef04", features = [
     "std",
 ] }
 

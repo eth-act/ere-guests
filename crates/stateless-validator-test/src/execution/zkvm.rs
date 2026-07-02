@@ -19,7 +19,7 @@ use stateless_validator_common::guest::{
 };
 
 use crate::{
-    execution::{ExecutionFailure, ExecutionOutput, GuestKind, run_execution},
+    execution::{ExecutionFailure, GuestKind, run_execution},
     fixture::{FixturePreset, preset_fixtures},
 };
 
@@ -132,11 +132,7 @@ pub fn run_stateless_validator_execution(
             GuestKind::Nethermind => nethermind_input(input)?,
             _ => input,
         };
-        let output = zkvm.execute(&Input::new().with_stdin(input))?.0.to_vec();
-        Ok(match guest_kind {
-            GuestKind::Ethrex | GuestKind::Reth => ExecutionOutput::Hash(output),
-            GuestKind::Zesu | GuestKind::Nethermind => ExecutionOutput::Bytes(output),
-        })
+        Ok(zkvm.execute(&Input::new().with_stdin(input))?.0.to_vec())
     })
 }
 

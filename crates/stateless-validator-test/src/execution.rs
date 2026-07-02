@@ -6,8 +6,8 @@ use std::{
     time::Instant,
 };
 
+use anyhow::{Context, bail};
 use rayon::prelude::*;
-use sha2::{Digest, Sha256};
 use stateless_validator_common::{SszDecode, guest::StatelessValidationResult};
 use tracing::{debug, info};
 use tracing_subscriber::EnvFilter;
@@ -42,76 +42,6 @@ impl GuestKind {
     }
 }
 
-/// The public values written by a guest execution.
-#[derive(Debug, Clone)]
-pub enum ExecutionOutput {
-    /// The stateless output bytes.
-    Bytes(Vec<u8>),
-    /// The sha256 digest of the stateless output bytes.
-    Hash(Vec<u8>),
-}
-
-impl ExecutionOutput {
-    fn matches(self, expected_stateless_output_bytes: Vec<u8>) -> anyhow::Result<()> {
-        match self {
-            Self::Bytes(stateless_output_bytes) => {
-                let expected_stateless_output =
-                    StatelessValidationResult::from_ssz_bytes(&expected_stateless_output_bytes)
-                        .map_err(|err| {
-                            anyhow::anyhow!("Decode fixture output bytes failure: {err:?}")
-                        })?;
-                if let Some((stateless_output_bytes, trailing)) =
-                    stateless_output_bytes.split_at_checked(expected_stateless_output_bytes.len())
-                    && trailing.iter().all(|byte| *byte == 0)
-                {
-                    match StatelessValidationResult::from_ssz_bytes(stateless_output_bytes) {
-                        Ok(stateless_output) => {
-                            if stateless_output != expected_stateless_output {
-                                anyhow::bail!(
-                                    "Output mismatch, expected {expected_stateless_output:?}, got {stateless_output:?}",
-                                );
-                            }
-                        }
-                        Err(err) => {
-                            anyhow::bail!("Decode execute output bytes failure: {err:?}")
-                        }
-                    }
-                } else {
-                    anyhow::bail!(
-                        "Output bytes mismatch, expected {}, got {}",
-                        const_hex::encode_prefixed(expected_stateless_output_bytes),
-                        const_hex::encode_prefixed(stateless_output_bytes)
-                    )
-                }
-            }
-            Self::Hash(stateless_output_hash) => {
-                let expected_stateless_output_hash =
-                    Sha256::digest(expected_stateless_output_bytes);
-
-                if let Some((stateless_output_hash, trailing)) =
-                    stateless_output_hash.split_at_checked(expected_stateless_output_hash.len())
-                    && trailing.iter().all(|byte| *byte == 0)
-                {
-                    if stateless_output_hash != &expected_stateless_output_hash[..] {
-                        anyhow::bail!(
-                            "Output hash mismatch, expected {}, got {}",
-                            const_hex::encode_prefixed(expected_stateless_output_hash),
-                            const_hex::encode_prefixed(stateless_output_hash)
-                        )
-                    }
-                } else {
-                    anyhow::bail!(
-                        "Output hash mismatch, expected {}, got {}",
-                        const_hex::encode_prefixed(expected_stateless_output_hash),
-                        const_hex::encode_prefixed(stateless_output_hash)
-                    )
-                }
-            }
-        };
-        Ok(())
-    }
-}
-
 /// A fixture that failed to execute or match its expected output.
 #[derive(Debug, Clone)]
 pub struct ExecutionFailure {
@@ -139,7 +69,7 @@ impl Display for ExecutionFailures<'_> {
 /// Runs `execute` over every fixture in parallel, returning the failures.
 pub fn run_execution(
     fixtures: impl IntoIterator<Item = StatelessValidatorFixture>,
-    execute: &(impl Fn(Vec<u8>) -> anyhow::Result<ExecutionOutput> + Sync),
+    execute: &(impl Fn(Vec<u8>) -> anyhow::Result<Vec<u8>> + Sync),
 ) -> Vec<ExecutionFailure> {
     static INIT_TRACING: Once = Once::new();
     INIT_TRACING.call_once(|| {
@@ -160,7 +90,7 @@ pub fn run_execution(
             let name = fixture.name;
             let start = Instant::now();
             if let Err(err) = execute(fixture.stateless_input_bytes)
-                .and_then(|output| output.matches(fixture.stateless_output_bytes))
+                .and_then(|output| matches_output(output, fixture.stateless_output_bytes))
                 .map_err(|err| err.to_string())
             {
                 Some(ExecutionFailure { name, err })
@@ -178,4 +108,49 @@ pub fn run_execution(
     }
 
     failures
+}
+
+fn matches_output(got_bytes: Vec<u8>, expectecd_bytes: Vec<u8>) -> anyhow::Result<()> {
+    let Some(got_bytes) =
+        got_bytes
+            .split_at_checked(expectecd_bytes.len())
+            .and_then(|(got_bytes, trailing)| {
+                trailing.iter().all(|byte| *byte == 0).then_some(got_bytes)
+            })
+    else {
+        bail!(
+            "Output bytes mismatch, expected {}, got {}",
+            const_hex::encode_prefixed(expectecd_bytes),
+            const_hex::encode_prefixed(got_bytes)
+        )
+    };
+
+    let got = StatelessValidationResult::from_ssz_bytes(got_bytes)
+        .context("Decode execute output bytes failure")?;
+    let expected = StatelessValidationResult::from_ssz_bytes(&expectecd_bytes)
+        .context("Decode fixture output bytes failure")?;
+
+    match (
+        expected.new_payload_request_root == got.new_payload_request_root,
+        expected.successful_validation == got.successful_validation,
+        expected.chain_config == got.chain_config,
+    ) {
+        (true, true, true) => Ok(()),
+        (false, true, true) => bail!(
+            "Output new_payload_request_root mismatch, expected {}, got {}",
+            const_hex::encode_prefixed(expected.new_payload_request_root),
+            const_hex::encode_prefixed(got.new_payload_request_root)
+        ),
+        (true, false, true) => bail!(
+            "Output successful_validation mismatch, expected {}, got {}",
+            expected.successful_validation,
+            got.successful_validation
+        ),
+        (true, true, false) => bail!(
+            "Output chain_config mismatch, expected {:?}, got {:?}",
+            expected.chain_config,
+            got.chain_config
+        ),
+        _ => bail!("Output mismatch, expected {expected:?}, got {got:?}"),
+    }
 }

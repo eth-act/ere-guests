@@ -1,21 +1,22 @@
-//! Copied and modified from https://github.com/axiom-crypto/openvm-eth/blob/938d3c0/crates/revm-crypto/src/lib.rs.
-//!
 //! OpenVM Crypto Implementation for REVM
 //!
 //! This module provides OpenVM-optimized implementations of cryptographic operations
 //! for both transaction validation (via Alloy crypto provider) and precompile execution.
+
+use std::{sync::Arc, vec::Vec};
 
 use alloy_consensus::crypto::{
     backend::{install_default_provider, CryptoProvider},
     RecoveryError,
 };
 use alloy_primitives::Address;
+use openvm_curve_utils::SubgroupCheck;
 use openvm_ecc_guest::{
     algebra::IntMod,
     weierstrass::{IntrinsicCurve, WeierstrassPoint},
     AffinePoint, Group,
 };
-use openvm_k256::ecdsa::{RecoveryId, Signature, VerifyingKey, signature::hazmat::PrehashVerifier};
+use openvm_k256::ecdsa::{signature::hazmat::PrehashVerifier, RecoveryId, Signature, VerifyingKey};
 use openvm_keccak256::keccak256;
 use openvm_kzg::{Bytes32, Bytes48, KzgProof};
 #[allow(unused_imports, clippy::single_component_path_imports)]
@@ -25,6 +26,7 @@ use openvm_pairing::{
     bn254::{self as bn, Bn254},
     PairingCheck,
 };
+use openvm_sha2::Sha256;
 use revm::{
     install_crypto,
     precompile::{
@@ -39,10 +41,6 @@ use revm::{
         Crypto, PrecompileHalt,
     },
 };
-use std::{sync::Arc, vec::Vec};
-
-mod subgroup_check;
-use subgroup_check::SubgroupCheck;
 
 // BN254 constants
 const BN_FQ_LEN: usize = 32;
@@ -81,11 +79,9 @@ impl CryptoProvider for OpenVmK256Provider {
             VerifyingKey::recover_from_prehash_noverify(msg, &signature.to_bytes(), recovery_id)
                 .map_err(|_| RecoveryError::new())?;
 
-        // Get public key coordinates
-        let public_key = recovered_key.as_affine();
-        let mut encoded_pubkey = [0u8; 64];
-        encoded_pubkey[..32].copy_from_slice(&WeierstrassPoint::x(public_key).to_be_bytes());
-        encoded_pubkey[32..].copy_from_slice(&WeierstrassPoint::y(public_key).to_be_bytes());
+        // Hash the uncompressed SEC1 key without the 0x04 prefix.
+        let public_key = recovered_key.to_encoded_point(false);
+        let encoded_pubkey = &public_key.as_bytes()[1..65];
 
         // Hash to get Ethereum address
         let pubkey_hash = keccak256(&encoded_pubkey);
@@ -123,7 +119,7 @@ struct OpenVmCrypto;
 impl Crypto for OpenVmCrypto {
     /// Custom SHA-256 implementation with openvm optimization
     fn sha256(&self, input: &[u8]) -> [u8; 32] {
-        openvm_sha2::sha256(input)
+        Sha256::digest(input).into()
     }
 
     /// Custom BN254 G1 addition with openvm optimization
@@ -178,8 +174,9 @@ impl Crypto for OpenVmCrypto {
         a: BlsG1Point,
         b: BlsG1Point,
     ) -> Result<[u8; BLS_G1_LEN], PrecompileHalt> {
-        let p1 = read_bls_g1_point(&a)?;
-        let p2 = read_bls_g1_point(&b)?;
+        // EIP-2537 G1ADD validates on-curve only, not subgroup membership.
+        let p1 = read_bls_g1_point_on_curve(&a)?;
+        let p2 = read_bls_g1_point_on_curve(&b)?;
         let sum = p1 + p2;
         Ok(encode_bls_g1_point(&sum))
     }
@@ -212,8 +209,9 @@ impl Crypto for OpenVmCrypto {
         a: BlsG2Point,
         b: BlsG2Point,
     ) -> Result<[u8; BLS_G2_LEN], PrecompileHalt> {
-        let p1 = read_bls_g2_point(&a)?;
-        let p2 = read_bls_g2_point(&b)?;
+        // EIP-2537 G2ADD validates on-curve only, not subgroup membership.
+        let p1 = read_bls_g2_point_on_curve(&a)?;
+        let p2 = read_bls_g2_point_on_curve(&b)?;
         let sum = p1 + p2;
         Ok(encode_bls_g2_point(&sum))
     }
@@ -290,10 +288,8 @@ impl Crypto for OpenVmCrypto {
             VerifyingKey::recover_from_prehash_noverify(msg_hash, &sig.to_bytes(), recovery_id)
                 .map_err(|_| PrecompileHalt::other("Key recovery failed"))?;
 
-        let public_key = recovered_key.as_affine();
-        let mut encoded_pubkey = [0u8; 64];
-        encoded_pubkey[..32].copy_from_slice(&WeierstrassPoint::x(public_key).to_be_bytes());
-        encoded_pubkey[32..].copy_from_slice(&WeierstrassPoint::y(public_key).to_be_bytes());
+        let public_key = recovered_key.to_encoded_point(false);
+        let encoded_pubkey = &public_key.as_bytes()[1..65];
 
         let pubkey_hash = keccak256(&encoded_pubkey);
         let mut address = [0u8; 32];
@@ -319,10 +315,10 @@ impl Crypto for OpenVmCrypto {
             Bytes32::from_slice(z).map_err(|_| PrecompileHalt::other("invalid z bytes"))?;
         let y_bytes =
             Bytes32::from_slice(y).map_err(|_| PrecompileHalt::other("invalid y bytes"))?;
-        let proof_bytes = Bytes48::from_slice(proof)
-            .map_err(|_| PrecompileHalt::other("invalid proof bytes"))?;
+        let proof_bytes =
+            Bytes48::from_slice(proof).map_err(|_| PrecompileHalt::other("invalid proof bytes"))?;
 
-        KzgProof::verify_kzg_proof(
+        let valid = KzgProof::verify_kzg_proof(
             &commitment_bytes,
             &z_bytes,
             &y_bytes,
@@ -330,7 +326,11 @@ impl Crypto for OpenVmCrypto {
             kzg_settings,
         )
         .map_err(|_| PrecompileHalt::other("openvm kzg proof verification failed"))?;
-        Ok(())
+        if valid {
+            Ok(())
+        } else {
+            Err(PrecompileHalt::other("openvm kzg proof is invalid"))
+        }
     }
 
     /// Custom modular exponentiation with BN254 Fr acceleration
@@ -350,7 +350,11 @@ fn is_bn254_fr(modulus: &[u8]) -> bool {
         None => return false, // all zeros
     };
     // bn::Scalar::MODULUS is little-endian; compare against reversed input
-    stripped.len() == BN_SCALAR_LEN && stripped.iter().rev().eq(bn::Scalar::MODULUS.as_ref().iter())
+    stripped.len() == BN_SCALAR_LEN
+        && stripped
+            .iter()
+            .rev()
+            .eq(bn::Scalar::MODULUS.as_ref().iter())
 }
 
 /// Accelerated modexp for BN254 Fr using field arithmetic intrinsics.
@@ -407,7 +411,10 @@ fn read_bn_g1_point(input: &[u8]) -> Result<bn::G1Affine, PrecompileHalt> {
     }
     let px = read_bn_fq(&input[0..BN_FQ_LEN])?;
     let py = read_bn_fq(&input[BN_FQ_LEN..BN_G1_LEN])?;
-    let point = bn::G1Affine::from_xy(px, py).ok_or(PrecompileHalt::Bn254AffineGFailedToCreate)?;
+    // SAFETY: `read_bn_fq` produces canonical Fp elements; `from_xy` itself checks the curve
+    // equation and returns `None` if `(px, py)` is not on the curve.
+    let point = unsafe { bn::G1Affine::from_xy(px, py) }
+        .ok_or(PrecompileHalt::Bn254AffineGFailedToCreate)?;
     if point.is_in_correct_subgroup() {
         Ok(point)
     } else {
@@ -422,7 +429,10 @@ fn read_bn_g2_point(input: &[u8]) -> Result<bn::G2Affine, PrecompileHalt> {
     }
     let c0 = read_bn_fq2(&input[0..BN_G1_LEN])?;
     let c1 = read_bn_fq2(&input[BN_G1_LEN..BN_G2_LEN])?;
-    let point = bn::G2Affine::from_xy(c0, c1).ok_or(PrecompileHalt::Bn254AffineGFailedToCreate)?;
+    // SAFETY: `read_bn_fq2` produces canonical Fp2 elements; `from_xy` itself checks the curve
+    // equation and returns `None` if `(c0, c1)` is not on the twist.
+    let point = unsafe { bn::G2Affine::from_xy(c0, c1) }
+        .ok_or(PrecompileHalt::Bn254AffineGFailedToCreate)?;
     if point.is_in_correct_subgroup() {
         Ok(point)
     } else {
@@ -483,7 +493,10 @@ fn read_bls_fp2(c0: &[u8], c1: &[u8]) -> Result<bls::Fp2, PrecompileHalt> {
 fn read_bls_g1_point(point: &BlsG1Point) -> Result<bls::G1Affine, PrecompileHalt> {
     let px = read_bls_fp(&point.0)?;
     let py = read_bls_fp(&point.1)?;
-    let point = bls::G1Affine::from_xy(px, py).ok_or(PrecompileHalt::Bls12381G1NotOnCurve)?;
+    // SAFETY: `read_bls_fp` produces canonical Fp elements; `from_xy` itself checks the curve
+    // equation and returns `None` if `(px, py)` is not on the curve.
+    let point =
+        unsafe { bls::G1Affine::from_xy(px, py) }.ok_or(PrecompileHalt::Bls12381G1NotOnCurve)?;
     if point.is_in_correct_subgroup() {
         Ok(point)
     } else {
@@ -495,12 +508,35 @@ fn read_bls_g1_point(point: &BlsG1Point) -> Result<bls::G1Affine, PrecompileHalt
 fn read_bls_g2_point(point: &BlsG2Point) -> Result<bls::G2Affine, PrecompileHalt> {
     let x = read_bls_fp2(&point.0, &point.1)?;
     let y = read_bls_fp2(&point.2, &point.3)?;
-    let point = bls::G2Affine::from_xy(x, y).ok_or(PrecompileHalt::Bls12381G2NotOnCurve)?;
+    // SAFETY: `read_bls_fp2` produces canonical Fp2 elements; `from_xy` itself checks the curve
+    // equation and returns `None` if `(x, y)` is not on the twist.
+    let point =
+        unsafe { bls::G2Affine::from_xy(x, y) }.ok_or(PrecompileHalt::Bls12381G2NotOnCurve)?;
     if point.is_in_correct_subgroup() {
         Ok(point)
     } else {
         Err(PrecompileHalt::Bls12381G2NotInSubgroup)
     }
+}
+
+/// Reads a BLS12-381 G1 point, validating only that it lies on the curve. Used
+/// by the addition precompile, which per EIP-2537 does not require subgroup
+/// membership (only MSM and pairing do).
+#[inline]
+fn read_bls_g1_point_on_curve(point: &BlsG1Point) -> Result<bls::G1Affine, PrecompileHalt> {
+    let px = read_bls_fp(&point.0)?;
+    let py = read_bls_fp(&point.1)?;
+    unsafe { bls::G1Affine::from_xy(px, py) }.ok_or(PrecompileHalt::Bls12381G1NotOnCurve)
+}
+
+/// Reads a BLS12-381 G2 point, validating only that it lies on the curve. Used
+/// by the addition precompile, which per EIP-2537 does not require subgroup
+/// membership (only MSM and pairing do).
+#[inline]
+fn read_bls_g2_point_on_curve(point: &BlsG2Point) -> Result<bls::G2Affine, PrecompileHalt> {
+    let x = read_bls_fp2(&point.0, &point.1)?;
+    let y = read_bls_fp2(&point.2, &point.3)?;
+    unsafe { bls::G2Affine::from_xy(x, y) }.ok_or(PrecompileHalt::Bls12381G2NotOnCurve)
 }
 
 #[inline]
