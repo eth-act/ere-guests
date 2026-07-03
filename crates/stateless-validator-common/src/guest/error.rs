@@ -23,11 +23,6 @@ pub enum Error {
     /// `InactiveForkConfigError`.
     #[error("ChainConfig active_fork is not active for the target payload")]
     InactiveForkConfig,
-    /// The configured active fork does not match the payload shape. The spec executes only
-    /// Amsterdam and so has no counterpart; this replaces the spec `UnsupportedForkConfigError`
-    /// for multi-fork inputs.
-    #[error("ChainConfig active_fork is not matching the target payload version")]
-    ForkNotMatchingPayload,
 }
 
 impl From<DecodeError> for Error {

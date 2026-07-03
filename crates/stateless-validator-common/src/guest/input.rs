@@ -10,9 +10,12 @@
 #![allow(missing_docs)]
 
 use alloc::vec::Vec;
-use core::fmt::{self, Debug};
+use core::{
+    array,
+    fmt::{self, Debug},
+};
 
-use libssz::{DecodeError, SszDecode, SszEncode};
+use libssz::{BYTES_PER_LENGTH_OFFSET, DecodeError, SszDecode, SszEncode};
 use libssz_derive::{SszDecode, SszEncode};
 use libssz_types::SszList;
 
@@ -123,23 +126,6 @@ impl ProtocolFork {
     /// Returns the SSZ enum value of this fork.
     pub fn as_u64(self) -> u64 {
         self as u64
-    }
-
-    /// Returns whether the payload matches the protocol fork.
-    pub fn matches_payload(&self, new_payload_request: &NewPayloadRequest) -> bool {
-        match self {
-            ProtocolFork::Paris => matches!(new_payload_request, NewPayloadRequest::Bellatrix(_)),
-            ProtocolFork::Shanghai => matches!(new_payload_request, NewPayloadRequest::Capella(_)),
-            ProtocolFork::Cancun => matches!(new_payload_request, NewPayloadRequest::Deneb(_)),
-            ProtocolFork::Prague
-            | ProtocolFork::Osaka
-            | ProtocolFork::BPO1
-            | ProtocolFork::BPO2 => {
-                matches!(new_payload_request, NewPayloadRequest::ElectraFulu(_))
-            }
-            ProtocolFork::Amsterdam => matches!(new_payload_request, NewPayloadRequest::Gloas(_)),
-            _ => false,
-        }
     }
 }
 
@@ -302,8 +288,8 @@ impl ChainConfig {
     /// Validates that the chain configuration is usable for the target payload, following
     /// `validate_chain_config` in the spec with two deliberate differences. The spec's
     /// blob-schedule equality check is performed by the verifier against the result public values
-    /// instead of here, and the spec's `fork != Amsterdam` rejection is generalized to a
-    /// payload-shape match through [`ProtocolFork::matches_payload`] for multi-fork inputs.
+    /// instead of here, and the spec's `fork != Amsterdam` rejection is enforced when
+    /// [`StatelessInput`] decoding selects the payload shape from the active fork.
     pub fn validate(&self, new_payload_request: &NewPayloadRequest) -> Result<(), Error> {
         if self.active_fork.activation.block_number().is_none()
             && self.active_fork.activation.timestamp().is_none()
@@ -318,19 +304,15 @@ impl ChainConfig {
             return Err(Error::InactiveForkConfig);
         }
 
-        if !self.active_fork.fork.matches_payload(new_payload_request) {
-            return Err(Error::ForkNotMatchingPayload);
-        }
-
         Ok(())
     }
 }
 
 /// Canonical input to stateless validation.
 ///
-/// Decoding accepts any payload request shape. The guests reject inputs whose shape does not
-/// match the active fork during chain configuration validation.
-#[derive(Debug, Clone, PartialEq, Eq, SszEncode, SszDecode)]
+/// Decoding selects the payload request shape from the active fork in `chain_config`. An input
+/// whose payload does not match the fork fails to decode.
+#[derive(Debug, Clone, PartialEq, Eq, SszEncode)]
 pub struct StatelessInput {
     /// Consensus-layer payload request to validate statelessly. See [`NewPayloadRequest`] for
     /// structure and links to consensus-specs.
@@ -370,4 +352,84 @@ impl StatelessInput {
             _ => Err(Error::UnsupportedSchemaId(schema_id)),
         }
     }
+}
+
+impl SszDecode for StatelessInput {
+    fn is_fixed_size() -> bool {
+        false
+    }
+
+    fn fixed_size() -> usize {
+        0
+    }
+
+    fn from_ssz_bytes(bytes: &[u8]) -> Result<Self, DecodeError> {
+        use crate::guest::input::{NewPayloadRequest::*, ProtocolFork::*};
+
+        let fields = ssz_split_var_fields::<4>(bytes)?;
+
+        // Decode the other fields as usual.
+        let witness = ExecutionWitness::from_ssz_bytes(fields[1])?;
+        let chain_config = ChainConfig::from_ssz_bytes(fields[2])?;
+        let public_keys = SszList::from_ssz_bytes(fields[3])?;
+
+        // Decode `new_payload_request` from the shape the active fork selects.
+        let new_payload_request = match chain_config.active_fork.fork {
+            Paris => Bellatrix(SszDecode::from_ssz_bytes(fields[0])?),
+            Shanghai => Capella(SszDecode::from_ssz_bytes(fields[0])?),
+            Cancun => Deneb(SszDecode::from_ssz_bytes(fields[0])?),
+            Prague | Osaka | BPO1 | BPO2 => ElectraFulu(SszDecode::from_ssz_bytes(fields[0])?),
+            Amsterdam => Gloas(SszDecode::from_ssz_bytes(fields[0])?),
+            fork => return Err(DecodeError::InvalidUnionSelector(fork.as_u64() as u8)),
+        };
+
+        Ok(Self {
+            new_payload_request,
+            witness,
+            chain_config,
+            public_keys,
+        })
+    }
+}
+
+/// Splits an SSZ container whose `N` fields are all variable-size.
+fn ssz_split_var_fields<const N: usize>(bytes: &[u8]) -> Result<[&[u8]; N], DecodeError> {
+    let fixed_part_len = N * BYTES_PER_LENGTH_OFFSET;
+    if bytes.len() < fixed_part_len {
+        return Err(DecodeError::InvalidByteLength {
+            expected: fixed_part_len,
+            got: bytes.len(),
+        });
+    }
+
+    let mut offsets = [0usize; N];
+    for i in 0..N {
+        let offset =
+            u32::from_le_bytes(array::from_fn(|j| bytes[i * BYTES_PER_LENGTH_OFFSET + j])) as usize;
+        if i == 0 {
+            if offset != fixed_part_len {
+                return Err(DecodeError::InvalidFirstOffset {
+                    expected: fixed_part_len,
+                    got: offset,
+                });
+            }
+        } else if offset < offsets[i - 1] {
+            return Err(DecodeError::OffsetsAreNotMonotonicallyIncreasing);
+        }
+        if offset > bytes.len() {
+            return Err(DecodeError::OffsetOutOfBounds {
+                offset,
+                length: bytes.len(),
+            });
+        }
+        offsets[i] = offset;
+    }
+
+    Ok(array::from_fn(|i| {
+        if i + 1 < N {
+            &bytes[offsets[i]..offsets[i + 1]]
+        } else {
+            &bytes[offsets[i]..bytes.len()]
+        }
+    }))
 }
