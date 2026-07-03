@@ -192,8 +192,8 @@ impl Crypto for OpenVmCrypto {
         b: ([u8; 48], [u8; 48]),
     ) -> Result<[u8; 96], CryptoError> {
         // EIP-2537 G1ADD validates on-curve only, not subgroup membership.
-        let p1 = read_bls_g1_point_on_curve(&a)?;
-        let p2 = read_bls_g1_point_on_curve(&b)?;
+        let p1 = read_bls_g1_point_no_subgroup_check(&a)?;
+        let p2 = read_bls_g1_point_no_subgroup_check(&b)?;
         Ok(encode_bls_g1_point(&(p1 + p2)))
     }
 
@@ -223,8 +223,8 @@ impl Crypto for OpenVmCrypto {
         b: ([u8; 48], [u8; 48], [u8; 48], [u8; 48]),
     ) -> Result<[u8; 192], CryptoError> {
         // EIP-2537 G2ADD validates on-curve only, not subgroup membership.
-        let p1 = read_bls_g2_point_on_curve(&a)?;
-        let p2 = read_bls_g2_point_on_curve(&b)?;
+        let p1 = read_bls_g2_point_no_subgroup_check(&a)?;
+        let p2 = read_bls_g2_point_no_subgroup_check(&b)?;
         Ok(encode_bls_g2_point(&(p1 + p2)))
     }
 
@@ -322,7 +322,7 @@ fn is_bn254_fr(modulus: &[u8]) -> bool {
 fn accelerated_modexp_bn254_fr(base: &[u8], exp: &[u8]) -> Vec<u8> {
     use openvm_ecc_guest::algebra::{ExpBytes, Reduce};
 
-    // Pad to a multiple of BN_SCALAR_LEN so reduce_be_bytes chunk processing works correctly.
+    // OpenVM's field reduction requires inputs to be aligned to the field byte size.
     let padded_len = base
         .len()
         .next_multiple_of(BN_SCALAR_LEN)
@@ -430,13 +430,20 @@ fn read_bls_fp2(c0: &[u8; 48], c1: &[u8; 48]) -> Result<bls::Fp2, CryptoError> {
 }
 
 #[inline]
-fn read_bls_g1_point(point: &([u8; 48], [u8; 48])) -> Result<bls::G1Affine, CryptoError> {
+fn read_bls_g1_point_no_subgroup_check(
+    point: &([u8; 48], [u8; 48]),
+) -> Result<bls::G1Affine, CryptoError> {
     let px = read_bls_fp(&point.0)?;
     let py = read_bls_fp(&point.1)?;
     // SAFETY: `read_bls_fp` produces canonical Fp elements; `from_xy` itself checks the curve
     // equation and returns `None` if `(px, py)` is not on the curve.
-    let point = unsafe { bls::G1Affine::from_xy(px, py) }
-        .ok_or(CryptoError::InvalidPoint("BLS12-381 G1 point not on curve"))?;
+    unsafe { bls::G1Affine::from_xy(px, py) }
+        .ok_or(CryptoError::InvalidPoint("BLS12-381 G1 point not on curve"))
+}
+
+#[inline]
+fn read_bls_g1_point(point: &([u8; 48], [u8; 48])) -> Result<bls::G1Affine, CryptoError> {
+    let point = read_bls_g1_point_no_subgroup_check(point)?;
     if point.is_in_correct_subgroup() {
         Ok(point)
     } else {
@@ -447,15 +454,22 @@ fn read_bls_g1_point(point: &([u8; 48], [u8; 48])) -> Result<bls::G1Affine, Cryp
 }
 
 #[inline]
-fn read_bls_g2_point(
+fn read_bls_g2_point_no_subgroup_check(
     point: &([u8; 48], [u8; 48], [u8; 48], [u8; 48]),
 ) -> Result<bls::G2Affine, CryptoError> {
     let x = read_bls_fp2(&point.0, &point.1)?;
     let y = read_bls_fp2(&point.2, &point.3)?;
     // SAFETY: `read_bls_fp2` produces canonical Fp2 elements; `from_xy` itself checks the curve
     // equation and returns `None` if `(x, y)` is not on the twist.
-    let point = unsafe { bls::G2Affine::from_xy(x, y) }
-        .ok_or(CryptoError::InvalidPoint("BLS12-381 G2 point not on curve"))?;
+    unsafe { bls::G2Affine::from_xy(x, y) }
+        .ok_or(CryptoError::InvalidPoint("BLS12-381 G2 point not on curve"))
+}
+
+#[inline]
+fn read_bls_g2_point(
+    point: &([u8; 48], [u8; 48], [u8; 48], [u8; 48]),
+) -> Result<bls::G2Affine, CryptoError> {
+    let point = read_bls_g2_point_no_subgroup_check(point)?;
     if point.is_in_correct_subgroup() {
         Ok(point)
     } else {
@@ -463,30 +477,6 @@ fn read_bls_g2_point(
             "BLS12-381 G2 point not in subgroup",
         ))
     }
-}
-
-/// Reads a BLS12-381 G1 point, validating only that it lies on the curve. Used
-/// by the addition precompile, which per EIP-2537 does not require subgroup
-/// membership (only MSM and pairing do).
-#[inline]
-fn read_bls_g1_point_on_curve(point: &([u8; 48], [u8; 48])) -> Result<bls::G1Affine, CryptoError> {
-    let px = read_bls_fp(&point.0)?;
-    let py = read_bls_fp(&point.1)?;
-    unsafe { bls::G1Affine::from_xy(px, py) }
-        .ok_or(CryptoError::InvalidPoint("BLS12-381 G1 point not on curve"))
-}
-
-/// Reads a BLS12-381 G2 point, validating only that it lies on the curve. Used
-/// by the addition precompile, which per EIP-2537 does not require subgroup
-/// membership (only MSM and pairing do).
-#[inline]
-fn read_bls_g2_point_on_curve(
-    point: &([u8; 48], [u8; 48], [u8; 48], [u8; 48]),
-) -> Result<bls::G2Affine, CryptoError> {
-    let x = read_bls_fp2(&point.0, &point.1)?;
-    let y = read_bls_fp2(&point.2, &point.3)?;
-    unsafe { bls::G2Affine::from_xy(x, y) }
-        .ok_or(CryptoError::InvalidPoint("BLS12-381 G2 point not on curve"))
 }
 
 /// Reads a scalar from the input bytes. The scalar does not need to be canonical.
