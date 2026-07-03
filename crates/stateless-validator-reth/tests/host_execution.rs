@@ -15,4 +15,4 @@ declare_test_host_execution!(RpcGlamsterdamDevnet5, run_stateless_guest);
 //    - test_creation_tx_regular_check_subtracts_intrinsic_state
 // - 1 EIP-8025 (in-block created-code resolution)
 //    - test_witness_codes_create_same_hash_then_read
-declare_test_host_execution!(EestBalDevnet7, run_stateless_guest, should_panic);
+declare_test_host_execution!(EestBalDevnet7, run_stateless_guest, failures = 16);

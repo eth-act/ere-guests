@@ -21,9 +21,6 @@ mod error;
 pub use crate::guest::error::Error;
 
 /// Runs the stateless guest on the [`Platform`].
-///
-/// The public values written diverge from the spec by hashing the output with
-/// sha256 because some zkVMs only support 32 byte public values.
 pub fn entrypoint<P: Platform>() {
     let input_bytes = P::cycle_scope("read_input", || P::read_input());
     let output_bytes = run_stateless_guest::<P>(&input_bytes);

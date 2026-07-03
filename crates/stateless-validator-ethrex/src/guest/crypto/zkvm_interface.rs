@@ -3,7 +3,6 @@
 use alloc::{string::ToString, sync::Arc, vec, vec::Vec};
 use core::mem::transmute;
 
-use ethrex_common::Address;
 use ethrex_crypto::{Crypto, CryptoError};
 use zkvm_interface::{
     zkvm_blake2f, zkvm_blake2f_message, zkvm_blake2f_offset, zkvm_blake2f_state, zkvm_bls12_381_fp,
@@ -37,24 +36,14 @@ impl Crypto for ZkVMInterfaceCrypto {
         recid: u8,
         msg: &[u8; 32],
     ) -> Result<[u8; 32], CryptoError> {
-        let mut hash = secp256k1_ecrecover_keccak(sig, recid, msg)?;
-        hash[..12].fill(0);
-        Ok(hash)
-    }
-
-    #[inline]
-    fn recover_signer(&self, sig: &[u8; 65], msg: &[u8; 32]) -> Result<Address, CryptoError> {
-        const SECP256K1_N_HALF: [u8; 32] = [
-            0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-            0xff, 0xff, 0x5d, 0x57, 0x6e, 0x73, 0x57, 0xa4, 0x50, 0x1d, 0xdf, 0xe9, 0x2f, 0x46,
-            0x68, 0x1b, 0x20, 0xa0,
-        ];
-        if sig[32..64] > SECP256K1_N_HALF[..] {
-            return Err(CryptoError::InvalidSignature);
+        let msg = zkvm_secp256k1_hash { data: *msg };
+        let sig = zkvm_secp256k1_signature { data: *sig };
+        let mut pubkey = zkvm_secp256k1_pubkey { data: [0; 64] };
+        let ret = unsafe { zkvm_secp256k1_ecrecover(&msg, &sig, recid, &mut pubkey) };
+        if ret != 0 {
+            return Err(CryptoError::RecoveryFailed);
         }
-        let sig_64: &[u8; 64] = sig[..64].try_into().unwrap();
-        let hash = secp256k1_ecrecover_keccak(sig_64, sig[64], msg)?;
-        Ok(Address::from_slice(&hash[12..]))
+        Ok(keccak256(&pubkey.data))
     }
 
     #[inline]
@@ -338,22 +327,6 @@ impl Crypto for ZkVMInterfaceCrypto {
             .then_some(result.data)
             .ok_or_else(|| CryptoError::Other("bls12_map_fp2_to_g2 failed".to_string()))
     }
-}
-
-#[inline]
-fn secp256k1_ecrecover_keccak(
-    sig: &[u8; 64],
-    recid: u8,
-    msg: &[u8; 32],
-) -> Result<[u8; 32], CryptoError> {
-    let msg = zkvm_secp256k1_hash { data: *msg };
-    let sig = zkvm_secp256k1_signature { data: *sig };
-    let mut pubkey = zkvm_secp256k1_pubkey { data: [0; 64] };
-    let ret = unsafe { zkvm_secp256k1_ecrecover(&msg, &sig, recid, &mut pubkey) };
-    if ret != 0 {
-        return Err(CryptoError::RecoveryFailed);
-    }
-    Ok(keccak256(&pubkey.data))
 }
 
 #[inline]
