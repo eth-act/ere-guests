@@ -136,20 +136,17 @@ pub fn run_stateless_validator_execution(
     })
 }
 
-/// Rewrites the canonical 2-byte schema prefix into nethermind's r7 payload
-/// selector. ere-guests always prefixes `0x0001`, whereas the r7 guest selects
-/// the payload type from `0x0000` for `ElectraFulu` (V3) and `0x0001` for
-/// `Gloas` (V4). The SSZ bodies are byte-identical, so only the prefix is
-/// rewritten after recovering the variant.
-fn nethermind_input(input: Vec<u8>) -> anyhow::Result<Vec<u8>> {
-    let canonical = StatelessInput::from_schema_prefixed_ssz(&input)
-        .map_err(|err| anyhow::anyhow!("decode stateless input: {err:?}"))?;
-    let schema_id = match &canonical.new_payload_request {
+/// Rewrites the schema prefix of `ElectraFulu` variant payload to `0x0000`.
+/// Reference: https://github.com/NethermindEth/nethermind/blob/zisk-guest-r7/src/Nethermind/Nethermind.Stateless.Executor/IO/InputDecoder.cs#L16-L23.
+fn nethermind_input(stateless_input_bytes: Vec<u8>) -> anyhow::Result<Vec<u8>> {
+    let stateless_input = StatelessInput::from_schema_prefixed_ssz(&stateless_input_bytes)
+        .map_err(|err| anyhow::anyhow!("decode stateless_input: {err:?}"))?;
+    let schema_id = match &stateless_input.new_payload_request {
         NewPayloadRequest::ElectraFulu(_) => [0x00, 0x00],
         NewPayloadRequest::Gloas(_) => [0x00, 0x01],
         _ => anyhow::bail!("nethermind r7 supports only ElectraFulu (V3) and Gloas (V4) payloads"),
     };
-    let mut input = input;
-    input[0..2].copy_from_slice(&schema_id);
-    Ok(input)
+    let mut stateless_input_bytes = stateless_input_bytes;
+    stateless_input_bytes[0..2].copy_from_slice(&schema_id);
+    Ok(stateless_input_bytes)
 }
