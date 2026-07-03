@@ -15,6 +15,7 @@ stateless-validator-ethrex = { path = "../../../crates/stateless-validator-ethre
     "sp1",
 ] }
 
+# FIXME: Remove the patch once https://github.com/succinctlabs/sp1/pull/2865 is merged and released.
 [patch.crates-io]
 sp1-lib = { git = "https://github.com/han0110/sp1", rev = "8564a70ea1952826fc0926eba5a3ce62af53ffac" }
 
