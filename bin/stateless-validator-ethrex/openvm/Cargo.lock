@@ -717,13 +717,13 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-platform-core"
-version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=968d72e1ca55e8744ff3517460f0bbd3ee88bd4b#968d72e1ca55e8744ff3517460f0bbd3ee88bd4b"
+version = "0.13.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.13.0#fcbf0dc8a2e1ea2af43cf0158a92dfbd33871fe0"
 
 [[package]]
 name = "ere-platform-openvm"
-version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=968d72e1ca55e8744ff3517460f0bbd3ee88bd4b#968d72e1ca55e8744ff3517460f0bbd3ee88bd4b"
+version = "0.13.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.13.0#fcbf0dc8a2e1ea2af43cf0158a92dfbd33871fe0"
 dependencies = [
  "ere-platform-core",
  "openvm",
@@ -731,8 +731,8 @@ dependencies = [
 
 [[package]]
 name = "ere-util-build"
-version = "0.12.2"
-source = "git+https://github.com/eth-act/ere?rev=968d72e1ca55e8744ff3517460f0bbd3ee88bd4b#968d72e1ca55e8744ff3517460f0bbd3ee88bd4b"
+version = "0.13.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.13.0#fcbf0dc8a2e1ea2af43cf0158a92dfbd33871fe0"
 dependencies = [
  "cargo_metadata",
 ]
