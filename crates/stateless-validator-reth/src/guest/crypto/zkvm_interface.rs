@@ -77,6 +77,11 @@ impl Crypto for ZkVMInterfaceCrypto {
 
     #[inline]
     fn modexp(&self, base: &[u8], exp: &[u8], modulus: &[u8]) -> Result<Vec<u8>, PrecompileHalt> {
+        #[cfg(feature = "sp1")]
+        if let Some(output) = super::sp1::fast_modexp(base, exp, modulus) {
+            return Ok(output);
+        }
+
         let mut output = vec![0u8; modulus.len()];
         let ret = unsafe {
             zkvm_interface::zkvm_modexp(
