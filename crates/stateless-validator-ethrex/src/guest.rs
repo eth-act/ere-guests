@@ -2,7 +2,7 @@
 
 use alloc::{format, vec::Vec};
 
-use ere_platform_core::Platform;
+pub use ere_platform_core::Platform;
 use ethrex_guest_program::{
     common::ExecutionError,
     l1::{DecodedEip8025, validate_eip8025_canonical_execution, validate_eip8025_execution},

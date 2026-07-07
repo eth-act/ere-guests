@@ -2,7 +2,7 @@
 
 use alloc::{format, vec::Vec};
 
-use ere_platform_core::Platform;
+pub use ere_platform_core::Platform;
 use reth_stateless::{stateless_validation_with_trie, validation::StatelessValidationError};
 use reth_tries::zeth::SparseState;
 use stateless_validator_common::{
