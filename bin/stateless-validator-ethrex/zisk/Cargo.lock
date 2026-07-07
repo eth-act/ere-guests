@@ -2383,7 +2383,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-common"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "const-hex",
  "libssz",
@@ -2396,7 +2396,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-ethrex"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "ere-platform-core",
  "ere-util-build",

@@ -1504,7 +1504,7 @@ dependencies = [
 
 [[package]]
 name = "downloader"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "reqwest",
@@ -5793,7 +5793,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-common"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "const-hex",
@@ -5807,7 +5807,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-debug"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "alloy-eips",
  "alloy-primitives",
@@ -5825,7 +5825,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-ethrex"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "bls12_381 0.8.0 (git+https://github.com/zkcrypto/bls12_381?rev=6bb96951d5c2035caf4989b6e4a018435379590f)",
  "ere-dockerized",
@@ -5852,7 +5852,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-reth"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -5881,7 +5881,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-test"
-version = "0.12.1"
+version = "0.13.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
