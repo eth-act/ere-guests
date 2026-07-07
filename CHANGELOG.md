@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.13.0](https://github.com/eth-act/ere-guests/compare/v0.12.1...v0.13.0) (2026-07-07)
+
+
+### Features
+
+* canonical stateless input ([#58](https://github.com/eth-act/ere-guests/issues/58)) ([afc3f4e](https://github.com/eth-act/ere-guests/commit/afc3f4e0fdd8f23353469fdc088af51c3a765194))
+* cleanup guests ([#56](https://github.com/eth-act/ere-guests/issues/56)) ([7fa855a](https://github.com/eth-act/ere-guests/commit/7fa855aef498e074a629ccd7ee3065c545169ba1))
+* update ere ([#59](https://github.com/eth-act/ere-guests/issues/59)) ([3a51da1](https://github.com/eth-act/ere-guests/commit/3a51da18930a21918d63c503880bdd9fa116289d))
+
+
+### Bug Fixes
+
+* re-export Platform ([#62](https://github.com/eth-act/ere-guests/issues/62)) ([70bd7a0](https://github.com/eth-act/ere-guests/commit/70bd7a0ef4ea585e5ab5d2766f510b987b68363f))
+
 ## [0.12.1](https://github.com/eth-act/ere-guests/compare/v0.12.0...v0.12.1) (2026-06-09)
 
 
