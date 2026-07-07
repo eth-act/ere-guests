@@ -28,7 +28,6 @@ jobs:
           - sp1
           - zisk
         include:
-          - { zkvm: zisk, external: true, guest: nethermind }
           - { zkvm: zisk, external: true, guest: zesu }
           - { zkvm: zisk, guest: ethrex, ere_profile: ethrex }
     steps:

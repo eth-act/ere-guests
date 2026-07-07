@@ -1,12 +1,6 @@
 //! Helpers for compiling guest programs and asserting their zkVM execution.
 
-use std::{
-    collections::BTreeMap,
-    fs,
-    io::Read,
-    path::{Path, PathBuf},
-    sync::LazyLock,
-};
+use std::{collections::BTreeMap, fs, path::PathBuf, sync::LazyLock};
 
 use dashmap::DashMap;
 use ere_dockerized::{
@@ -14,9 +8,6 @@ use ere_dockerized::{
     ProverResource, zkVMKind,
 };
 use serde::Deserialize;
-use stateless_validator_common::guest::{
-    StatelessInput, input::new_payload_request::NewPayloadRequest,
-};
 
 use crate::{
     execution::{ExecutionFailure, GuestKind, run_execution},
@@ -37,7 +28,7 @@ pub fn resolve_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
     ELF.entry((guest_kind, zkvm_kind))
         .or_insert_with(|| match guest_kind {
             GuestKind::Ethrex | GuestKind::Reth => compile_guest(guest_kind, zkvm_kind),
-            GuestKind::Zesu | GuestKind::Nethermind => download_guest(guest_kind, zkvm_kind),
+            GuestKind::Zesu => download_guest(guest_kind, zkvm_kind),
         })
         .clone()
 }
@@ -65,7 +56,6 @@ pub fn download_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
     #[derive(Deserialize)]
     struct GuestSoure {
         url: String,
-        archive_elf_path: Option<String>,
     }
 
     let registry = {
@@ -84,27 +74,7 @@ pub fn download_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
         .bytes()
         .unwrap()
         .to_vec();
-    match &source.archive_elf_path {
-        Some(archive_elf_path) => Elf(extract_elf_from_tar_gz(&bytes, archive_elf_path)),
-        None => Elf(bytes),
-    }
-}
-
-/// Extracts the entry at `archive_elf_path` from a gzip-compressed tar archive.
-/// Some prebuilt guests, such as the nethermind ZisK release, distribute the ELF
-/// inside a `.tar.gz` under an extensionless name recorded as `archive_elf_path`
-/// in the registry.
-fn extract_elf_from_tar_gz(bytes: &[u8], archive_elf_path: &str) -> Vec<u8> {
-    let mut archive = tar::Archive::new(flate2::read::GzDecoder::new(bytes));
-    for entry in archive.entries().unwrap() {
-        let mut entry = entry.unwrap();
-        if entry.path().unwrap().as_ref() == Path::new(archive_elf_path) {
-            let mut buf = Vec::new();
-            entry.read_to_end(&mut buf).unwrap();
-            return buf;
-        }
-    }
-    panic!("{archive_elf_path} not found in archive")
+    Elf(bytes)
 }
 
 /// Initializes a CPU-backed zkVM for `elf`.
@@ -128,25 +98,6 @@ pub fn run_stateless_validator_execution(
     let elf = resolve_guest(guest_kind, zkvm_kind);
     let zkvm = init_zkvm(zkvm_kind, elf);
     run_execution(preset_fixtures(preset), &|input| {
-        let input = match guest_kind {
-            GuestKind::Nethermind => nethermind_input(input)?,
-            _ => input,
-        };
         Ok(zkvm.execute(&Input::new().with_stdin(input))?.0.to_vec())
     })
-}
-
-/// Rewrites the schema prefix of `ElectraFulu` variant payload to `0x0000`.
-/// Reference: https://github.com/NethermindEth/nethermind/blob/zisk-guest-r7/src/Nethermind/Nethermind.Stateless.Executor/IO/InputDecoder.cs#L16-L23.
-fn nethermind_input(stateless_input_bytes: Vec<u8>) -> anyhow::Result<Vec<u8>> {
-    let stateless_input = StatelessInput::from_schema_prefixed_ssz(&stateless_input_bytes)
-        .map_err(|err| anyhow::anyhow!("decode stateless_input: {err:?}"))?;
-    let schema_id = match &stateless_input.new_payload_request {
-        NewPayloadRequest::ElectraFulu(_) => [0x00, 0x00],
-        NewPayloadRequest::Gloas(_) => [0x00, 0x01],
-        _ => anyhow::bail!("nethermind r7 supports only ElectraFulu (V3) and Gloas (V4) payloads"),
-    };
-    let mut stateless_input_bytes = stateless_input_bytes;
-    stateless_input_bytes[0..2].copy_from_slice(&schema_id);
-    Ok(stateless_input_bytes)
 }

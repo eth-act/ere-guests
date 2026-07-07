@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 #
 # Fetches the prebuilt guest ELF for <guest> listed in artifact-registry.json,
-# verifies its sha256, and writes OUTPUT_DIR/stateless-validator-<guest>.elf. When
-# the entry sets "archive_elf_path", that member is extracted from the downloaded
-# gzip tar archive; otherwise the download is the raw ELF.
+# verifies its sha256, and writes OUTPUT_DIR/stateless-validator-<guest>.elf.
 #
 # Usage: fetch-elf-for-republish.sh <el>-<zkvm>
 #   REGISTRY    artifact-registry.json (default: artifact-registry.json)
@@ -25,12 +23,6 @@ curl -fsSL --proto '=https' --tlsv1.2 --retry 3 "$(entry url)" -o "$WORKSPACE/do
 echo "$(entry sha256) $WORKSPACE/download" | sha256sum -c -
 
 OUT="$OUTPUT_DIR/stateless-validator-$GUEST.elf"
-ARCHIVE_ELF_PATH="$(entry archive_elf_path)"
-if [ -n "$ARCHIVE_ELF_PATH" ]; then
-  tar -xzf "$WORKSPACE/download" -C "$WORKSPACE" "$ARCHIVE_ELF_PATH"
-  mv "$WORKSPACE/$ARCHIVE_ELF_PATH" "$OUT"
-else
-  mv "$WORKSPACE/download" "$OUT"
-fi
+mv "$WORKSPACE/download" "$OUT"
 
 echo "Prepared $OUT"

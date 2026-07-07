@@ -26,8 +26,6 @@ pub enum GuestKind {
     Reth,
     /// The zesu guest.
     Zesu,
-    /// The nethermind guest.
-    Nethermind,
 }
 
 impl GuestKind {
@@ -37,7 +35,6 @@ impl GuestKind {
             Self::Ethrex => "ethrex",
             Self::Reth => "reth",
             Self::Zesu => "zesu",
-            Self::Nethermind => "nethermind",
         }
     }
 }

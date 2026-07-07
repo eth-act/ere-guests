@@ -76,10 +76,3 @@ declare_test!(Reth, Zisk, EestBalDevnet7, failures = 38);
 declare_test!(Zesu, Zisk, EestBalDevnet7, failures = 121);
 // Should be fixed by https://github.com/Consensys/zesu/pull/70.
 declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet5, failures = 50);
-
-// Nethermind
-
-declare_test!(Nethermind, Zisk, RpcBpo2);
-declare_test!(Nethermind, Zisk, RpcGlamsterdamDevnet5);
-// Nethermind divergences + ZisK `zkvm-interface` impl bug.
-declare_test!(Nethermind, Zisk, EestBalDevnet7, failures = 614);
