@@ -5859,6 +5859,7 @@ dependencies = [
  "alloy-genesis",
  "alloy-primitives",
  "alloy-rpc-types-engine",
+ "aurora-engine-modexp",
  "ere-dockerized",
  "ere-platform-core",
  "ere-util-build",

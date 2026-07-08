@@ -465,3 +465,123 @@ fn trimmed_be_bytes<const BITS: usize, const LIMBS: usize>(value: Uint<BITS, LIM
         bytes.to_vec()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn reference(base: &[u8], exp: &[u8], modulus: &[u8]) -> Vec<u8> {
+        aurora_engine_modexp::modexp(base, exp, modulus)
+    }
+
+    fn left_pad_to_modulus_len(bytes: Vec<u8>, modulus_len: usize) -> Vec<u8> {
+        if bytes.len() >= modulus_len {
+            return bytes[bytes.len().saturating_sub(modulus_len)..].to_vec();
+        }
+        let mut padded = vec![0; modulus_len];
+        padded[modulus_len - bytes.len()..].copy_from_slice(&bytes);
+        padded
+    }
+
+    fn assert_fast_matches(base: &[u8], exp: &[u8], modulus: &[u8]) {
+        let Some(actual) = fast_modexp(base, exp, modulus) else {
+            return;
+        };
+        let expected = reference(base, exp, modulus);
+        let actual = left_pad_to_modulus_len(actual, modulus.len());
+        let expected = left_pad_to_modulus_len(expected, modulus.len());
+        assert_eq!(
+            actual, expected,
+            "base={base:02x?} exp={exp:02x?} modulus={modulus:02x?}"
+        );
+    }
+
+    #[test]
+    fn simple_identity_paths_match_reference() {
+        let cases: &[(&[u8], &[u8], &[u8])] = &[
+            (&[], &[], &[]),
+            (&[0], &[0], &[0]),
+            (&[0], &[0], &[1]),
+            (&[7], &[0], &[13]),
+            (&[0], &[5], &[13]),
+            (&[1], &[5], &[13]),
+            (&[13], &[5], &[13]),
+            (&[14], &[5], &[13]),
+            (&[0, 14], &[5], &[0, 13]),
+        ];
+        for (base, exp, modulus) in cases {
+            assert_fast_matches(base, exp, modulus);
+        }
+    }
+
+    #[test]
+    fn u256_path_matches_reference_for_lcg_cases() {
+        let mut seed = 0x1234_5678_90ab_cdef_u64;
+        for base_len in 0..=32 {
+            for exp_len in 0..=32 {
+                for modulus_len in 0..=32 {
+                    seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1);
+                    let mut base = vec![0; base_len];
+                    let mut exp = vec![0; exp_len];
+                    let mut modulus = vec![0; modulus_len];
+                    for byte in base
+                        .iter_mut()
+                        .chain(exp.iter_mut())
+                        .chain(modulus.iter_mut())
+                    {
+                        seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1);
+                        *byte = (seed >> 56) as u8;
+                    }
+                    assert_fast_matches(&base, &exp, &modulus);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn ruint_small_exp_paths_match_reference() {
+        for len in [33, 40, 48, 56, 64, 65, 128, 129, 256, 257, 512, 513, 1024] {
+            let mut base = vec![0x11; len];
+            let mut modulus = vec![0x33; len];
+            base[0] = 1;
+            modulus[0] = 2;
+            for exp in [&[2][..], &[3], &[4], &[1, 0, 1]] {
+                assert_fast_matches(&base, exp, &modulus);
+            }
+        }
+    }
+
+    #[test]
+    fn ruint_short_exp_paths_match_reference() {
+        let exponents: &[&[u8]] = &[&[5], &[1, 2], &[0x12, 0x34, 0x56], &[0xff; 8]];
+        for len in [33, 40, 41, 48, 49, 56, 57, 64] {
+            for modulus_low_byte in [0x31, 0x32] {
+                let mut seed = len as u64 | ((modulus_low_byte as u64) << 32);
+                for exp in exponents {
+                    let mut base = vec![0; len];
+                    let mut modulus = vec![0; len];
+                    for byte in base.iter_mut().chain(modulus.iter_mut()) {
+                        seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1);
+                        *byte = (seed >> 56) as u8;
+                    }
+                    modulus[0] |= 1;
+                    modulus[len - 1] = modulus_low_byte;
+                    assert_fast_matches(&base, exp, &modulus);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn repeated_248_bit_chunk_cube_matches_reference() {
+        for chunks in [1, 2, 31, 32, 33, 62, 63, 64, 95, 96, 97, 127, 128] {
+            let base = vec![0xff; chunks * 32];
+            let mut modulus = Vec::with_capacity(chunks * 32);
+            for _ in 0..chunks {
+                modulus.push(0);
+                modulus.extend_from_slice(&[0xff; 31]);
+            }
+            assert_fast_matches(&base, &[3], &modulus);
+        }
+    }
+}

@@ -45,6 +45,7 @@ ere-platform-core.workspace = true
 stateless-validator-common.workspace = true
 
 [dev-dependencies]
+aurora-engine-modexp = { version = "1.2.0", default-features = false }
 paste.workspace = true
 ere-dockerized.workspace = true
 stateless-validator-test.workspace = true
