@@ -9,6 +9,7 @@ use revm::precompile::{
     Crypto, PrecompileHalt,
     bls12_381::{G1Point, G1PointScalar, G2Point, G2PointScalar},
 };
+use spin::Mutex;
 use stateless_validator_common::Sha256Hasher;
 use zkvm_interface::{
     zkvm_blake2f_message, zkvm_blake2f_offset, zkvm_blake2f_state, zkvm_bls12_381_fp,
@@ -24,18 +25,60 @@ use zkvm_interface::{
 /// Installs [`ZkVMInterfaceCrypto`] as [`revm::precompile::Crypto`] backend and as
 /// [`alloy_consensus::crypto::CryptoProvider`].
 pub fn install_crypto() {
-    assert!(revm::install_crypto(ZkVMInterfaceCrypto));
-    install_default_provider(Arc::new(ZkVMInterfaceCrypto)).unwrap();
+    assert!(revm::install_crypto(ZkVMInterfaceCrypto::default()));
+    install_default_provider(Arc::new(ZkVMInterfaceCrypto::default())).unwrap();
 }
 
 /// Returns a [`Sha256Hasher`] implementation using [`zkvm_interface`].
 #[inline]
 pub fn sha256_hasher() -> impl Sha256Hasher {
-    ZkVMInterfaceCrypto
+    ZkVMInterfaceCrypto::default()
 }
 
-#[derive(Debug, Default)]
-struct ZkVMInterfaceCrypto;
+#[derive(Debug)]
+struct ZkVMInterfaceCrypto {
+    modexp_cache: Mutex<Option<ModexpCacheEntry>>,
+    blake2_cache: Mutex<Option<Blake2CacheEntry>>,
+}
+
+impl Default for ZkVMInterfaceCrypto {
+    fn default() -> Self {
+        Self {
+            modexp_cache: Mutex::new(None),
+            blake2_cache: Mutex::new(None),
+        }
+    }
+}
+
+#[derive(Debug)]
+struct ModexpCacheEntry {
+    base: Vec<u8>,
+    exp: Vec<u8>,
+    modulus: Vec<u8>,
+    output: Vec<u8>,
+}
+
+impl ModexpCacheEntry {
+    fn matches(&self, base: &[u8], exp: &[u8], modulus: &[u8]) -> bool {
+        self.base == base && self.exp == exp && self.modulus == modulus
+    }
+}
+
+#[derive(Debug)]
+struct Blake2CacheEntry {
+    rounds: u32,
+    h: [u64; 8],
+    m: [u64; 16],
+    t: [u64; 2],
+    f: bool,
+    output: [u64; 8],
+}
+
+impl Blake2CacheEntry {
+    fn matches(&self, rounds: u32, h: &[u64; 8], m: &[u64; 16], t: &[u64; 2], f: bool) -> bool {
+        self.rounds == rounds && self.h == *h && self.m == *m && self.t == *t && self.f == f
+    }
+}
 
 impl Sha256Hasher for ZkVMInterfaceCrypto {
     #[inline]
@@ -52,6 +95,20 @@ impl Crypto for ZkVMInterfaceCrypto {
 
     #[inline]
     fn blake2_compress(&self, rounds: u32, h: &mut [u64; 8], m: &[u64; 16], t: &[u64; 2], f: bool) {
+        if let Some(output) = self
+            .blake2_cache
+            .lock()
+            .as_ref()
+            .filter(|entry| entry.matches(rounds, h, m, t, f))
+            .map(|entry| entry.output)
+        {
+            *h = output;
+            return;
+        }
+
+        let input_h = *h;
+        let input_m = *m;
+        let input_t = *t;
         let mut state = zkvm_blake2f_state {
             data: unsafe { transmute::<[u64; 8], [u8; 64]>(*h) },
         };
@@ -64,6 +121,14 @@ impl Crypto for ZkVMInterfaceCrypto {
         let ret = unsafe { zkvm_interface::zkvm_blake2f(rounds, &mut state, &m, &t, f as u8) };
         assert_eq!(ret, 0, "blake2f failed");
         *h = unsafe { transmute::<[u8; 64], [u64; 8]>(state.data) };
+        *self.blake2_cache.lock() = Some(Blake2CacheEntry {
+            rounds,
+            h: input_h,
+            m: input_m,
+            t: input_t,
+            f,
+            output: *h,
+        });
     }
 
     #[inline]
@@ -77,6 +142,16 @@ impl Crypto for ZkVMInterfaceCrypto {
 
     #[inline]
     fn modexp(&self, base: &[u8], exp: &[u8], modulus: &[u8]) -> Result<Vec<u8>, PrecompileHalt> {
+        if let Some(output) = self
+            .modexp_cache
+            .lock()
+            .as_ref()
+            .filter(|entry| entry.matches(base, exp, modulus))
+            .map(|entry| entry.output.clone())
+        {
+            return Ok(output);
+        }
+
         let mut output = vec![0u8; modulus.len()];
         let ret = unsafe {
             zkvm_interface::zkvm_modexp(
@@ -89,9 +164,17 @@ impl Crypto for ZkVMInterfaceCrypto {
                 output.as_mut_ptr(),
             )
         };
-        (ret == 0)
-            .then_some(output)
-            .ok_or_else(|| PrecompileHalt::other("modexp failed"))
+        if ret != 0 {
+            return Err(PrecompileHalt::other("modexp failed"));
+        }
+
+        *self.modexp_cache.lock() = Some(ModexpCacheEntry {
+            base: base.to_vec(),
+            exp: exp.to_vec(),
+            modulus: modulus.to_vec(),
+            output: output.clone(),
+        });
+        Ok(output)
     }
 
     #[inline]
