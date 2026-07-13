@@ -3323,7 +3323,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 [[package]]
 name = "stateless"
 version = "0.1.0"
-source = "git+https://github.com/paradigmxyz/stateless?rev=2236845a84c3a7515312214e8a507e4731d73bb5#2236845a84c3a7515312214e8a507e4731d73bb5"
+source = "git+https://github.com/paradigmxyz/stateless?rev=3d2fc174df31f5b0d5d4d831dc7e1607ea541531#3d2fc174df31f5b0d5d4d831dc7e1607ea541531"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -3379,6 +3379,7 @@ dependencies = [
  "reth-payload-validator",
  "reth-primitives-traits",
  "revm",
+ "spin 0.10.0",
  "stateless",
  "stateless-validator-common",
  "thiserror",
@@ -3623,7 +3624,7 @@ checksum = "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a"
 [[package]]
 name = "tries"
 version = "0.1.0"
-source = "git+https://github.com/paradigmxyz/stateless?rev=2236845a84c3a7515312214e8a507e4731d73bb5#2236845a84c3a7515312214e8a507e4731d73bb5"
+source = "git+https://github.com/paradigmxyz/stateless?rev=3d2fc174df31f5b0d5d4d831dc7e1607ea541531#3d2fc174df31f5b0d5d4d831dc7e1607ea541531"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",
@@ -3632,7 +3633,6 @@ dependencies = [
  "itertools 0.14.0",
  "reth-trie-common",
  "reth-trie-sparse",
- "revm-bytecode",
  "revm-database-interface",
  "thiserror",
  "zeth-mpt",
@@ -3869,7 +3869,7 @@ dependencies = [
 [[package]]
 name = "zeth-mpt"
 version = "0.1.0"
-source = "git+https://github.com/paradigmxyz/stateless?rev=2236845a84c3a7515312214e8a507e4731d73bb5#2236845a84c3a7515312214e8a507e4731d73bb5"
+source = "git+https://github.com/paradigmxyz/stateless?rev=3d2fc174df31f5b0d5d4d831dc7e1607ea541531#3d2fc174df31f5b0d5d4d831dc7e1607ea541531"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",

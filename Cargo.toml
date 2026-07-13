@@ -79,8 +79,8 @@ reth-ethereum-primitives = { git = "https://github.com/paradigmxyz/reth", tag = 
 reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
 reth-payload-validator = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
 reth-primitives-traits = { version = "0.4.1", default-features = false }
-reth-stateless = { git = "https://github.com/paradigmxyz/stateless", rev = "2236845a84c3a7515312214e8a507e4731d73bb5", default-features = false, package = "stateless" }
-reth-tries = { git = "https://github.com/paradigmxyz/stateless", rev = "2236845a84c3a7515312214e8a507e4731d73bb5", default-features = false, package = "tries" }
+reth-stateless = { git = "https://github.com/paradigmxyz/stateless", rev = "3d2fc174df31f5b0d5d4d831dc7e1607ea541531", default-features = false, package = "stateless" }
+reth-tries = { git = "https://github.com/paradigmxyz/stateless", rev = "3d2fc174df31f5b0d5d4d831dc7e1607ea541531", default-features = false, package = "tries" }
 
 # ethrex
 ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
