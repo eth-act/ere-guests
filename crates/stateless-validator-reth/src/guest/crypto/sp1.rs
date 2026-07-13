@@ -416,6 +416,8 @@ fn mul_mod_u256(x: &[u64; 4], y: &[u64; 4], modulus: &[u64; 4]) -> [u64; 4] {
         let mut y_modulus = [0u64; 8];
         y_modulus[..4].copy_from_slice(y);
         y_modulus[4..].copy_from_slice(modulus);
+        // SAFETY: SP1 reads four aligned limbs from `result` and eight aligned limbs from the
+        // second pointer, where the latter must contain the multiplier followed by the modulus.
         unsafe {
             syscall_uint256_mulmod(&mut result, y_modulus.as_ptr() as *const [u64; 4]);
         }
@@ -484,9 +486,7 @@ mod tests {
     }
 
     fn assert_fast_matches(base: &[u8], exp: &[u8], modulus: &[u8]) {
-        let Some(actual) = fast_modexp(base, exp, modulus) else {
-            return;
-        };
+        let actual = fast_modexp(base, exp, modulus).expect("case should use a fast path");
         let expected = reference(base, exp, modulus);
         let actual = left_pad_to_modulus_len(actual, modulus.len());
         let expected = left_pad_to_modulus_len(expected, modulus.len());

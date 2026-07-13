@@ -10,7 +10,7 @@ workspace = true
 
 [dependencies]
 once_cell.workspace = true
-spin.workspace = true
+spin = { workspace = true, optional = true }
 thiserror.workspace = true
 
 # alloy
@@ -58,7 +58,7 @@ ere-util-build.workspace = true
 default = ["std"]
 std = ["once_cell/std", "stateless-validator-common/std"]
 openvm = ["dep:openvm-sha2"]
-sp1 = ["zkvm-interface"]
+sp1 = ["dep:spin", "zkvm-interface"]
 zisk = ["zkvm-interface"]
 zkvm-interface = ["alloy-consensus/crypto-backend", "dep:zkvm-interface"]
 

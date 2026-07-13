@@ -9,6 +9,7 @@ use revm::precompile::{
     Crypto, PrecompileHalt,
     bls12_381::{G1Point, G1PointScalar, G2Point, G2PointScalar},
 };
+#[cfg(feature = "sp1")]
 use spin::Mutex;
 use stateless_validator_common::Sha256Hasher;
 use zkvm_interface::{
@@ -25,31 +26,20 @@ use zkvm_interface::{
 /// Installs [`ZkVMInterfaceCrypto`] as [`revm::precompile::Crypto`] backend and as
 /// [`alloy_consensus::crypto::CryptoProvider`].
 pub fn install_crypto() {
-    assert!(revm::install_crypto(ZkVMInterfaceCrypto::default()));
-    install_default_provider(Arc::new(ZkVMInterfaceCrypto::default())).unwrap();
+    assert!(revm::install_crypto(ZkVMInterfaceCrypto));
+    install_default_provider(Arc::new(ZkVMInterfaceCrypto)).unwrap();
 }
 
 /// Returns a [`Sha256Hasher`] implementation using [`zkvm_interface`].
 #[inline]
 pub fn sha256_hasher() -> impl Sha256Hasher {
-    ZkVMInterfaceCrypto::default()
+    ZkVMInterfaceCrypto
 }
 
 #[derive(Debug)]
-struct ZkVMInterfaceCrypto {
-    modexp_cache: Mutex<Option<ModexpCacheEntry>>,
-    blake2_cache: Mutex<Option<Blake2CacheEntry>>,
-}
+struct ZkVMInterfaceCrypto;
 
-impl Default for ZkVMInterfaceCrypto {
-    fn default() -> Self {
-        Self {
-            modexp_cache: Mutex::new(None),
-            blake2_cache: Mutex::new(None),
-        }
-    }
-}
-
+#[cfg(feature = "sp1")]
 #[derive(Debug)]
 struct ModexpCacheEntry {
     base: Vec<u8>,
@@ -58,12 +48,17 @@ struct ModexpCacheEntry {
     output: Vec<u8>,
 }
 
+#[cfg(feature = "sp1")]
 impl ModexpCacheEntry {
     fn matches(&self, base: &[u8], exp: &[u8], modulus: &[u8]) -> bool {
         self.base == base && self.exp == exp && self.modulus == modulus
     }
 }
 
+#[cfg(feature = "sp1")]
+static MODEXP_CACHE: Mutex<Option<ModexpCacheEntry>> = Mutex::new(None);
+
+#[cfg(feature = "sp1")]
 #[derive(Debug)]
 struct Blake2CacheEntry {
     rounds: u32,
@@ -74,11 +69,15 @@ struct Blake2CacheEntry {
     output: [u64; 8],
 }
 
+#[cfg(feature = "sp1")]
 impl Blake2CacheEntry {
     fn matches(&self, rounds: u32, h: &[u64; 8], m: &[u64; 16], t: &[u64; 2], f: bool) -> bool {
         self.rounds == rounds && self.h == *h && self.m == *m && self.t == *t && self.f == f
     }
 }
+
+#[cfg(feature = "sp1")]
+static BLAKE2_CACHE: Mutex<Option<Blake2CacheEntry>> = Mutex::new(None);
 
 impl Sha256Hasher for ZkVMInterfaceCrypto {
     #[inline]
@@ -95,8 +94,8 @@ impl Crypto for ZkVMInterfaceCrypto {
 
     #[inline]
     fn blake2_compress(&self, rounds: u32, h: &mut [u64; 8], m: &[u64; 16], t: &[u64; 2], f: bool) {
-        if let Some(output) = self
-            .blake2_cache
+        #[cfg(feature = "sp1")]
+        if let Some(output) = BLAKE2_CACHE
             .lock()
             .as_ref()
             .filter(|entry| entry.matches(rounds, h, m, t, f))
@@ -106,9 +105,8 @@ impl Crypto for ZkVMInterfaceCrypto {
             return;
         }
 
-        let input_h = *h;
-        let input_m = *m;
-        let input_t = *t;
+        #[cfg(feature = "sp1")]
+        let (input_h, input_m, input_t) = (*h, *m, *t);
         let mut state = zkvm_blake2f_state {
             data: unsafe { transmute::<[u64; 8], [u8; 64]>(*h) },
         };
@@ -121,14 +119,17 @@ impl Crypto for ZkVMInterfaceCrypto {
         let ret = unsafe { zkvm_interface::zkvm_blake2f(rounds, &mut state, &m, &t, f as u8) };
         assert_eq!(ret, 0, "blake2f failed");
         *h = unsafe { transmute::<[u8; 64], [u64; 8]>(state.data) };
-        *self.blake2_cache.lock() = Some(Blake2CacheEntry {
-            rounds,
-            h: input_h,
-            m: input_m,
-            t: input_t,
-            f,
-            output: *h,
-        });
+        #[cfg(feature = "sp1")]
+        {
+            *BLAKE2_CACHE.lock() = Some(Blake2CacheEntry {
+                rounds,
+                h: input_h,
+                m: input_m,
+                t: input_t,
+                f,
+                output: *h,
+            });
+        }
     }
 
     #[inline]
@@ -142,8 +143,8 @@ impl Crypto for ZkVMInterfaceCrypto {
 
     #[inline]
     fn modexp(&self, base: &[u8], exp: &[u8], modulus: &[u8]) -> Result<Vec<u8>, PrecompileHalt> {
-        if let Some(output) = self
-            .modexp_cache
+        #[cfg(feature = "sp1")]
+        if let Some(output) = MODEXP_CACHE
             .lock()
             .as_ref()
             .filter(|entry| entry.matches(base, exp, modulus))
@@ -154,7 +155,7 @@ impl Crypto for ZkVMInterfaceCrypto {
 
         #[cfg(feature = "sp1")]
         if let Some(output) = super::sp1::fast_modexp(base, exp, modulus) {
-            *self.modexp_cache.lock() = Some(ModexpCacheEntry {
+            *MODEXP_CACHE.lock() = Some(ModexpCacheEntry {
                 base: base.to_vec(),
                 exp: exp.to_vec(),
                 modulus: modulus.to_vec(),
@@ -179,12 +180,15 @@ impl Crypto for ZkVMInterfaceCrypto {
             return Err(PrecompileHalt::other("modexp failed"));
         }
 
-        *self.modexp_cache.lock() = Some(ModexpCacheEntry {
-            base: base.to_vec(),
-            exp: exp.to_vec(),
-            modulus: modulus.to_vec(),
-            output: output.clone(),
-        });
+        #[cfg(feature = "sp1")]
+        {
+            *MODEXP_CACHE.lock() = Some(ModexpCacheEntry {
+                base: base.to_vec(),
+                exp: exp.to_vec(),
+                modulus: modulus.to_vec(),
+                output: output.clone(),
+            });
+        }
         Ok(output)
     }
 
