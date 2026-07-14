@@ -4,18 +4,15 @@
 //! format is a 2-byte big-endian schema identifier followed by the SSZ-encoded `StatelessInput`
 //! container.
 //!
-//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless.py
-//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless_ssz.py
+//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/stateless.py
+//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/stateless_ssz.py
 
 #![allow(missing_docs)]
 
 use alloc::vec::Vec;
-use core::{
-    array,
-    fmt::{self, Debug},
-};
+use core::fmt::{self, Debug};
 
-use libssz::{BYTES_PER_LENGTH_OFFSET, DecodeError, SszDecode, SszEncode};
+use libssz::{SszDecode, SszEncode};
 use libssz_derive::{SszDecode, SszEncode};
 use libssz_types::SszList;
 
@@ -23,25 +20,26 @@ use crate::guest::{error::Error, input::new_payload_request::NewPayloadRequest};
 
 pub mod new_payload_request;
 
-/// Schema identifier of the SSZ Amsterdam stateless input.
+/// Revision byte of the SSZ stateless input schema.
 ///
-/// The spec fixes this schema to the Amsterdam payload shape. This
-/// implementation extends it and accepts payload shape from Bellatrix onward
-/// under the same identifier.
-pub const STATELESS_INPUT_SCHEMA_ID: u16 = 0x0001;
+/// The schema identifier is `fork_index << 8 | revision`, where `fork_index` is the
+/// [`ProtocolFork`] discriminant of the payload's active fork.
+///
+/// The spec fixes the fork index to Amsterdam. This implementation extends it
+/// and accepts payload shape from Bellatrix onward under the matching identifier.
+pub const STATELESS_INPUT_SCHEMA_REVISION: u8 = 0x01;
 /// Byte length of the big-endian schema identifier prefix.
 pub const STATELESS_INPUT_SCHEMA_ID_SIZE: usize = 2;
 
 /// SSZ list bounds from the Amsterdam stateless schema.
-pub const MAX_WITNESS_NODES: usize = 1 << 20;
-pub const MAX_WITNESS_CODES: usize = 1 << 16;
+pub const MAX_WITNESS_NODES: usize = 1 << 22;
+pub const MAX_WITNESS_CODES: usize = 1 << 18;
 pub const MAX_WITNESS_HEADERS: usize = 256;
-pub const MAX_BYTES_PER_WITNESS_NODE: usize = 1 << 20;
-pub const MAX_BYTES_PER_CODE: usize = 1 << 24;
+pub const MAX_BYTES_PER_WITNESS_NODE: usize = 1 << 10;
+pub const MAX_BYTES_PER_CODE: usize = 1 << 16;
 pub const MAX_BYTES_PER_HEADER: usize = 1 << 10;
 pub const MAX_OPTIONAL_FORK_ACTIVATION_VALUES: usize = 1;
-pub const MAX_BLOB_SCHEDULES_PER_FORK: usize = 1;
-pub const MAX_PUBLIC_KEYS: usize = 1 << 20;
+pub const MAX_PUBLIC_KEYS: usize = 1 << 15;
 pub const PUBLIC_KEY_BYTES: usize = 65;
 
 /// Execution witness data for stateless validation.
@@ -56,69 +54,58 @@ pub struct ExecutionWitness {
     pub headers: SszList<SszList<u8, MAX_BYTES_PER_HEADER>, MAX_WITNESS_HEADERS>,
 }
 
-/// Semantic execution-layer fork names understood by stateless inputs.
-///
-/// The discriminants are the SSZ enum values, which the spec derives from the declaration order
-/// of `ProtocolFork`.
+/// Execution-layer fork identifiers used by stateless schemas.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u64)]
 pub enum ProtocolFork {
-    Frontier = 0,
-    Homestead = 1,
-    DAOFork = 2,
-    TangerineWhistle = 3,
-    SpuriousDragon = 4,
-    Byzantium = 5,
-    Constantinople = 6,
-    ConstantinopleFix = 7,
-    Istanbul = 8,
-    MuirGlacier = 9,
-    Berlin = 10,
-    London = 11,
-    ArrowGlacier = 12,
-    GrayGlacier = 13,
-    Paris = 14,
-    Shanghai = 15,
-    Cancun = 16,
-    Prague = 17,
-    Osaka = 18,
-    BPO1 = 19,
-    BPO2 = 20,
-    BPO3 = 21,
-    BPO4 = 22,
-    BPO5 = 23,
-    Amsterdam = 24,
+    Frontier = 0x01,
+    Homestead = 0x02,
+    DAOFork = 0x03,
+    TangerineWhistle = 0x04,
+    SpuriousDragon = 0x05,
+    Byzantium = 0x06,
+    StPetersburg = 0x07,
+    Istanbul = 0x08,
+    MuirGlacier = 0x09,
+    Berlin = 0x0A,
+    London = 0x0B,
+    ArrowGlacier = 0x0C,
+    GrayGlacier = 0x0D,
+    Paris = 0x0E,
+    Shanghai = 0x0F,
+    Cancun = 0x10,
+    Prague = 0x11,
+    Osaka = 0x12,
+    BPO1 = 0x13,
+    BPO2 = 0x14,
+    Amsterdam = 0x15,
 }
 
 impl ProtocolFork {
     /// Converts an SSZ enum value into a [`ProtocolFork`].
     pub fn from_u64(value: u64) -> Option<Self> {
         Some(match value {
-            0 => Self::Frontier,
-            1 => Self::Homestead,
-            2 => Self::DAOFork,
-            3 => Self::TangerineWhistle,
-            4 => Self::SpuriousDragon,
-            5 => Self::Byzantium,
-            6 => Self::Constantinople,
-            7 => Self::ConstantinopleFix,
-            8 => Self::Istanbul,
-            9 => Self::MuirGlacier,
-            10 => Self::Berlin,
-            11 => Self::London,
-            12 => Self::ArrowGlacier,
-            13 => Self::GrayGlacier,
-            14 => Self::Paris,
-            15 => Self::Shanghai,
-            16 => Self::Cancun,
-            17 => Self::Prague,
-            18 => Self::Osaka,
-            19 => Self::BPO1,
-            20 => Self::BPO2,
-            21 => Self::BPO3,
-            22 => Self::BPO4,
-            23 => Self::BPO5,
-            24 => Self::Amsterdam,
+            0x01 => Self::Frontier,
+            0x02 => Self::Homestead,
+            0x03 => Self::DAOFork,
+            0x04 => Self::TangerineWhistle,
+            0x05 => Self::SpuriousDragon,
+            0x06 => Self::Byzantium,
+            0x07 => Self::StPetersburg,
+            0x08 => Self::Istanbul,
+            0x09 => Self::MuirGlacier,
+            0x0A => Self::Berlin,
+            0x0B => Self::London,
+            0x0C => Self::ArrowGlacier,
+            0x0D => Self::GrayGlacier,
+            0x0E => Self::Paris,
+            0x0F => Self::Shanghai,
+            0x10 => Self::Cancun,
+            0x11 => Self::Prague,
+            0x12 => Self::Osaka,
+            0x13 => Self::BPO1,
+            0x14 => Self::BPO2,
+            0x15 => Self::Amsterdam,
             _ => return None,
         })
     }
@@ -126,45 +113,6 @@ impl ProtocolFork {
     /// Returns the SSZ enum value of this fork.
     pub fn as_u64(self) -> u64 {
         self as u64
-    }
-}
-
-impl SszEncode for ProtocolFork {
-    fn is_fixed_size() -> bool {
-        true
-    }
-
-    fn fixed_size() -> usize {
-        <u64 as SszEncode>::fixed_size()
-    }
-
-    fn encoded_len(&self) -> usize {
-        <u64 as SszEncode>::fixed_size()
-    }
-
-    fn ssz_append(&self, buf: &mut Vec<u8>) {
-        self.as_u64().ssz_append(buf);
-    }
-}
-
-impl SszDecode for ProtocolFork {
-    fn is_fixed_size() -> bool {
-        true
-    }
-
-    fn fixed_size() -> usize {
-        <u64 as SszDecode>::fixed_size()
-    }
-
-    /// Decodes a fork value, rejecting values outside the enumeration even
-    /// though the spec schema models the field as a plain `uint64`. Unknown
-    /// values are reported as an invalid union selector since the fork
-    /// selects the [`NewPayloadRequest`] variant.
-    fn from_ssz_bytes(bytes: &[u8]) -> Result<Self, DecodeError> {
-        let value = u64::from_ssz_bytes(bytes)?;
-        Self::from_u64(value).ok_or(DecodeError::InvalidUnionSelector(
-            u8::try_from(value).unwrap_or(u8::MAX),
-        ))
     }
 }
 
@@ -230,55 +178,21 @@ impl Debug for ForkActivation {
     }
 }
 
-/// Effective blob parameters for a protocol fork.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, SszEncode, SszDecode)]
-pub struct BlobSchedule {
-    pub target: u64,
-    pub max: u64,
-    pub base_fee_update_fraction: u64,
-}
-
 /// Per-fork configuration needed to interpret stateless inputs.
-#[derive(Clone, PartialEq, Eq, SszEncode, SszDecode)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct ForkConfig {
-    pub fork: ProtocolFork,
     pub activation: ForkActivation,
-    pub blob_schedule: SszList<BlobSchedule, MAX_BLOB_SCHEDULES_PER_FORK>,
 }
 
 impl ForkConfig {
     /// Constructs a [`ForkConfig`].
-    pub fn new(
-        fork: ProtocolFork,
-        activation: ForkActivation,
-        blob_schedule: Option<BlobSchedule>,
-    ) -> Self {
-        Self {
-            fork,
-            activation,
-            blob_schedule: SszList::try_from(blob_schedule.into_iter().collect::<Vec<_>>())
-                .expect("a list of at most one element is always within bounds"),
-        }
-    }
-
-    /// Returns the blob schedule when present.
-    pub fn blob_schedule(&self) -> Option<&BlobSchedule> {
-        self.blob_schedule.first()
-    }
-}
-
-impl Debug for ForkConfig {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("ForkConfig")
-            .field("fork", &self.fork)
-            .field("activation", &self.activation)
-            .field("blob_schedule", &self.blob_schedule.first())
-            .finish()
+    pub fn new(activation: ForkActivation) -> Self {
+        Self { activation }
     }
 }
 
 /// Chain configuration needed for stateless validation.
-#[derive(Debug, Clone, PartialEq, Eq, SszEncode, SszDecode)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct ChainConfig {
     pub chain_id: u64,
     pub active_fork: ForkConfig,
@@ -286,10 +200,8 @@ pub struct ChainConfig {
 
 impl ChainConfig {
     /// Validates that the chain configuration is usable for the target payload, following
-    /// `validate_chain_config` in the spec with two deliberate differences. The spec's
-    /// blob-schedule equality check is performed by the verifier against the result public values
-    /// instead of here, and the spec's `fork != Amsterdam` rejection is enforced when
-    /// [`StatelessInput`] decoding selects the payload shape from the active fork.
+    /// `validate_chain_config` in the spec. The active fork is selected by the schema identifier
+    /// during [`StatelessInput`] decoding, so only the activation point is checked here.
     pub fn validate(&self, new_payload_request: &NewPayloadRequest) -> Result<(), Error> {
         if self.active_fork.activation.block_number().is_none()
             && self.active_fork.activation.timestamp().is_none()
@@ -310,9 +222,9 @@ impl ChainConfig {
 
 /// Canonical input to stateless validation.
 ///
-/// Decoding selects the payload request shape from the active fork in `chain_config`. An input
-/// whose payload does not match the fork fails to decode.
-#[derive(Debug, Clone, PartialEq, Eq, SszEncode)]
+/// A fork-agnostic SSZ container. The active fork is in the 2-byte schema identifier rather than
+/// the SSZ body, and decoding validates the recovered payload request against that fork.
+#[derive(Debug, Clone, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct StatelessInput {
     /// Consensus-layer payload request to validate statelessly. See [`NewPayloadRequest`] for
     /// structure and links to consensus-specs.
@@ -327,109 +239,71 @@ pub struct StatelessInput {
 }
 
 impl StatelessInput {
-    /// Serializes to schema-prefixed SSZ bytes, mirroring
-    /// `serialize_stateless_input` in [`stateless_host.py`].
+    /// Serializes to schema-prefixed SSZ bytes, mirroring `serialize_stateless_input` in
+    /// [`stateless_host.py`]. The fork is encoded into the schema identifier prefix.
     ///
-    /// [`stateless_host.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless_host.py
-    pub fn to_schema_prefixed_ssz(&self) -> Vec<u8> {
+    /// [`stateless_host.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/stateless_host.py
+    pub fn to_schema_prefixed_ssz(&self, fork: ProtocolFork) -> Vec<u8> {
         let mut out = Vec::with_capacity(STATELESS_INPUT_SCHEMA_ID_SIZE + self.encoded_len());
-        out.extend_from_slice(&STATELESS_INPUT_SCHEMA_ID.to_be_bytes());
+        let schema_id = ((fork.as_u64() as u16) << 8) | u16::from(STATELESS_INPUT_SCHEMA_REVISION);
+        out.extend_from_slice(&schema_id.to_be_bytes());
         self.ssz_append(&mut out);
         out
     }
 
-    /// Deserializes from schema-prefixed SSZ bytes, mirroring
-    /// `deserialize_stateless_input` in [`stateless_guest.py`].
+    /// Deserializes from schema-prefixed SSZ bytes, mirroring `deserialize_stateless_input` in
+    /// [`stateless_guest.py`]. Returns the fork carried by the schema identifier alongside the
+    /// decoded input, and rejects a payload request whose shape does not match that fork.
     ///
-    /// [`stateless_guest.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless_guest.py
-    pub fn from_schema_prefixed_ssz(bytes: &[u8]) -> Result<Self, Error> {
+    /// [`stateless_guest.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/stateless_guest.py
+    pub fn from_schema_prefixed_ssz(bytes: &[u8]) -> Result<(ProtocolFork, Self), Error> {
+        use ProtocolFork::*;
         let (schema_id, body) = bytes
             .split_first_chunk::<STATELESS_INPUT_SCHEMA_ID_SIZE>()
             .ok_or(Error::MissingSchemaId)?;
         let schema_id = u16::from_be_bytes(*schema_id);
-        match schema_id {
-            STATELESS_INPUT_SCHEMA_ID => Ok(Self::from_ssz_bytes(body)?),
-            _ => Err(Error::UnsupportedSchemaId(schema_id)),
+        if (schema_id & 0xff) as u8 != STATELESS_INPUT_SCHEMA_REVISION {
+            return Err(Error::UnsupportedSchemaId(schema_id));
         }
-    }
-}
-
-impl SszDecode for StatelessInput {
-    fn is_fixed_size() -> bool {
-        false
-    }
-
-    fn fixed_size() -> usize {
-        0
-    }
-
-    fn from_ssz_bytes(bytes: &[u8]) -> Result<Self, DecodeError> {
-        use crate::guest::input::{NewPayloadRequest::*, ProtocolFork::*};
-
-        let fields = ssz_split_var_fields::<4>(bytes)?;
-
-        // Decode the other fields as usual.
-        let witness = ExecutionWitness::from_ssz_bytes(fields[1])?;
-        let chain_config = ChainConfig::from_ssz_bytes(fields[2])?;
-        let public_keys = SszList::from_ssz_bytes(fields[3])?;
-
-        // Decode `new_payload_request` from the shape the active fork selects.
-        let new_payload_request = match chain_config.active_fork.fork {
-            Paris => Bellatrix(SszDecode::from_ssz_bytes(fields[0])?),
-            Shanghai => Capella(SszDecode::from_ssz_bytes(fields[0])?),
-            Cancun => Deneb(SszDecode::from_ssz_bytes(fields[0])?),
-            Prague | Osaka | BPO1 | BPO2 => ElectraFulu(SszDecode::from_ssz_bytes(fields[0])?),
-            Amsterdam => Gloas(SszDecode::from_ssz_bytes(fields[0])?),
-            fork => return Err(DecodeError::InvalidUnionSelector(fork.as_u64() as u8)),
+        let fork = ProtocolFork::from_u64(u64::from(schema_id >> 8))
+            .ok_or(Error::UnsupportedSchemaId(schema_id))?;
+        let input = match fork {
+            Paris => StatelessInputBellatrix::from_ssz_bytes(body)?.into(),
+            Shanghai => StatelessInputCapella::from_ssz_bytes(body)?.into(),
+            Cancun => StatelessInputDeneb::from_ssz_bytes(body)?.into(),
+            Prague | Osaka | BPO1 | BPO2 => StatelessInputElectraFulu::from_ssz_bytes(body)?.into(),
+            Amsterdam => StatelessInputGloas::from_ssz_bytes(body)?.into(),
+            _ => return Err(Error::UnsupportedProtocolFork(fork)),
         };
-
-        Ok(Self {
-            new_payload_request,
-            witness,
-            chain_config,
-            public_keys,
-        })
+        Ok((fork, input))
     }
 }
 
-/// Splits an SSZ container whose `N` fields are all variable-size.
-fn ssz_split_var_fields<const N: usize>(bytes: &[u8]) -> Result<[&[u8]; N], DecodeError> {
-    let fixed_part_len = N * BYTES_PER_LENGTH_OFFSET;
-    if bytes.len() < fixed_part_len {
-        return Err(DecodeError::InvalidByteLength {
-            expected: fixed_part_len,
-            got: bytes.len(),
-        });
-    }
+macro_rules! declare_stateless_input_variants {
+    ($($variant:ident),*) => {
+        paste::paste! {
+            $(
+                #[derive(SszDecode)]
+                struct [<StatelessInput $variant>] {
+                    new_payload_request: new_payload_request::[<NewPayloadRequest $variant>],
+                    witness: ExecutionWitness,
+                    chain_config: ChainConfig,
+                    public_keys: SszList<[u8; PUBLIC_KEY_BYTES], MAX_PUBLIC_KEYS>,
+                }
 
-    let mut offsets = [0usize; N];
-    for i in 0..N {
-        let offset =
-            u32::from_le_bytes(array::from_fn(|j| bytes[i * BYTES_PER_LENGTH_OFFSET + j])) as usize;
-        if i == 0 {
-            if offset != fixed_part_len {
-                return Err(DecodeError::InvalidFirstOffset {
-                    expected: fixed_part_len,
-                    got: offset,
-                });
-            }
-        } else if offset < offsets[i - 1] {
-            return Err(DecodeError::OffsetsAreNotMonotonicallyIncreasing);
+                impl From<[<StatelessInput $variant>]> for StatelessInput {
+                    fn from(input: [<StatelessInput $variant>]) -> StatelessInput {
+                        StatelessInput {
+                            new_payload_request: NewPayloadRequest::$variant(input.new_payload_request),
+                            witness: input.witness,
+                            chain_config: input.chain_config,
+                            public_keys: input.public_keys,
+                        }
+                    }
+                }
+            )*
         }
-        if offset > bytes.len() {
-            return Err(DecodeError::OffsetOutOfBounds {
-                offset,
-                length: bytes.len(),
-            });
-        }
-        offsets[i] = offset;
-    }
-
-    Ok(array::from_fn(|i| {
-        if i + 1 < N {
-            &bytes[offsets[i]..offsets[i + 1]]
-        } else {
-            &bytes[offsets[i]..bytes.len()]
-        }
-    }))
+    };
 }
+
+declare_stateless_input_variants!(Bellatrix, Capella, Deneb, ElectraFulu, Gloas);

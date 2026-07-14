@@ -24,7 +24,7 @@ use stateless_validator_common::{
     guest::{
         Error as CommonError,
         input::{
-            BlobSchedule, ChainConfig, ExecutionWitness, ProtocolFork, StatelessInput,
+            ChainConfig, ExecutionWitness, ProtocolFork, StatelessInput,
             new_payload_request::{
                 ExecutionRequests, MAX_WITHDRAWALS_PER_PAYLOAD, NewPayloadRequest,
                 NewPayloadRequestElectraFulu, NewPayloadRequestGloas, Withdrawals,
@@ -40,16 +40,19 @@ const MAINNET_DEPOSIT_CONTRACT_ADDRESS: [u8; 20] = hex!("00000000219ab540356cbb8
 
 /// Converts the decoded canonical stateless input into the ethrex program
 /// input consumed by `execute_decoded`.
-pub(crate) fn to_ethrex_input(input: StatelessInput) -> Result<DecodedEip8025, Error> {
-    let chain_config = to_ethrex_chain_config(&input.chain_config)?;
+pub(crate) fn to_ethrex_input(
+    fork: ProtocolFork,
+    input: StatelessInput,
+) -> Result<DecodedEip8025, Error> {
+    let chain_config = to_ethrex_chain_config(fork, &input.chain_config)?;
     Ok(match input.new_payload_request {
         NewPayloadRequest::Gloas(request) => {
-            let public_keys = map_ssz_list(input.public_keys, array_to_ssz_vec);
+            let public_keys = rebound_ssz_list(map_ssz_list(input.public_keys, array_to_ssz_vec))?;
             DecodedEip8025::Canonical {
                 stateless_input: CanonicalStatelessInput {
                     new_payload_request: to_ethrex_new_payload_request(request)?,
                     witness: to_ethrex_witness(input.witness)?,
-                    chain_config: to_ethrex_canonical_chain_config(&input.chain_config),
+                    chain_config: to_ethrex_canonical_chain_config(fork, &input.chain_config),
                     public_keys,
                 },
                 chain_config,
@@ -94,7 +97,7 @@ fn to_ethrex_new_payload_request(
         withdrawals: to_ethrex_withdrawals(payload.withdrawals),
         blob_gas_used: payload.blob_gas_used,
         excess_blob_gas: payload.excess_blob_gas,
-        block_access_list: payload.block_access_list,
+        block_access_list: rebound_ssz_list(payload.block_access_list)?,
         slot_number: payload.slot_number,
     };
     Ok(eip8025_ssz::NewPayloadRequestAmsterdam {
@@ -149,28 +152,31 @@ fn to_ethrex_execution_requests(requests: ExecutionRequests) -> eip8025_ssz::Exe
 /// Converts the execution witness into the ethrex container.
 fn to_ethrex_witness(witness: ExecutionWitness) -> Result<CanonicalExecutionWitness, Error> {
     Ok(CanonicalExecutionWitness {
-        state: witness.state,
-        codes: witness.codes,
+        state: rebound_nested_ssz_list(witness.state)?,
+        codes: rebound_nested_ssz_list(witness.codes)?,
         headers: witness.headers,
     })
 }
 
 /// Converts the chain configuration into the ethrex canonical chain
 /// configuration container.
-fn to_ethrex_canonical_chain_config(config: &ChainConfig) -> CanonicalChainConfig {
+fn to_ethrex_canonical_chain_config(
+    fork: ProtocolFork,
+    config: &ChainConfig,
+) -> CanonicalChainConfig {
     CanonicalChainConfig {
         chain_id: config.chain_id,
         active_fork: CanonicalForkConfig {
-            fork: config.active_fork.fork.as_u64(),
+            fork: fork.as_u64(),
             activation: CanonicalForkActivation {
                 block_number: config.active_fork.activation.block_number.clone(),
                 timestamp: config.active_fork.activation.timestamp.clone(),
             },
-            blob_schedule: option_to_ssz_list(config.active_fork.blob_schedule().map(
-                |blob_schedule| CanonicalBlobSchedule {
-                    target: blob_schedule.target,
-                    max: blob_schedule.max,
-                    base_fee_update_fraction: blob_schedule.base_fee_update_fraction,
+            blob_schedule: option_to_ssz_list(blob_schedule(fork).map(
+                |(target, max, base_fee_update_fraction)| CanonicalBlobSchedule {
+                    target,
+                    max,
+                    base_fee_update_fraction,
                 },
             )),
         },
@@ -179,10 +185,9 @@ fn to_ethrex_canonical_chain_config(config: &ChainConfig) -> CanonicalChainConfi
 
 /// Converts a chain configuration into a [`ethrex_common::types::ChainConfig`].
 fn to_ethrex_chain_config(
+    fork: ProtocolFork,
     config: &ChainConfig,
 ) -> Result<ethrex_common::types::ChainConfig, Error> {
-    let fork = config.active_fork.fork;
-
     let (activation_block_number, activation_timestamp) = if fork >= ProtocolFork::Shanghai {
         let timestamp = config
             .active_fork
@@ -218,8 +223,8 @@ fn to_ethrex_chain_config(
         eip155_block: block_at(ProtocolFork::SpuriousDragon),
         eip158_block: block_at(ProtocolFork::SpuriousDragon),
         byzantium_block: block_at(ProtocolFork::Byzantium),
-        constantinople_block: block_at(ProtocolFork::Constantinople),
-        petersburg_block: block_at(ProtocolFork::ConstantinopleFix),
+        constantinople_block: block_at(ProtocolFork::StPetersburg),
+        petersburg_block: block_at(ProtocolFork::StPetersburg),
         istanbul_block: block_at(ProtocolFork::Istanbul),
         muir_glacier_block: block_at(ProtocolFork::MuirGlacier),
         berlin_block: block_at(ProtocolFork::Berlin),
@@ -240,26 +245,35 @@ fn to_ethrex_chain_config(
         amsterdam_time: time_at(ProtocolFork::Amsterdam),
         terminal_total_difficulty: (fork >= ProtocolFork::Paris).then_some(0),
         terminal_total_difficulty_passed: fork >= ProtocolFork::Paris,
-        blob_schedule: active_fork_blob_schedule(fork, config.active_fork.blob_schedule())?,
+        blob_schedule: active_fork_blob_schedule(fork)?,
         deposit_contract_address: H160(MAINNET_DEPOSIT_CONTRACT_ADDRESS),
         enable_verkle_at_genesis: false,
     })
 }
 
-/// Builds an ethrex blob schedule.
+/// Per-fork blob schedule `(target, max, base_fee_update_fraction)`, or `None` before Cancun.
+fn blob_schedule(fork: ProtocolFork) -> Option<(u64, u64, u64)> {
+    Some(match fork {
+        ProtocolFork::Cancun => (3, 6, 3_338_477),
+        ProtocolFork::Prague | ProtocolFork::Osaka => (6, 9, 5_007_716),
+        ProtocolFork::BPO1 => (10, 15, 8_346_193),
+        ProtocolFork::BPO2 | ProtocolFork::Amsterdam => (14, 21, 11_684_671),
+        _ => return None,
+    })
+}
+
+/// Builds an ethrex blob schedule for the active fork.
 fn active_fork_blob_schedule(
     fork: ProtocolFork,
-    blob_schedule: Option<&BlobSchedule>,
 ) -> Result<ethrex_common::types::BlobSchedule, Error> {
     let mut schedule = ethrex_common::types::BlobSchedule::default();
-    if fork < ProtocolFork::Cancun {
+    let Some((target, max, base_fee_update_fraction)) = blob_schedule(fork) else {
         return Ok(schedule);
-    }
-    let blob_schedule = blob_schedule.ok_or(Error::MissingBlobSchedule)?;
+    };
     let entry = ForkBlobSchedule {
-        base_fee_update_fraction: blob_schedule.base_fee_update_fraction,
-        target: u32::try_from(blob_schedule.target).map_err(|_| Error::BlobTargetOutOfBounds)?,
-        max: u32::try_from(blob_schedule.max).map_err(|_| Error::BlobMaxOutOfBounds)?,
+        base_fee_update_fraction,
+        target: u32::try_from(target).map_err(|_| Error::BlobTargetOutOfBounds)?,
+        max: u32::try_from(max).map_err(|_| Error::BlobMaxOutOfBounds)?,
     };
     match fork {
         ProtocolFork::Cancun => schedule.cancun = entry,
@@ -268,7 +282,7 @@ fn active_fork_blob_schedule(
         ProtocolFork::BPO1 => schedule.bpo1 = entry,
         ProtocolFork::BPO2 => schedule.bpo2 = entry,
         ProtocolFork::Amsterdam => schedule.amsterdam = Some(entry),
-        _ => unreachable!("forks before Cancun return early"),
+        _ => unreachable!("forks before Cancun return None above"),
     }
     Ok(schedule)
 }
@@ -343,6 +357,22 @@ fn map_ssz_list<T, U, const N: usize>(list: SszList<T, N>, f: impl Fn(T) -> U) -
         .collect::<Vec<_>>()
         .try_into()
         .expect("infallible")
+}
+
+fn rebound_ssz_list<T, const M: usize, const N: usize>(
+    list: SszList<T, M>,
+) -> Result<SszList<T, N>, Error> {
+    SszList::try_from(list.into_iter().collect::<Vec<_>>()).map_err(|_| Error::ListBoundExceeded)
+}
+
+fn rebound_nested_ssz_list<const IM: usize, const IN: usize, const OM: usize, const ON: usize>(
+    list: SszList<SszList<u8, IM>, OM>,
+) -> Result<SszList<SszList<u8, IN>, ON>, Error> {
+    let list = list
+        .into_iter()
+        .map(rebound_ssz_list)
+        .collect::<Result<Vec<_>, _>>()?;
+    SszList::try_from(list).map_err(|_| Error::ListBoundExceeded)
 }
 
 fn to_bytes_vec<const M: usize, const N: usize>(items: SszList<SszList<u8, M>, N>) -> Vec<Bytes> {

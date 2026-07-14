@@ -1,4 +1,7 @@
 //! Execution tests for stateless validator guest program
+//!
+//! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built
+//! image as the executor.
 
 use ere_dockerized::zkVMKind;
 use stateless_validator_test::{

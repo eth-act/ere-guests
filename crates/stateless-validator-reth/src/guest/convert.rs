@@ -25,7 +25,7 @@ use stateless_validator_common::{
     guest::{
         Error as CommonError,
         input::{
-            BlobSchedule, ChainConfig, ExecutionWitness, ProtocolFork, StatelessInput,
+            ChainConfig, ExecutionWitness, ProtocolFork, StatelessInput,
             new_payload_request::{
                 ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, ExecutionPayloadV4,
                 ExecutionRequests, Hash32, NewPayloadRequest, VersionedHashes, Withdrawals,
@@ -47,9 +47,9 @@ pub(crate) struct RethInput {
 
 /// Converts the decoded canonical stateless input into the reth validation
 /// input consumed by `stateless_validation_with_trie`.
-pub(crate) fn to_reth_input(input: StatelessInput) -> Result<RethInput, Error> {
+pub(crate) fn to_reth_input(fork: ProtocolFork, input: StatelessInput) -> Result<RethInput, Error> {
     let chain_spec = Arc::new(ChainSpec::from(Genesis {
-        config: to_reth_chain_config(&input.chain_config)?,
+        config: to_reth_chain_config(fork, &input.chain_config)?,
         ..Default::default()
     }));
     let evm_config = EthEvmConfig::new(chain_spec.clone());
@@ -66,9 +66,10 @@ pub(crate) fn to_reth_input(input: StatelessInput) -> Result<RethInput, Error> {
 }
 
 /// Converts a chain configuration into an [`alloy_genesis::ChainConfig`].
-fn to_reth_chain_config(config: &ChainConfig) -> Result<alloy_genesis::ChainConfig, Error> {
-    let fork = config.active_fork.fork;
-
+fn to_reth_chain_config(
+    fork: ProtocolFork,
+    config: &ChainConfig,
+) -> Result<alloy_genesis::ChainConfig, Error> {
     let (activation_block_number, activation_timestamp) = if fork >= ProtocolFork::Shanghai {
         let timestamp = config
             .active_fork
@@ -104,8 +105,8 @@ fn to_reth_chain_config(config: &ChainConfig) -> Result<alloy_genesis::ChainConf
         eip155_block: block_at(ProtocolFork::SpuriousDragon),
         eip158_block: block_at(ProtocolFork::SpuriousDragon),
         byzantium_block: block_at(ProtocolFork::Byzantium),
-        constantinople_block: block_at(ProtocolFork::Constantinople),
-        petersburg_block: block_at(ProtocolFork::ConstantinopleFix),
+        constantinople_block: block_at(ProtocolFork::StPetersburg),
+        petersburg_block: block_at(ProtocolFork::StPetersburg),
         istanbul_block: block_at(ProtocolFork::Istanbul),
         muir_glacier_block: block_at(ProtocolFork::MuirGlacier),
         berlin_block: block_at(ProtocolFork::Berlin),
@@ -125,45 +126,27 @@ fn to_reth_chain_config(config: &ChainConfig) -> Result<alloy_genesis::ChainConf
         amsterdam_time: time_at(ProtocolFork::Amsterdam),
         terminal_total_difficulty: (fork >= ProtocolFork::Paris).then_some(U256::ZERO),
         terminal_total_difficulty_passed: fork >= ProtocolFork::Paris,
-        blob_schedule: active_fork_blob_schedule(fork, config.active_fork.blob_schedule())?,
+        blob_schedule: active_fork_blob_schedule(fork),
         deposit_contract_address: Some(alloy_eips::eip6110::MAINNET_DEPOSIT_CONTRACT_ADDRESS),
         ..Default::default()
     })
 }
 
-/// Builds a reth blob schedule.
-fn active_fork_blob_schedule(
-    fork: ProtocolFork,
-    blob_schedule: Option<&BlobSchedule>,
-) -> Result<BTreeMap<String, BlobParams>, Error> {
-    if fork < ProtocolFork::Cancun {
-        return Ok(BTreeMap::new());
-    }
-    let blob_schedule = blob_schedule.ok_or(Error::MissingBlobSchedule)?;
-    let base = match fork {
-        ProtocolFork::Cancun => BlobParams::cancun(),
-        ProtocolFork::Prague => BlobParams::prague(),
-        _ => BlobParams::osaka(),
+/// Builds a reth blob schedule for the active fork.
+fn active_fork_blob_schedule(fork: ProtocolFork) -> BTreeMap<String, BlobParams> {
+    let (key, params) = match fork {
+        ProtocolFork::Cancun => ("cancun", BlobParams::cancun()),
+        ProtocolFork::Prague => ("prague", BlobParams::prague()),
+        ProtocolFork::Osaka => ("osaka", BlobParams::osaka()),
+        ProtocolFork::BPO1 => ("bpo1", BlobParams::bpo1()),
+        ProtocolFork::BPO2 => ("bpo2", BlobParams::bpo2()),
+        // The amsterdam arm in `blob_schedule_blob_params` of alloy-genesis is spelled `Amsterdam`
+        // while every other fork key is lowercase. A lowercase key would be silently ignored and
+        // never register.
+        ProtocolFork::Amsterdam => ("Amsterdam", BlobParams::bpo2()),
+        _ => return BTreeMap::new(),
     };
-    let params = BlobParams {
-        target_blob_count: blob_schedule.target,
-        max_blob_count: blob_schedule.max,
-        update_fraction: u128::from(blob_schedule.base_fee_update_fraction),
-        ..base
-    };
-    let key = match fork {
-        ProtocolFork::Cancun => "cancun",
-        ProtocolFork::Prague => "prague",
-        ProtocolFork::Osaka => "osaka",
-        ProtocolFork::BPO1 => "bpo1",
-        ProtocolFork::BPO2 => "bpo2",
-        // The amsterdam arm in `blob_schedule_blob_params` of alloy-genesis is
-        // spelled `Amsterdam` while every other fork key is lowercase. A
-        // lowercase key would be silently ignored and never register.
-        ProtocolFork::Amsterdam => "Amsterdam",
-        _ => unreachable!("forks before Cancun return early"),
-    };
-    Ok(BTreeMap::from([(key.to_string(), params)]))
+    BTreeMap::from([(key.to_string(), params)])
 }
 
 /// Converts the new payload request into engine-API execution data.

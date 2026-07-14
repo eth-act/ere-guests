@@ -16,7 +16,7 @@ use walkdir::{DirEntry, WalkDir};
 
 /// Release hosting the EEST fixtures filled by `ethereum/execution-specs`.
 const EEST_FIXTURES_BASE_URL: &str =
-    "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v0.4.1";
+    "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v0.6.2";
 /// Release hosting the RPC-derived fixtures from `witness-generator-spec-cli`.
 const RPC_FIXTURES_BASE_URL: &str =
     "https://github.com/han0110/ere-guests/releases/download/rpc-fixtures@v0.1.0";

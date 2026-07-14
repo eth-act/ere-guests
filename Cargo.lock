@@ -5801,6 +5801,7 @@ dependencies = [
  "libssz-derive",
  "libssz-merkle",
  "libssz-types",
+ "paste",
  "sha2",
  "thiserror",
 ]
