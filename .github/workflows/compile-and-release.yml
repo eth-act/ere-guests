@@ -60,7 +60,7 @@ jobs:
         run: |
           docker run \
             ${{ matrix.ere_profile && format('-e ERE_PROFILE={0}', matrix.ere_profile) || '' }} \
-            -e OPENVM_RUST_TOOLCHAIN=nightly-2025-10-30 \
+            -e OPENVM_RUST_TOOLCHAIN=nightly-2026-01-18 \
             -e RUST_LOG=info \
             -v $PWD:/ere-guests \
             -v $PWD/output:/output \
@@ -75,7 +75,7 @@ jobs:
         run: |
           docker run \
             ${{ matrix.ere_profile && format('-e ERE_PROFILE={0}', matrix.ere_profile) || '' }} \
-            -e OPENVM_RUST_TOOLCHAIN=nightly-2025-10-30 \
+            -e OPENVM_RUST_TOOLCHAIN=nightly-2026-01-18 \
             -e RUST_LOG=info \
             -v $PWD:/ere-guests \
             -v $PWD/output:/output \
