@@ -97,7 +97,7 @@ pub fn run_stateless_validator_execution(
 ) -> Vec<ExecutionFailure> {
     let elf = resolve_guest(guest_kind, zkvm_kind);
     let zkvm = init_zkvm(zkvm_kind, elf);
-    run_execution(preset_fixtures(preset), &|input| {
+    run_execution(guest_kind, preset_fixtures(preset), &|input| {
         Ok(zkvm.execute(&Input::new().with_stdin(input))?.0.to_vec())
     })
 }

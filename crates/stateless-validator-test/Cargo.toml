@@ -35,5 +35,8 @@ ere-platform-core.workspace = true
 # local
 stateless-validator-common = { workspace = true, features = ["host"] }
 
+# legacy stateless_output_bytes decoding support
+stateless-validator-common-legacy = { git = "https://github.com/eth-act/ere-guests", tag = "v0.13.0", package = "stateless-validator-common" }
+
 [dev-dependencies]
 paste.workspace = true

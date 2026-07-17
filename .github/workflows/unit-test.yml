@@ -89,5 +89,5 @@ jobs:
             --no-default-features \
             --target riscv64imac-unknown-none-elf \
             --package stateless-validator-reth \
-            --package stateless-validator-common
+            --package "file://$PWD/crates/stateless-validator-common"
             # --package stateless-validator-ethrex

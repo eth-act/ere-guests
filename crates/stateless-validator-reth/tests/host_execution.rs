@@ -3,7 +3,7 @@
 use stateless_validator_reth::guest::run_stateless_guest;
 use stateless_validator_test::declare_test_host_execution;
 
-declare_test_host_execution!(RpcBpo2, run_stateless_guest);
+declare_test_host_execution!(Reth, RpcBpo2, run_stateless_guest);
 // NOTE:
 // - 12 EIP-7610
 //    - test_init_collision_create_tx
@@ -19,4 +19,9 @@ declare_test_host_execution!(RpcBpo2, run_stateless_guest);
 //    - test_witness_codes_create_same_hash_then_read
 // - 1 EIP-8037 (state creation gas for set code)
 //    - test_same_tx_clear_then_reset_pre_delegated
-declare_test_host_execution!(EestGlamsterdamDevnet7, run_stateless_guest, failures = 17);
+declare_test_host_execution!(
+    Reth,
+    EestGlamsterdamDevnet7,
+    run_stateless_guest,
+    failures = 17
+);

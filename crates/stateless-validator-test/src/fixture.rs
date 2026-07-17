@@ -16,7 +16,7 @@ use walkdir::{DirEntry, WalkDir};
 
 /// Release hosting the EEST fixtures filled by `ethereum/execution-specs`.
 const EEST_FIXTURES_BASE_URL: &str =
-    "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v0.6.2";
+    "https://github.com/ethereum/execution-specs/releases/download";
 /// Release hosting the RPC-derived fixtures from `witness-generator-spec-cli`.
 const RPC_FIXTURES_BASE_URL: &str =
     "https://github.com/han0110/ere-guests/releases/download/rpc-fixtures@v0.1.0";
@@ -24,8 +24,10 @@ const RPC_FIXTURES_BASE_URL: &str =
 /// A preset fixture set identifying both its source archive and its format.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FixturePreset {
-    /// EEST `blockchain_test` fixtures based on `glamsterdam-devnet-7`.
+    /// EEST `blockchain_test` fixtures based on `tests-zkevm@v0.6.2`.
     EestGlamsterdamDevnet7,
+    /// EEST `blockchain_test` fixtures based on `tests-zkevm@v0.4.1`.
+    EestGlamsterdamDevnet5,
     /// RPC-derived fixtures from the `mainnet`.
     RpcBpo2,
 }
@@ -44,8 +46,13 @@ impl FixturePreset {
     fn source(self) -> FixtureSource {
         match self {
             Self::EestGlamsterdamDevnet7 => FixtureSource {
-                url: format!("{EEST_FIXTURES_BASE_URL}/fixtures_zkevm.tar.gz"),
-                dir: "eest-bal-devnet-7",
+                url: format!("{EEST_FIXTURES_BASE_URL}/tests-zkevm@v0.6.2/fixtures_zkevm.tar.gz"),
+                dir: "eest-glamsterdam-devnet-7",
+                archive_dir: "fixtures/blockchain_tests",
+            },
+            Self::EestGlamsterdamDevnet5 => FixtureSource {
+                url: format!("{EEST_FIXTURES_BASE_URL}/tests-zkevm@v0.4.1/fixtures_zkevm.tar.gz"),
+                dir: "eest-bal-devnet-5",
                 archive_dir: "fixtures/blockchain_tests",
             },
             Self::RpcBpo2 => FixtureSource {
