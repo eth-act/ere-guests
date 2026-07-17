@@ -15,8 +15,8 @@ use ethrex_common::{
 };
 use ethrex_crypto::Crypto;
 use ethrex_guest_program::l1::{
-    CanonicalBlobSchedule, CanonicalChainConfig, CanonicalExecutionWitness,
-    CanonicalForkActivation, CanonicalForkConfig, CanonicalStatelessInput, DecodedEip8025,
+    CanonicalChainConfig, CanonicalExecutionWitness, CanonicalForkActivation, CanonicalForkConfig,
+    CanonicalStatelessInput, DecodedEip8025,
 };
 use hex_literal::hex;
 use stateless_validator_common::{
@@ -26,7 +26,7 @@ use stateless_validator_common::{
         input::{
             ChainConfig, ExecutionWitness, ProtocolFork, StatelessInput,
             new_payload_request::{
-                ExecutionRequests, MAX_WITHDRAWALS_PER_PAYLOAD, NewPayloadRequest,
+                ExecutionRequestsGloas, MAX_WITHDRAWALS_PER_PAYLOAD, NewPayloadRequest,
                 NewPayloadRequestElectraFulu, NewPayloadRequestGloas, Withdrawals,
             },
         },
@@ -52,7 +52,7 @@ pub(crate) fn to_ethrex_input(
                 stateless_input: CanonicalStatelessInput {
                     new_payload_request: to_ethrex_new_payload_request(request)?,
                     witness: to_ethrex_witness(input.witness)?,
-                    chain_config: to_ethrex_canonical_chain_config(fork, &input.chain_config),
+                    chain_config: to_ethrex_canonical_chain_config(&input.chain_config),
                     public_keys,
                 },
                 chain_config,
@@ -123,7 +123,9 @@ fn to_ethrex_withdrawals(
 
 /// Converts the canonical execution requests into the ethrex container. All
 /// request list bounds match the canonical bounds.
-fn to_ethrex_execution_requests(requests: ExecutionRequests) -> eip8025_ssz::ExecutionRequests {
+fn to_ethrex_execution_requests(
+    requests: ExecutionRequestsGloas,
+) -> eip8025_ssz::ExecutionRequests {
     eip8025_ssz::ExecutionRequests {
         deposits: map_ssz_list(requests.deposits, |deposit| eip8025_ssz::DepositRequest {
             pubkey: deposit.pubkey,
@@ -146,6 +148,20 @@ fn to_ethrex_execution_requests(requests: ExecutionRequests) -> eip8025_ssz::Exe
                 target_pubkey: consolidation.target_pubkey,
             }
         }),
+        builder_deposits: map_ssz_list(requests.builder_deposits, |builder_deposit| {
+            eip8025_ssz::BuilderDepositRequest {
+                pubkey: builder_deposit.pubkey,
+                withdrawal_credentials: builder_deposit.withdrawal_credentials,
+                amount: builder_deposit.amount,
+                signature: builder_deposit.signature,
+            }
+        }),
+        builder_exits: map_ssz_list(requests.builder_exits, |builder_exit| {
+            eip8025_ssz::BuilderExitRequest {
+                source_address: builder_exit.source_address.into(),
+                pubkey: builder_exit.pubkey,
+            }
+        }),
     }
 }
 
@@ -160,25 +176,14 @@ fn to_ethrex_witness(witness: ExecutionWitness) -> Result<CanonicalExecutionWitn
 
 /// Converts the chain configuration into the ethrex canonical chain
 /// configuration container.
-fn to_ethrex_canonical_chain_config(
-    fork: ProtocolFork,
-    config: &ChainConfig,
-) -> CanonicalChainConfig {
+fn to_ethrex_canonical_chain_config(config: &ChainConfig) -> CanonicalChainConfig {
     CanonicalChainConfig {
         chain_id: config.chain_id,
         active_fork: CanonicalForkConfig {
-            fork: fork.as_u64(),
             activation: CanonicalForkActivation {
                 block_number: config.active_fork.activation.block_number.clone(),
                 timestamp: config.active_fork.activation.timestamp.clone(),
             },
-            blob_schedule: option_to_ssz_list(blob_schedule(fork).map(
-                |(target, max, base_fee_update_fraction)| CanonicalBlobSchedule {
-                    target,
-                    max,
-                    base_fee_update_fraction,
-                },
-            )),
         },
     }
 }
@@ -243,6 +248,7 @@ fn to_ethrex_chain_config(
         bpo4_time: None,
         bpo5_time: None,
         amsterdam_time: time_at(ProtocolFork::Amsterdam),
+        hegota_time: None,
         terminal_total_difficulty: (fork >= ProtocolFork::Paris).then_some(0),
         terminal_total_difficulty_passed: fork >= ProtocolFork::Paris,
         blob_schedule: active_fork_blob_schedule(fork)?,
@@ -315,7 +321,12 @@ fn to_ethrex_legacy_new_payload_request(
         },
         versioned_hashes: request.versioned_hashes,
         parent_beacon_block_root: request.parent_beacon_block_root,
-        execution_requests: to_ethrex_execution_requests(request.execution_requests),
+        execution_requests: to_ethrex_execution_requests(ExecutionRequestsGloas {
+            deposits: request.execution_requests.deposits,
+            withdrawals: request.execution_requests.withdrawals,
+            consolidations: request.execution_requests.consolidations,
+            ..Default::default()
+        }),
     }
 }
 
@@ -345,10 +356,6 @@ fn to_ethrex_legacy_witness(
 
 fn array_to_ssz_vec<T: Clone, const N: usize>(array: [T; N]) -> SszVector<T, N> {
     array.to_vec().try_into().expect("infallible")
-}
-
-fn option_to_ssz_list<T>(value: Option<T>) -> SszList<T, 1> {
-    SszList::try_from(value.into_iter().collect::<Vec<_>>()).expect("infallible")
 }
 
 fn map_ssz_list<T, U, const N: usize>(list: SszList<T, N>, f: impl Fn(T) -> U) -> SszList<U, N> {

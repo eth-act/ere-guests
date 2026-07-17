@@ -4,7 +4,6 @@ use alloc::{
     collections::BTreeMap,
     string::{String, ToString},
     sync::Arc,
-    vec,
     vec::Vec,
 };
 use core::cmp::Ordering;
@@ -21,20 +20,28 @@ use reth_payload_validator::{cancun, prague, shanghai};
 use reth_primitives_traits::{Block as _, SealedBlock, SignedTransaction};
 use reth_stateless::{Genesis, UncompressedPublicKey};
 use stateless_validator_common::{
-    Sha256Hasher, SszEncode as _, SszList,
+    Sha256Hasher, SszEncode, SszList,
     guest::{
         Error as CommonError,
         input::{
             ChainConfig, ExecutionWitness, ProtocolFork, StatelessInput,
             new_payload_request::{
                 ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, ExecutionPayloadV4,
-                ExecutionRequests, Hash32, NewPayloadRequest, VersionedHashes, Withdrawals,
+                ExecutionRequestsElectraFulu, ExecutionRequestsGloas, Hash32, NewPayloadRequest,
+                VersionedHashes, Withdrawals,
             },
         },
     },
 };
 
 use crate::guest::{crypto, error::Error};
+
+/// EIP-7685 request type prefixes.
+const DEPOSIT_REQUEST_TYPE: u8 = 0x00;
+const WITHDRAWAL_REQUEST_TYPE: u8 = 0x01;
+const CONSOLIDATION_REQUEST_TYPE: u8 = 0x02;
+const BUILDER_DEPOSIT_REQUEST_TYPE: u8 = 0x03;
+const BUILDER_EXIT_REQUEST_TYPE: u8 = 0x04;
 
 /// Reconstructed reth validation input consumed by `stateless_validation_with_trie`.
 pub(crate) struct RethInput {
@@ -180,7 +187,10 @@ fn new_payload_request_to_execution_data(request: NewPayloadRequest) -> Executio
             )),
             ExecutionPayloadSidecar::v4(
                 cancun_fields(request.versioned_hashes, request.parent_beacon_block_root),
-                prague_fields(&request.execution_requests, &hasher),
+                prague_fields(compute_requests_hash_electra_fulu(
+                    &request.execution_requests,
+                    &hasher,
+                )),
             ),
         ),
         NewPayloadRequest::Gloas(request) => ExecutionData::new(
@@ -189,7 +199,10 @@ fn new_payload_request_to_execution_data(request: NewPayloadRequest) -> Executio
             )),
             ExecutionPayloadSidecar::v4(
                 cancun_fields(request.versioned_hashes, request.parent_beacon_block_root),
-                prague_fields(&request.execution_requests, &hasher),
+                prague_fields(compute_requests_hash_gloas(
+                    &request.execution_requests,
+                    &hasher,
+                )),
             ),
         ),
     }
@@ -292,52 +305,65 @@ fn cancun_fields(
     )
 }
 
-fn prague_fields(
-    execution_requests: &ExecutionRequests,
-    hasher: &impl Sha256Hasher,
-) -> alloy_rpc_types_engine::PraguePayloadFields {
-    alloy_rpc_types_engine::PraguePayloadFields::new(B256::from(compute_requests_hash(
-        execution_requests,
-        hasher,
-    )))
+fn prague_fields(requests_hash: B256) -> alloy_rpc_types_engine::PraguePayloadFields {
+    alloy_rpc_types_engine::PraguePayloadFields::new(requests_hash)
 }
 
-/// Computes the EIP-7685 requests hash, mirroring `compute_requests_hash` in
-/// [`requests.py`].
+/// Computes the EIP-7685 requests hash over the canonical Electra/Fulu execution requests,
+/// mirroring `compute_requests_hash` applied to `encode_execution_requests` in
+/// [`validation_helpers.py`].
 ///
-/// Each non-empty request list contributes the hash of its one byte request
-/// type followed by the concatenated SSZ-encoded requests. Deposit, withdrawal,
-/// and consolidation requests use the types 0x00, 0x01, and 0x02 respectively.
+/// [`validation_helpers.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/execution_engine/validation_helpers.py
+fn compute_requests_hash_electra_fulu(
+    requests: &ExecutionRequestsElectraFulu,
+    hasher: &impl Sha256Hasher,
+) -> B256 {
+    let hashes = [
+        encode_execution_requests(DEPOSIT_REQUEST_TYPE, &requests.deposits),
+        encode_execution_requests(WITHDRAWAL_REQUEST_TYPE, &requests.withdrawals),
+        encode_execution_requests(CONSOLIDATION_REQUEST_TYPE, &requests.consolidations),
+    ]
+    .into_iter()
+    .flat_map(|buf| buf.map(|buf| hasher.hash(&buf)))
+    .flatten()
+    .collect::<Vec<_>>();
+    hasher.hash(&hashes).into()
+}
+
+/// Computes the EIP-7685 requests hash over the canonical Gloas execution requests, which
+/// EIP-8282 extends with the builder deposit and builder exit lists.
+fn compute_requests_hash_gloas(
+    requests: &ExecutionRequestsGloas,
+    hasher: &impl Sha256Hasher,
+) -> B256 {
+    let hashes = [
+        encode_execution_requests(DEPOSIT_REQUEST_TYPE, &requests.deposits),
+        encode_execution_requests(WITHDRAWAL_REQUEST_TYPE, &requests.withdrawals),
+        encode_execution_requests(CONSOLIDATION_REQUEST_TYPE, &requests.consolidations),
+        encode_execution_requests(BUILDER_DEPOSIT_REQUEST_TYPE, &requests.builder_deposits),
+        encode_execution_requests(BUILDER_EXIT_REQUEST_TYPE, &requests.builder_exits),
+    ]
+    .into_iter()
+    .flat_map(|buf| buf.map(|buf| hasher.hash(&buf)))
+    .flatten()
+    .collect::<Vec<_>>();
+    hasher.hash(&hashes).into()
+}
+
+/// Encodes one request list as its type byte followed by the concatenated SSZ-encoded requests,
+/// mirroring `encode_execution_requests` in [`requests.py`]. A list holding no items has no wire
+/// form and contributes nothing to the commitment.
 ///
-/// [`requests.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/requests.py
-fn compute_requests_hash(requests: &ExecutionRequests, hasher: &impl Sha256Hasher) -> [u8; 32] {
-    let mut outer_bytes = Vec::new();
-
-    let mut deposits_bytes = vec![0x00u8];
-    for deposit in requests.deposits.iter() {
-        deposits_bytes.extend(deposit.to_ssz());
-    }
-    if deposits_bytes.len() > 1 {
-        outer_bytes.extend_from_slice(&hasher.hash(&deposits_bytes));
-    }
-
-    let mut withdrawals_bytes = vec![0x01u8];
-    for withdrawal in requests.withdrawals.iter() {
-        withdrawals_bytes.extend(withdrawal.to_ssz());
-    }
-    if withdrawals_bytes.len() > 1 {
-        outer_bytes.extend_from_slice(&hasher.hash(&withdrawals_bytes));
-    }
-
-    let mut consolidations_bytes = vec![0x02u8];
-    for consolidation in requests.consolidations.iter() {
-        consolidations_bytes.extend(consolidation.to_ssz());
-    }
-    if consolidations_bytes.len() > 1 {
-        outer_bytes.extend_from_slice(&hasher.hash(&consolidations_bytes));
-    }
-
-    hasher.hash(&outer_bytes)
+/// [`requests.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/execution_engine/requests.py
+fn encode_execution_requests<T: SszEncode>(request_type: u8, requests: &[T]) -> Option<Vec<u8>> {
+    (!requests.is_empty()).then(|| {
+        let mut buf = Vec::with_capacity(1 + requests.len() * T::fixed_size());
+        buf.push(request_type);
+        requests
+            .iter()
+            .for_each(|request| request.ssz_append(&mut buf));
+        buf
+    })
 }
 
 /// Reconstructs the canonical payload request into a validated reth block.

@@ -4,7 +4,6 @@ use stateless_validator_reth::guest::run_stateless_guest;
 use stateless_validator_test::declare_test_host_execution;
 
 declare_test_host_execution!(RpcBpo2, run_stateless_guest);
-declare_test_host_execution!(RpcGlamsterdamDevnet5, run_stateless_guest);
 // FIXME:
 // - 14 EIP-7610
 //    - test_init_collision_create_tx
@@ -15,4 +14,4 @@ declare_test_host_execution!(RpcGlamsterdamDevnet5, run_stateless_guest);
 //    - test_creation_tx_regular_check_subtracts_intrinsic_state
 // - 1 EIP-8025 (in-block created-code resolution)
 //    - test_witness_codes_create_same_hash_then_read
-declare_test_host_execution!(EestBalDevnet7, run_stateless_guest, failures = 16);
+declare_test_host_execution!(EestGlamsterdamDevnet7, run_stateless_guest, failures = 16);

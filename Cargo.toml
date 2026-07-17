@@ -82,9 +82,9 @@ reth-stateless = { git = "https://github.com/paradigmxyz/stateless", rev = "2236
 reth-tries = { git = "https://github.com/paradigmxyz/stateless", rev = "2236845a84c3a7515312214e8a507e4731d73bb5", default-features = false, package = "tries" }
 
 # ethrex
-ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
-ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
-ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
+ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", rev = "8dcb46e305b0309d4b32a4644fd22a1c1bb73b86", default-features = false }
+ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", rev = "8dcb46e305b0309d4b32a4644fd22a1c1bb73b86", default-features = false }
+ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", rev = "8dcb46e305b0309d4b32a4644fd22a1c1bb73b86", default-features = false }
 
 # ssz
 libssz = { version = "0.2.2", default-features = false, features = ["alloc"] }

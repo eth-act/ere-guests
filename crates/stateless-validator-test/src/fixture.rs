@@ -24,12 +24,10 @@ const RPC_FIXTURES_BASE_URL: &str =
 /// A preset fixture set identifying both its source archive and its format.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FixturePreset {
+    /// EEST `blockchain_test` fixtures based on `glamsterdam-devnet-7`.
+    EestGlamsterdamDevnet7,
     /// RPC-derived fixtures from the `mainnet`.
     RpcBpo2,
-    /// RPC-derived fixtures from the `glamsterdam-devnet-5`.
-    RpcGlamsterdamDevnet5,
-    /// EEST `blockchain_test` fixtures based on `bal-devnet-7`.
-    EestBalDevnet7,
 }
 
 /// Download and on-disk layout details for a [`FixturePreset`].
@@ -45,7 +43,7 @@ struct FixtureSource {
 impl FixturePreset {
     fn source(self) -> FixtureSource {
         match self {
-            Self::EestBalDevnet7 => FixtureSource {
+            Self::EestGlamsterdamDevnet7 => FixtureSource {
                 url: format!("{EEST_FIXTURES_BASE_URL}/fixtures_zkevm.tar.gz"),
                 dir: "eest-bal-devnet-7",
                 archive_dir: "fixtures/blockchain_tests",
@@ -54,11 +52,6 @@ impl FixturePreset {
                 url: format!("{RPC_FIXTURES_BASE_URL}/rpc-bpo2.tar.zst"),
                 dir: "rpc-bpo2",
                 archive_dir: "rpc-bpo2",
-            },
-            Self::RpcGlamsterdamDevnet5 => FixtureSource {
-                url: format!("{RPC_FIXTURES_BASE_URL}/rpc-glamsterdam-devnet-5.tar.zst"),
-                dir: "rpc-glamsterdam-devnet-5",
-                archive_dir: "rpc-glamsterdam-devnet-5",
             },
         }
     }
