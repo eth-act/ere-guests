@@ -62,12 +62,21 @@ fn verify_stateless_new_payload<P: Platform>(
         input.chain_config.validate(&input.new_payload_request)
     })?;
 
+    #[cfg(debug_assertions)]
+    let new_payload_request_root = input.new_payload_request.hash_tree_root(&sha256_hasher());
+
     let ethrex_input = P::cycle_scope("to_ethrex_input", || {
         to_ethrex_input(fork, input).map_err(|err| {
             P::print(&format!("Input conversion failed: {err}\n"));
             err
         })
     })?;
+
+    #[cfg(debug_assertions)]
+    if fork == ProtocolFork::Amsterdam {
+        let ethrex_new_payload_request_root = ethrex_new_payload_request_root(&ethrex_input);
+        assert_eq!(ethrex_new_payload_request_root, new_payload_request_root);
+    }
 
     P::cycle_scope("run_validation", || {
         run_validation(ethrex_input).map_err(|err| {
@@ -91,5 +100,19 @@ fn run_validation(ethrex_input: DecodedEip8025) -> Result<(), ExecutionError> {
             stateless_input,
             chain_config,
         } => validate_eip8025_canonical_execution(stateless_input, chain_config, crypto::crypto()),
+    }
+}
+
+#[cfg(debug_assertions)]
+fn ethrex_new_payload_request_root(ethrex_input: &DecodedEip8025) -> [u8; 32] {
+    let hasher = sha256_hasher();
+    match ethrex_input {
+        DecodedEip8025::Legacy {
+            new_payload_request,
+            ..
+        } => new_payload_request.hash_tree_root(&hasher),
+        DecodedEip8025::Canonical {
+            stateless_input, ..
+        } => stateless_input.new_payload_request.hash_tree_root(&hasher),
     }
 }

@@ -20,9 +20,6 @@ pub enum Error {
     /// The payload variant has no ethrex execution path.
     #[error("unsupported payload")]
     UnsupportedPayload,
-    /// A canonical list exceeded ethrex's list bound during re-bounding.
-    #[error("canonical list exceeds ethrex bound")]
-    ListBoundExceeded,
     /// The witness did not build into the state tries.
     #[error(transparent)]
     GuestProgramStateError(#[from] GuestProgramStateError),

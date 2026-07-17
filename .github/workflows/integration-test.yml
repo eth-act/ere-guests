@@ -144,6 +144,7 @@ jobs:
       - name: Test host execution
         env:
           RUST_LOG: info
+          CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS: true
         run: |
           cargo test --release --package stateless-validator-${{ matrix.guest }} --features host --test host_execution -- --test-threads=1
 

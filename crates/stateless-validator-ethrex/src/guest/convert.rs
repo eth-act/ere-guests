@@ -46,18 +46,15 @@ pub(crate) fn to_ethrex_input(
 ) -> Result<DecodedEip8025, Error> {
     let chain_config = to_ethrex_chain_config(fork, &input.chain_config)?;
     Ok(match input.new_payload_request {
-        NewPayloadRequest::Gloas(request) => {
-            let public_keys = rebound_ssz_list(map_ssz_list(input.public_keys, array_to_ssz_vec))?;
-            DecodedEip8025::Canonical {
-                stateless_input: CanonicalStatelessInput {
-                    new_payload_request: to_ethrex_new_payload_request(request)?,
-                    witness: to_ethrex_witness(input.witness)?,
-                    chain_config: to_ethrex_canonical_chain_config(&input.chain_config),
-                    public_keys,
-                },
-                chain_config,
-            }
-        }
+        NewPayloadRequest::Gloas(request) => DecodedEip8025::Canonical {
+            stateless_input: CanonicalStatelessInput {
+                new_payload_request: to_ethrex_new_payload_request(request),
+                witness: to_ethrex_witness(input.witness),
+                chain_config: to_ethrex_canonical_chain_config(&input.chain_config),
+                public_keys: map_ssz_list(input.public_keys, array_to_ssz_vec),
+            },
+            chain_config,
+        },
         NewPayloadRequest::ElectraFulu(request) => {
             let first_block_number = request.execution_payload.block_number;
             DecodedEip8025::Legacy {
@@ -77,7 +74,7 @@ pub(crate) fn to_ethrex_input(
 /// Converts the new payload request into the ethrex container.
 fn to_ethrex_new_payload_request(
     request: NewPayloadRequestGloas,
-) -> Result<eip8025_ssz::NewPayloadRequestAmsterdam, Error> {
+) -> eip8025_ssz::NewPayloadRequestAmsterdam {
     let payload = request.execution_payload;
     let execution_payload = eip8025_ssz::ExecutionPayloadV4 {
         parent_hash: payload.parent_hash,
@@ -97,19 +94,18 @@ fn to_ethrex_new_payload_request(
         withdrawals: to_ethrex_withdrawals(payload.withdrawals),
         blob_gas_used: payload.blob_gas_used,
         excess_blob_gas: payload.excess_blob_gas,
-        block_access_list: rebound_ssz_list(payload.block_access_list)?,
+        block_access_list: payload.block_access_list,
         slot_number: payload.slot_number,
     };
-    Ok(eip8025_ssz::NewPayloadRequestAmsterdam {
+    eip8025_ssz::NewPayloadRequestAmsterdam {
         execution_payload,
         versioned_hashes: request.versioned_hashes,
         parent_beacon_block_root: request.parent_beacon_block_root,
         execution_requests: to_ethrex_execution_requests(request.execution_requests),
-    })
+    }
 }
 
-/// Converts canonical withdrawals into the ethrex list. The list bound
-/// matches the canonical bound.
+/// Converts canonical withdrawals into the ethrex list.
 fn to_ethrex_withdrawals(
     withdrawals: Withdrawals,
 ) -> SszList<eip8025_ssz::Withdrawal, MAX_WITHDRAWALS_PER_PAYLOAD> {
@@ -121,8 +117,7 @@ fn to_ethrex_withdrawals(
     })
 }
 
-/// Converts the canonical execution requests into the ethrex container. All
-/// request list bounds match the canonical bounds.
+/// Converts the canonical execution requests into the ethrex container.
 fn to_ethrex_execution_requests(
     requests: ExecutionRequestsGloas,
 ) -> eip8025_ssz::ExecutionRequests {
@@ -166,12 +161,12 @@ fn to_ethrex_execution_requests(
 }
 
 /// Converts the execution witness into the ethrex container.
-fn to_ethrex_witness(witness: ExecutionWitness) -> Result<CanonicalExecutionWitness, Error> {
-    Ok(CanonicalExecutionWitness {
-        state: rebound_nested_ssz_list(witness.state)?,
-        codes: rebound_nested_ssz_list(witness.codes)?,
+fn to_ethrex_witness(witness: ExecutionWitness) -> CanonicalExecutionWitness {
+    CanonicalExecutionWitness {
+        state: witness.state,
+        codes: witness.codes,
         headers: witness.headers,
-    })
+    }
 }
 
 /// Converts the chain configuration into the ethrex canonical chain
@@ -364,22 +359,6 @@ fn map_ssz_list<T, U, const N: usize>(list: SszList<T, N>, f: impl Fn(T) -> U) -
         .collect::<Vec<_>>()
         .try_into()
         .expect("infallible")
-}
-
-fn rebound_ssz_list<T, const M: usize, const N: usize>(
-    list: SszList<T, M>,
-) -> Result<SszList<T, N>, Error> {
-    SszList::try_from(list.into_iter().collect::<Vec<_>>()).map_err(|_| Error::ListBoundExceeded)
-}
-
-fn rebound_nested_ssz_list<const IM: usize, const IN: usize, const OM: usize, const ON: usize>(
-    list: SszList<SszList<u8, IM>, OM>,
-) -> Result<SszList<SszList<u8, IN>, ON>, Error> {
-    let list = list
-        .into_iter()
-        .map(rebound_ssz_list)
-        .collect::<Result<Vec<_>, _>>()?;
-    SszList::try_from(list).map_err(|_| Error::ListBoundExceeded)
 }
 
 fn to_bytes_vec<const M: usize, const N: usize>(items: SszList<SszList<u8, M>, N>) -> Vec<Bytes> {
