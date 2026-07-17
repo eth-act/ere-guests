@@ -147,9 +147,8 @@ fn active_fork_blob_schedule(fork: ProtocolFork) -> BTreeMap<String, BlobParams>
         ProtocolFork::Osaka => ("osaka", BlobParams::osaka()),
         ProtocolFork::BPO1 => ("bpo1", BlobParams::bpo1()),
         ProtocolFork::BPO2 => ("bpo2", BlobParams::bpo2()),
-        // The amsterdam arm in `blob_schedule_blob_params` of alloy-genesis is spelled `Amsterdam`
-        // while every other fork key is lowercase. A lowercase key would be silently ignored and
-        // never register.
+        // The amsterdam arm in `blob_schedule_blob_params` of alloy-genesis is
+        // spelled `Amsterdam` while every other fork key is lowercase.
         ProtocolFork::Amsterdam => ("Amsterdam", BlobParams::bpo2()),
         _ => return BTreeMap::new(),
     };
@@ -309,11 +308,7 @@ fn prague_fields(requests_hash: B256) -> alloy_rpc_types_engine::PraguePayloadFi
     alloy_rpc_types_engine::PraguePayloadFields::new(requests_hash)
 }
 
-/// Computes the EIP-7685 requests hash over the canonical Electra/Fulu execution requests,
-/// mirroring `compute_requests_hash` applied to `encode_execution_requests` in
-/// [`validation_helpers.py`].
-///
-/// [`validation_helpers.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/execution_engine/validation_helpers.py
+/// Computes the EIP-7685 requests hash over the Electra/Fulu execution requests.
 fn compute_requests_hash_electra_fulu(
     requests: &ExecutionRequestsElectraFulu,
     hasher: &impl Sha256Hasher,
@@ -324,14 +319,13 @@ fn compute_requests_hash_electra_fulu(
         encode_execution_requests(CONSOLIDATION_REQUEST_TYPE, &requests.consolidations),
     ]
     .into_iter()
-    .flat_map(|buf| buf.map(|buf| hasher.hash(&buf)))
     .flatten()
+    .flat_map(|buf| hasher.hash(&buf))
     .collect::<Vec<_>>();
     hasher.hash(&hashes).into()
 }
 
-/// Computes the EIP-7685 requests hash over the canonical Gloas execution requests, which
-/// EIP-8282 extends with the builder deposit and builder exit lists.
+/// Computes the EIP-7685 requests hash over the Gloas execution requests.
 fn compute_requests_hash_gloas(
     requests: &ExecutionRequestsGloas,
     hasher: &impl Sha256Hasher,
@@ -344,8 +338,8 @@ fn compute_requests_hash_gloas(
         encode_execution_requests(BUILDER_EXIT_REQUEST_TYPE, &requests.builder_exits),
     ]
     .into_iter()
-    .flat_map(|buf| buf.map(|buf| hasher.hash(&buf)))
     .flatten()
+    .flat_map(|buf| hasher.hash(&buf))
     .collect::<Vec<_>>();
     hasher.hash(&hashes).into()
 }
