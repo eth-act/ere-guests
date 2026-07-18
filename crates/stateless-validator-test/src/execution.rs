@@ -8,6 +8,7 @@ use std::{
 
 use anyhow::{anyhow, bail};
 use rayon::prelude::*;
+use stateless_validator_common::{SszDecode, guest::StatelessValidationResult};
 use tracing::{debug, info};
 use tracing_subscriber::EnvFilter;
 
@@ -64,7 +65,6 @@ impl Display for ExecutionFailures<'_> {
 
 /// Runs `execute` over every fixture in parallel, returning the failures.
 pub fn run_execution(
-    guest_kind: GuestKind,
     fixtures: impl IntoIterator<Item = StatelessValidatorFixture>,
     execute: &(impl Fn(Vec<u8>) -> anyhow::Result<Vec<u8>> + Sync),
 ) -> Vec<ExecutionFailure> {
@@ -80,12 +80,6 @@ pub fn run_execution(
     assert!(total > 0);
 
     info!("Running execution of {total} fixtures...");
-
-    let matches_output = if matches!(guest_kind, GuestKind::Zesu) {
-        matches_output_legacy
-    } else {
-        matches_output
-    };
 
     let mut failures = fixtures
         .into_par_iter()
@@ -113,52 +107,47 @@ pub fn run_execution(
     failures
 }
 
-macro_rules! declare_matches_output {
-    ($name:ident, $stateless_validator_common_crate:ident) => {
-        fn $name(got_bytes: Vec<u8>, expected_bytes: Vec<u8>) -> anyhow::Result<()> {
-            use $stateless_validator_common_crate::{SszDecode, guest::StatelessValidationResult};
-
-            let Some(got_bytes) = got_bytes.split_at_checked(expected_bytes.len()).and_then(
-                |(got_bytes, trailing)| trailing.iter().all(|byte| *byte == 0).then_some(got_bytes),
-            ) else {
-                bail!(
-                    "Output bytes mismatch, expected {}, got {}",
-                    const_hex::encode_prefixed(expected_bytes),
-                    const_hex::encode_prefixed(got_bytes)
-                )
-            };
-
-            let got = StatelessValidationResult::from_ssz_bytes(got_bytes)
-                .map_err(|err| anyhow!("Decode execute output bytes failure: {err:?}"))?;
-            let expected = StatelessValidationResult::from_ssz_bytes(&expected_bytes)
-                .map_err(|err| anyhow!("Decode fixture output bytes failure: {err:?}"))?;
-
-            match (
-                expected.new_payload_request_root == got.new_payload_request_root,
-                expected.successful_validation == got.successful_validation,
-                expected.chain_config == got.chain_config,
-            ) {
-                (true, true, true) => Ok(()),
-                (false, true, true) => bail!(
-                    "Output new_payload_request_root mismatch, expected {}, got {}",
-                    const_hex::encode_prefixed(expected.new_payload_request_root),
-                    const_hex::encode_prefixed(got.new_payload_request_root)
-                ),
-                (true, false, true) => bail!(
-                    "Output successful_validation mismatch, expected {}, got {}",
-                    expected.successful_validation,
-                    got.successful_validation
-                ),
-                (true, true, false) => bail!(
-                    "Output chain_config mismatch, expected {:?}, got {:?}",
-                    expected.chain_config,
-                    got.chain_config
-                ),
-                _ => bail!("Output mismatch, expected {expected:?}, got {got:?}"),
-            }
-        }
+fn matches_output(got_bytes: Vec<u8>, expectecd_bytes: Vec<u8>) -> anyhow::Result<()> {
+    let Some(got_bytes) =
+        got_bytes
+            .split_at_checked(expectecd_bytes.len())
+            .and_then(|(got_bytes, trailing)| {
+                trailing.iter().all(|byte| *byte == 0).then_some(got_bytes)
+            })
+    else {
+        bail!(
+            "Output bytes mismatch, expected {}, got {}",
+            const_hex::encode_prefixed(expectecd_bytes),
+            const_hex::encode_prefixed(got_bytes)
+        )
     };
-}
 
-declare_matches_output!(matches_output, stateless_validator_common);
-declare_matches_output!(matches_output_legacy, stateless_validator_common_legacy);
+    let got = StatelessValidationResult::from_ssz_bytes(got_bytes)
+        .map_err(|err| anyhow!("Decode execute output bytes failure: {err:?}"))?;
+    let expected = StatelessValidationResult::from_ssz_bytes(&expectecd_bytes)
+        .map_err(|err| anyhow!("Decode fixture output bytes failure: {err:?}"))?;
+
+    match (
+        expected.new_payload_request_root == got.new_payload_request_root,
+        expected.successful_validation == got.successful_validation,
+        expected.chain_config == got.chain_config,
+    ) {
+        (true, true, true) => Ok(()),
+        (false, true, true) => bail!(
+            "Output new_payload_request_root mismatch, expected {}, got {}",
+            const_hex::encode_prefixed(expected.new_payload_request_root),
+            const_hex::encode_prefixed(got.new_payload_request_root)
+        ),
+        (true, false, true) => bail!(
+            "Output successful_validation mismatch, expected {}, got {}",
+            expected.successful_validation,
+            got.successful_validation
+        ),
+        (true, true, false) => bail!(
+            "Output chain_config mismatch, expected {:?}, got {:?}",
+            expected.chain_config,
+            got.chain_config
+        ),
+        _ => bail!("Output mismatch, expected {expected:?}, got {got:?}"),
+    }
+}

@@ -26,8 +26,6 @@ const RPC_FIXTURES_BASE_URL: &str =
 pub enum FixturePreset {
     /// EEST `blockchain_test` fixtures based on `tests-zkevm@v0.6.2`.
     EestGlamsterdamDevnet7,
-    /// EEST `blockchain_test` fixtures based on `tests-zkevm@v0.4.1`.
-    EestGlamsterdamDevnet5,
     /// RPC-derived fixtures from the `mainnet`.
     RpcBpo2,
 }
@@ -48,11 +46,6 @@ impl FixturePreset {
             Self::EestGlamsterdamDevnet7 => FixtureSource {
                 url: format!("{EEST_FIXTURES_BASE_URL}/tests-zkevm@v0.6.2/fixtures_zkevm.tar.gz"),
                 dir: "eest-glamsterdam-devnet-7",
-                archive_dir: "fixtures/blockchain_tests",
-            },
-            Self::EestGlamsterdamDevnet5 => FixtureSource {
-                url: format!("{EEST_FIXTURES_BASE_URL}/tests-zkevm@v0.4.1/fixtures_zkevm.tar.gz"),
-                dir: "eest-bal-devnet-5",
                 archive_dir: "fixtures/blockchain_tests",
             },
             Self::RpcBpo2 => FixtureSource {

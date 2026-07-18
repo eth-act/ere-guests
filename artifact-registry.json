@@ -1,11 +1,5 @@
 {
-    "stateless_validator_elf": {
-        "zesu-zisk": {
-            "el_version": "bal-devnet-7-2026-06-24",
-            "url": "https://github.com/Consensys/zesu-zkvm/releases/download/bal-devnet-7-2026-06-24/stateless-validator-zesu-zisk.elf",
-            "sha256": "3ed03dce984ca476ee18fa96a4102176931c9863a01496b4a7e46fd601824dfc"
-        }
-    },
+    "stateless_validator_elf": {},
     "stateless_validator_static_library": {},
     "zkvm_static_library": {}
 }
