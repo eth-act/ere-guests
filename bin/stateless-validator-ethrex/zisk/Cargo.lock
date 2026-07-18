@@ -806,12 +806,12 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 [[package]]
 name = "ere-platform-core"
 version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.13.0#fcbf0dc8a2e1ea2af43cf0158a92dfbd33871fe0"
+source = "git+https://github.com/eth-act/ere?rev=58ca85beaee2fa8acd31dbf33b90bb765aac9010#58ca85beaee2fa8acd31dbf33b90bb765aac9010"
 
 [[package]]
 name = "ere-platform-zisk"
 version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.13.0#fcbf0dc8a2e1ea2af43cf0158a92dfbd33871fe0"
+source = "git+https://github.com/eth-act/ere?rev=58ca85beaee2fa8acd31dbf33b90bb765aac9010#58ca85beaee2fa8acd31dbf33b90bb765aac9010"
 dependencies = [
  "ere-platform-core",
  "ziskos",
@@ -820,7 +820,7 @@ dependencies = [
 [[package]]
 name = "ere-util-build"
 version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.13.0#fcbf0dc8a2e1ea2af43cf0158a92dfbd33871fe0"
+source = "git+https://github.com/eth-act/ere?rev=58ca85beaee2fa8acd31dbf33b90bb765aac9010#58ca85beaee2fa8acd31dbf33b90bb765aac9010"
 dependencies = [
  "cargo_metadata",
 ]
@@ -854,8 +854,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-common"
-version = "19.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?tag=v19.0.0#68b2f4f523a7c34675acfafac0d52c895e03db29"
+version = "21.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
 dependencies = [
  "bytes",
  "crc32fast",
@@ -886,8 +886,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-crypto"
-version = "19.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?tag=v19.0.0#68b2f4f523a7c34675acfafac0d52c895e03db29"
+version = "21.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
 dependencies = [
  "ark-bn254",
  "ark-ec",
@@ -905,8 +905,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-guest-program"
-version = "19.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?tag=v19.0.0#68b2f4f523a7c34675acfafac0d52c895e03db29"
+version = "21.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -928,8 +928,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-l2-common"
-version = "19.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?tag=v19.0.0#68b2f4f523a7c34675acfafac0d52c895e03db29"
+version = "21.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -946,8 +946,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-levm"
-version = "19.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?tag=v19.0.0#68b2f4f523a7c34675acfafac0d52c895e03db29"
+version = "21.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
 dependencies = [
  "bytes",
  "derive_more",
@@ -963,8 +963,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-rlp"
-version = "19.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?tag=v19.0.0#68b2f4f523a7c34675acfafac0d52c895e03db29"
+version = "21.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -973,8 +973,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-trie"
-version = "19.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?tag=v19.0.0#68b2f4f523a7c34675acfafac0d52c895e03db29"
+version = "21.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
 dependencies = [
  "anyhow",
  "bytes",
@@ -992,8 +992,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-vm"
-version = "19.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?tag=v19.0.0#68b2f4f523a7c34675acfafac0d52c895e03db29"
+version = "21.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
 dependencies = [
  "bytes",
  "derive_more",
@@ -2390,6 +2390,7 @@ dependencies = [
  "libssz-derive",
  "libssz-merkle",
  "libssz-types",
+ "paste",
  "sha2",
  "thiserror",
 ]

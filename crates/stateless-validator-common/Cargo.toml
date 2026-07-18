@@ -11,6 +11,7 @@ workspace = true
 [dependencies]
 anyhow = { workspace = true, optional = true }
 const-hex = { workspace = true, features = ["alloc"] }
+paste.workspace = true
 sha2.workspace = true
 thiserror.workspace = true
 

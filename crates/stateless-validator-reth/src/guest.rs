@@ -7,7 +7,7 @@ use reth_stateless::{stateless_validation_with_trie, validation::StatelessValida
 use reth_tries::zeth::SparseState;
 use stateless_validator_common::{
     HashTreeRoot, SszEncode as _,
-    guest::{StatelessInput, StatelessValidationResult},
+    guest::{StatelessInput, StatelessValidationResult, input::ProtocolFork},
 };
 
 use crate::guest::{
@@ -31,7 +31,7 @@ pub fn entrypoint<P: Platform>() {
 /// Runs the stateless guest with serialized input and returns serialized
 /// output, mirroring `run_stateless_guest` in the spec.
 pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
-    let Ok(input) = P::cycle_scope("deserialize_input", || {
+    let Ok((fork, input)) = P::cycle_scope("deserialize_input", || {
         StatelessInput::from_schema_prefixed_ssz(input_bytes)
     }) else {
         return StatelessValidationResult::default().to_ssz();
@@ -42,7 +42,7 @@ pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
     });
     let chain_config = input.chain_config.clone();
 
-    let successful_validation = verify_stateless_new_payload::<P>(input).is_ok();
+    let successful_validation = verify_stateless_new_payload::<P>(fork, input).is_ok();
 
     let output = StatelessValidationResult::new(
         new_payload_request_root,
@@ -55,13 +55,16 @@ pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
 
 /// Statelessly validates the execution payload, mirroring
 /// `verify_stateless_new_payload` in the spec.
-fn verify_stateless_new_payload<P: Platform>(input: StatelessInput) -> Result<(), Error> {
+fn verify_stateless_new_payload<P: Platform>(
+    fork: ProtocolFork,
+    input: StatelessInput,
+) -> Result<(), Error> {
     P::cycle_scope("validate_chain_config", || {
         input.chain_config.validate(&input.new_payload_request)
     })?;
 
     let reth_input = P::cycle_scope("to_reth_input", || {
-        to_reth_input(input).map_err(|err| {
+        to_reth_input(fork, input).map_err(|err| {
             P::print(&format!("Input conversion failed: {err}\n"));
             err
         })

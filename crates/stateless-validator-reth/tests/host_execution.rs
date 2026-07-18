@@ -4,15 +4,19 @@ use stateless_validator_reth::guest::run_stateless_guest;
 use stateless_validator_test::declare_test_host_execution;
 
 declare_test_host_execution!(RpcBpo2, run_stateless_guest);
-declare_test_host_execution!(RpcGlamsterdamDevnet5, run_stateless_guest);
-// FIXME:
-// - 14 EIP-7610
+// NOTE:
+// - 12 EIP-7610
 //    - test_init_collision_create_tx
 //    - test_init_collision_create_opcode
 //    - test_collision_with_create2_revert_in_initcode
 //    - test_create2_collision_storage
-// - 1 EIP-8037 (stale fixture, should be fixed in execution-specs#2892)
-//    - test_creation_tx_regular_check_subtracts_intrinsic_state
+// - 2 EIP-2780 (authorization charges)
+//    - test_auth_base_net_new_only
+//    - test_multi_authorization_intra_tx_state
+// - 1 EIP-7702 (delegation clearing)
+//    - test_delegation_clearing_and_set
 // - 1 EIP-8025 (in-block created-code resolution)
 //    - test_witness_codes_create_same_hash_then_read
-declare_test_host_execution!(EestBalDevnet7, run_stateless_guest, failures = 16);
+// - 1 EIP-8037 (state creation gas for set code)
+//    - test_same_tx_clear_then_reset_pre_delegated
+declare_test_host_execution!(EestGlamsterdamDevnet7, run_stateless_guest, failures = 17);

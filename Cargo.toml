@@ -63,28 +63,29 @@ walkdir = "2.5.0"
 zstd = "0.13.3"
 
 # alloy
-alloy-consensus = { version = "2.0.5", default-features = false }
-alloy-eips = { version = "2.0.5", default-features = false }
-alloy-genesis = { version = "2.0.5", default-features = false }
+alloy-consensus = { version = "2.1.1", default-features = false }
+alloy-eips = { version = "2.1.1", default-features = false }
+alloy-genesis = { version = "2.1.1", default-features = false }
 alloy-primitives = { version = "1.6.0", default-features = false }
-alloy-rpc-types-engine = { version = "2.0.5", default-features = false }
+alloy-rpc-types-engine = { version = "2.1.1", default-features = false }
 
 # revm
-revm = { version = "40.0.3", default-features = false }
+revm = { version = "41.0.0", default-features = false }
 
 # reth
-reth-chainspec = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
-reth-ethereum-primitives = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
-reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
-reth-payload-validator = { git = "https://github.com/paradigmxyz/reth", tag = "v2.3.0", default-features = false }
-reth-primitives-traits = { version = "0.4.1", default-features = false }
-reth-stateless = { git = "https://github.com/paradigmxyz/stateless", rev = "2236845a84c3a7515312214e8a507e4731d73bb5", default-features = false, package = "stateless" }
-reth-tries = { git = "https://github.com/paradigmxyz/stateless", rev = "2236845a84c3a7515312214e8a507e4731d73bb5", default-features = false, package = "tries" }
+# FIXME: Switch back to a released tag once glamsterdam-devnet-7 lands upstream and zkVM compiler verison is bumped to 1.95.
+reth-chainspec = { git = "https://github.com/han0110/reth", rev = "c5dff62a8804b207659f5d1f30f13e66c3a66d4b", default-features = false }
+reth-ethereum-primitives = { git = "https://github.com/han0110/reth", rev = "c5dff62a8804b207659f5d1f30f13e66c3a66d4b", default-features = false }
+reth-evm-ethereum = { git = "https://github.com/han0110/reth", rev = "c5dff62a8804b207659f5d1f30f13e66c3a66d4b", default-features = false }
+reth-payload-validator = { git = "https://github.com/han0110/reth", rev = "c5dff62a8804b207659f5d1f30f13e66c3a66d4b", default-features = false }
+reth-primitives-traits = { version = "0.5.2", default-features = false }
+reth-stateless = { git = "https://github.com/han0110/stateless", rev = "711c3f91a41e656c1f0aaecd70b62c1bc8df2d06", default-features = false, package = "stateless" }
+reth-tries = { git = "https://github.com/han0110/stateless", rev = "711c3f91a41e656c1f0aaecd70b62c1bc8df2d06", default-features = false, package = "tries" }
 
 # ethrex
-ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
-ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
-ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v19.0.0", default-features = false }
+ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", rev = "e8860d2918921603afa67f62687e9a39f197367e", default-features = false }
+ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", rev = "e8860d2918921603afa67f62687e9a39f197367e", default-features = false }
+ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", rev = "e8860d2918921603afa67f62687e9a39f197367e", default-features = false }
 
 # ssz
 libssz = { version = "0.2.2", default-features = false, features = ["alloc"] }
@@ -93,24 +94,23 @@ libssz-merkle = { version = "0.2.2", default-features = false, features = ["allo
 libssz-types = { version = "0.2.2", default-features = false, features = ["alloc"] }
 
 # openvm
-
-openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3" }
-openvm-sha2 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3" }
-openvm-pairing = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3" }
-openvm-k256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3", package = "k256" }
-openvm-p256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3", package = "p256" }
-openvm-keccak256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0-rc.3" }
-openvm-curve-utils = { git = "https://github.com/axiom-crypto/openvm-eth", branch = "develop-v2.0.0-rc.3" }
-openvm-kzg = { git = "https://github.com/axiom-crypto/openvm-eth", branch = "develop-v2.0.0-rc.3" }
+openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0" }
+openvm-sha2 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0" }
+openvm-pairing = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0" }
+openvm-k256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0", package = "k256" }
+openvm-p256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0", package = "p256" }
+openvm-keccak256 = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.0.0" }
+openvm-curve-utils = { git = "https://github.com/axiom-crypto/openvm-eth", rev = "aa8bbe17e624d317f14ea925df7c256c0b205134" }
+openvm-kzg = { git = "https://github.com/axiom-crypto/openvm-eth", rev = "aa8bbe17e624d317f14ea925df7c256c0b205134" }
 bls12_381 = { git = "https://github.com/zkcrypto/bls12_381", rev = "6bb96951d5c2035caf4989b6e4a018435379590f", default-features = false }
 
 # zkvm-standard
 zkvm-interface = { git = "https://github.com/eth-act/zkvm-standards", rev = "282cd356c3a0498416bb0619f9c8a347ce9933fb" }
 
 # ere
-ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.13.0" }
-ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.13.0" }
-ere-util-build = { git = "https://github.com/eth-act/ere", tag = "v0.13.0" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", rev = "58ca85beaee2fa8acd31dbf33b90bb765aac9010" }
+ere-platform-core = { git = "https://github.com/eth-act/ere", rev = "58ca85beaee2fa8acd31dbf33b90bb765aac9010" }
+ere-util-build = { git = "https://github.com/eth-act/ere", rev = "58ca85beaee2fa8acd31dbf33b90bb765aac9010" }
 
 # local
 stateless-validator-common = { path = "crates/stateless-validator-common", default-features = false }
@@ -118,3 +118,24 @@ stateless-validator-debug = { path = "crates/stateless-validator-debug", default
 stateless-validator-ethrex = { path = "crates/stateless-validator-ethrex", default-features = false }
 stateless-validator-reth = { path = "crates/stateless-validator-reth", default-features = false }
 stateless-validator-test = { path = "crates/stateless-validator-test", default-features = false }
+
+# FIXME: Remove the patch once glamsterdam-devnet-7 lands upstream.
+# Taken from https://github.com/paradigmxyz/reth/blob/9acd64229e4667d94690c2976e6f8f547ba49d7c/Cargo.toml
+[patch.crates-io]
+revm = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-bytecode = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-context = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-context-interface = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-database = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-database-interface = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-handler = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-inspector = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-interpreter = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-precompile = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+revm-state = { git = "https://github.com/bluealloy/revm", rev = "335a35ddb370b667bff248109524a4efc589213f" }
+alloy-evm = { git = "https://github.com/alloy-rs/evm", rev = "721c59b9e4f640c9e646c0516e5be7142c956a26" }
+reth-codecs = { git = "https://github.com/paradigmxyz/reth-core", rev = "1030ec2e47bfd01956e2239ad3399bf3b5121cbe" }
+reth-codecs-derive = { git = "https://github.com/paradigmxyz/reth-core", rev = "1030ec2e47bfd01956e2239ad3399bf3b5121cbe" }
+reth-primitives-traits = { git = "https://github.com/paradigmxyz/reth-core", rev = "1030ec2e47bfd01956e2239ad3399bf3b5121cbe" }
+reth-zstd-compressors = { git = "https://github.com/paradigmxyz/reth-core", rev = "1030ec2e47bfd01956e2239ad3399bf3b5121cbe" }

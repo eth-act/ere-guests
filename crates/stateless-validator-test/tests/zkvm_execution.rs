@@ -1,4 +1,10 @@
 //! Execution tests for stateless validator guest program
+//!
+//! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built
+//! image as the executor.
+//!
+//! Run with env `OPENVM_RUST_TOOLCHAIN=nightly-2026-01-18` for OpenVM to
+//! compile Reth guest.
 
 use ere_dockerized::zkVMKind;
 use stateless_validator_test::{
@@ -44,35 +50,27 @@ macro_rules! declare_test {
 // Ethrex
 
 declare_test!(Ethrex, OpenVM, RpcBpo2);
-declare_test!(Ethrex, OpenVM, RpcGlamsterdamDevnet5);
-// Ethrex arithmetic overflow on 32-bit targets and calldata allocation OOM.
-declare_test!(Ethrex, OpenVM, EestBalDevnet7, failures = 4);
+// Ethrex arithmetic overflow on 32-bit targets + OOM.
+declare_test!(Ethrex, OpenVM, EestGlamsterdamDevnet7, failures = 5);
 declare_test!(Ethrex, SP1, RpcBpo2);
-declare_test!(Ethrex, SP1, RpcGlamsterdamDevnet5);
-declare_test!(Ethrex, SP1, EestBalDevnet7);
+declare_test!(Ethrex, SP1, EestGlamsterdamDevnet7);
 declare_test!(Ethrex, Zisk, RpcBpo2);
-declare_test!(Ethrex, Zisk, RpcGlamsterdamDevnet5);
-// Ethrex calldata allocation OOM + ZisK `zkvm-interface` impl bug.
-declare_test!(Ethrex, Zisk, EestBalDevnet7, failures = 25);
+// Ethrex OOM + ZisK `zkvm-interface` impl bug.
+declare_test!(Ethrex, Zisk, EestGlamsterdamDevnet7, failures = 26);
 
 // Reth
 
 declare_test!(Reth, OpenVM, RpcBpo2);
-declare_test!(Reth, OpenVM, RpcGlamsterdamDevnet5);
 // Reth divergences.
-declare_test!(Reth, OpenVM, EestBalDevnet7, failures = 16);
+declare_test!(Reth, OpenVM, EestGlamsterdamDevnet7, failures = 17);
 declare_test!(Reth, SP1, RpcBpo2);
-declare_test!(Reth, SP1, RpcGlamsterdamDevnet5);
 // Reth divergences.
-declare_test!(Reth, SP1, EestBalDevnet7, failures = 16);
+declare_test!(Reth, SP1, EestGlamsterdamDevnet7, failures = 17);
 declare_test!(Reth, Zisk, RpcBpo2);
-declare_test!(Reth, Zisk, RpcGlamsterdamDevnet5);
 // Reth divergences + ZisK `zkvm-interface` impl bug.
-declare_test!(Reth, Zisk, EestBalDevnet7, failures = 38);
+declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 39);
 
 // Zesu
 
-// ZisK `zkvm-interface` impl bug.
-declare_test!(Zesu, Zisk, EestBalDevnet7, failures = 121);
-// Should be fixed by https://github.com/Consensys/zesu/pull/70.
-declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet5, failures = 50);
+// ZisK `zkvm-interface` impl bug + Zesu alignment issue.
+// declare_test!(Zesu, Zisk, EestGlamsterdamDevnet5, failures = 121);

@@ -9,6 +9,3 @@ pub use libssz_merkle::{HashTreeRoot, Sha2Hasher, Sha256Hasher};
 pub use libssz_types::{SszList, SszVector};
 
 pub mod guest;
-
-#[cfg(feature = "host")]
-pub mod host;

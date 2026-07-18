@@ -3,18 +3,18 @@
 //! The types mirror `StatelessValidationResult` in [`stateless.py`] and its SSZ schema in
 //! [`stateless_ssz.py`]. The serialized form is the plain SSZ encoding without a schema prefix.
 //!
-//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless.py
-//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/stateless_ssz.py
+//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/stateless.py
+//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/stateless_ssz.py
 
 use alloc::vec::Vec;
 use core::fmt::{self, Debug};
 
 use libssz_derive::{SszDecode, SszEncode};
 
-use crate::guest::input::{ChainConfig, ForkActivation, ForkConfig, ProtocolFork};
+use crate::guest::input::ChainConfig;
 
 /// Canonical result returned by stateless validation.
-#[derive(Clone, PartialEq, Eq, SszEncode, SszDecode)]
+#[derive(Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct StatelessValidationResult {
     /// The SSZ hash tree root of the validated payload request.
     pub new_payload_request_root: [u8; 32],
@@ -36,23 +36,6 @@ impl StatelessValidationResult {
             successful_validation,
             chain_config,
         }
-    }
-}
-
-impl Default for StatelessValidationResult {
-    fn default() -> Self {
-        Self::new(
-            [0; 32],
-            false,
-            ChainConfig {
-                chain_id: 0,
-                active_fork: ForkConfig::new(
-                    ProtocolFork::Frontier,
-                    ForkActivation::default(),
-                    None,
-                ),
-            },
-        )
     }
 }
 

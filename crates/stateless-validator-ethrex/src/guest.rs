@@ -9,7 +9,7 @@ use ethrex_guest_program::{
 };
 use stateless_validator_common::{
     HashTreeRoot, SszEncode as _,
-    guest::{StatelessInput, StatelessValidationResult},
+    guest::{StatelessInput, StatelessValidationResult, input::ProtocolFork},
 };
 
 use crate::guest::{convert::to_ethrex_input, crypto::sha256_hasher};
@@ -30,7 +30,7 @@ pub fn entrypoint<P: Platform>() {
 /// Runs the stateless guest with serialized input and returns serialized
 /// output, mirroring `run_stateless_guest` in the spec.
 pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
-    let Ok(input) = P::cycle_scope("deserialize_input", || {
+    let Ok((fork, input)) = P::cycle_scope("deserialize_input", || {
         StatelessInput::from_schema_prefixed_ssz(input_bytes)
     }) else {
         return StatelessValidationResult::default().to_ssz();
@@ -41,7 +41,7 @@ pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
     });
     let chain_config = input.chain_config.clone();
 
-    let successful_validation = verify_stateless_new_payload::<P>(input).is_ok();
+    let successful_validation = verify_stateless_new_payload::<P>(fork, input).is_ok();
 
     let output = StatelessValidationResult::new(
         new_payload_request_root,
@@ -54,17 +54,29 @@ pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
 
 /// Statelessly validates the execution payload, mirroring
 /// `verify_stateless_new_payload` in the spec.
-fn verify_stateless_new_payload<P: Platform>(input: StatelessInput) -> Result<(), Error> {
+fn verify_stateless_new_payload<P: Platform>(
+    fork: ProtocolFork,
+    input: StatelessInput,
+) -> Result<(), Error> {
     P::cycle_scope("validate_chain_config", || {
         input.chain_config.validate(&input.new_payload_request)
     })?;
 
+    #[cfg(debug_assertions)]
+    let new_payload_request_root = input.new_payload_request.hash_tree_root(&sha256_hasher());
+
     let ethrex_input = P::cycle_scope("to_ethrex_input", || {
-        to_ethrex_input(input).map_err(|err| {
+        to_ethrex_input(fork, input).map_err(|err| {
             P::print(&format!("Input conversion failed: {err}\n"));
             err
         })
     })?;
+
+    #[cfg(debug_assertions)]
+    if fork == ProtocolFork::Amsterdam {
+        let ethrex_new_payload_request_root = ethrex_new_payload_request_root(&ethrex_input);
+        assert_eq!(ethrex_new_payload_request_root, new_payload_request_root);
+    }
 
     P::cycle_scope("run_validation", || {
         run_validation(ethrex_input).map_err(|err| {
@@ -88,5 +100,19 @@ fn run_validation(ethrex_input: DecodedEip8025) -> Result<(), ExecutionError> {
             stateless_input,
             chain_config,
         } => validate_eip8025_canonical_execution(stateless_input, chain_config, crypto::crypto()),
+    }
+}
+
+#[cfg(debug_assertions)]
+fn ethrex_new_payload_request_root(ethrex_input: &DecodedEip8025) -> [u8; 32] {
+    let hasher = sha256_hasher();
+    match ethrex_input {
+        DecodedEip8025::Legacy {
+            new_payload_request,
+            ..
+        } => new_payload_request.hash_tree_root(&hasher),
+        DecodedEip8025::Canonical {
+            stateless_input, ..
+        } => stateless_input.new_payload_request.hash_tree_root(&hasher),
     }
 }

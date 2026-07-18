@@ -11,9 +11,6 @@ pub enum Error {
     /// Shared guest validation failed.
     #[error(transparent)]
     Common(#[from] stateless_validator_common::guest::Error),
-    /// A Cancun-onward active fork carried no blob schedule.
-    #[error("missing blob schedule")]
-    MissingBlobSchedule,
     /// The blob target exceeded the ethrex `u32` bound.
     #[error("blob target out of bounds")]
     BlobTargetOutOfBounds,

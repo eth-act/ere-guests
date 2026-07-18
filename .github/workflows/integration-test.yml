@@ -85,7 +85,7 @@ jobs:
         env:
           RUST_LOG: info,ere_server=error
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
-          OPENVM_RUST_TOOLCHAIN: nightly-2025-10-30
+          OPENVM_RUST_TOOLCHAIN: nightly-2026-01-18
         run: |
           cargo test --release --package stateless-validator-test --test zkvm_execution -- ${{ matrix.guest }}_${{ matrix.zkvm }}_rpc --test-threads=1
 
@@ -93,7 +93,7 @@ jobs:
         env:
           RUST_LOG: info,ere_server=error
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
-          OPENVM_RUST_TOOLCHAIN: nightly-2025-10-30
+          OPENVM_RUST_TOOLCHAIN: nightly-2026-01-18
         run: |
           cargo test --release --package stateless-validator-test --test zkvm_execution -- ${{ matrix.guest }}_${{ matrix.zkvm }}_eest --test-threads=1
 
@@ -144,6 +144,7 @@ jobs:
       - name: Test host execution
         env:
           RUST_LOG: info
+          CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS: true
         run: |
           cargo test --release --package stateless-validator-${{ matrix.guest }} --features host --test host_execution -- --test-threads=1
 

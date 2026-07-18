@@ -5,9 +5,9 @@
 //! execution-apis, because a multi-fork crate needs distinct names while each execution-specs
 //! fork module defines a single `ExecutionPayload` shape.
 //!
-//! [`types.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/execution_engine/types.py
-//! [`requests.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/execution_engine/requests.py
-//! [`blocks.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.4.1/src/ethereum/forks/amsterdam/blocks.py
+//! [`types.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/execution_engine/types.py
+//! [`requests.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/execution_engine/requests.py
+//! [`blocks.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/blocks.py
 
 #![allow(missing_docs)]
 
@@ -37,10 +37,11 @@ pub const MAX_BLOB_COMMITMENTS_PER_BLOCK: usize = 4096;
 pub const MAX_DEPOSIT_REQUESTS_PER_PAYLOAD: usize = 8192;
 pub const MAX_WITHDRAWAL_REQUESTS_PER_PAYLOAD: usize = 16;
 pub const MAX_CONSOLIDATION_REQUESTS_PER_PAYLOAD: usize = 2;
-pub const MAX_BLOCK_ACCESS_LIST_BYTES: usize = 1 << 24;
+pub const MAX_BUILDER_DEPOSIT_REQUESTS_PER_PAYLOAD: usize = 64;
+pub const MAX_BUILDER_EXIT_REQUESTS_PER_PAYLOAD: usize = 16;
 
 /// Composite types from the Amsterdam stateless schema.
-pub type BlockAccessList = SszList<u8, MAX_BLOCK_ACCESS_LIST_BYTES>;
+pub type BlockAccessList = SszList<u8, MAX_BYTES_PER_TRANSACTION>;
 pub type Transaction = SszList<u8, MAX_BYTES_PER_TRANSACTION>;
 pub type Transactions = SszList<Transaction, MAX_TRANSACTIONS_PER_PAYLOAD>;
 pub type Withdrawals = SszList<Withdrawal, MAX_WITHDRAWALS_PER_PAYLOAD>;
@@ -49,6 +50,9 @@ pub type DepositRequests = SszList<DepositRequest, MAX_DEPOSIT_REQUESTS_PER_PAYL
 pub type WithdrawalRequests = SszList<WithdrawalRequest, MAX_WITHDRAWAL_REQUESTS_PER_PAYLOAD>;
 pub type ConsolidationRequests =
     SszList<ConsolidationRequest, MAX_CONSOLIDATION_REQUESTS_PER_PAYLOAD>;
+pub type BuilderDepositRequests =
+    SszList<BuilderDepositRequest, MAX_BUILDER_DEPOSIT_REQUESTS_PER_PAYLOAD>;
+pub type BuilderExitRequests = SszList<BuilderExitRequest, MAX_BUILDER_EXIT_REQUESTS_PER_PAYLOAD>;
 
 /// Withdrawals represent a transfer of ETH from the consensus layer (beacon chain) to the
 /// execution layer, as validated by the consensus layer. Each withdrawal is listed in the block's
@@ -91,14 +95,41 @@ pub struct ConsolidationRequest {
     pub target_pubkey: Bytes48,
 }
 
-/// Typed engine-API container of execution-layer triggered requests.
+/// A single EIP-8282 builder deposit request.
+#[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+pub struct BuilderDepositRequest {
+    pub pubkey: Bytes48,
+    pub withdrawal_credentials: Hash32,
+    pub amount: u64,
+    pub signature: Bytes96,
+}
+
+/// A single EIP-8282 builder exit request.
+#[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+pub struct BuilderExitRequest {
+    pub source_address: Address,
+    pub pubkey: Bytes48,
+}
+
+/// Typed engine-API container of execution-layer triggered requests, as of Electra.
 ///
 /// Mirrors the consensus-layer `ExecutionRequests` Container.
 #[derive(Debug, Clone, Default, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
-pub struct ExecutionRequests {
+pub struct ExecutionRequestsElectraFulu {
     pub deposits: DepositRequests,
     pub withdrawals: WithdrawalRequests,
     pub consolidations: ConsolidationRequests,
+}
+
+/// Typed engine-API container of execution-layer triggered requests, as of Gloas, which
+/// EIP-8282 extends with the builder deposit and builder exit lists.
+#[derive(Debug, Clone, Default, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+pub struct ExecutionRequestsGloas {
+    pub deposits: DepositRequests,
+    pub withdrawals: WithdrawalRequests,
+    pub consolidations: ConsolidationRequests,
+    pub builder_deposits: BuilderDepositRequests,
+    pub builder_exits: BuilderExitRequests,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
@@ -204,7 +235,7 @@ pub struct NewPayloadRequestElectraFulu {
     pub execution_payload: ExecutionPayloadV3,
     pub versioned_hashes: VersionedHashes,
     pub parent_beacon_block_root: Hash32,
-    pub execution_requests: ExecutionRequests,
+    pub execution_requests: ExecutionRequestsElectraFulu,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
@@ -212,7 +243,7 @@ pub struct NewPayloadRequestGloas {
     pub execution_payload: ExecutionPayloadV4,
     pub versioned_hashes: VersionedHashes,
     pub parent_beacon_block_root: Hash32,
-    pub execution_requests: ExecutionRequests,
+    pub execution_requests: ExecutionRequestsGloas,
 }
 
 /// Consensus-layer new payload request with one container shape per fork.
@@ -352,8 +383,7 @@ mod tests {
     use libssz_merkle::Sha2Hasher;
 
     use crate::guest::input::{
-        ChainConfig, ExecutionWitness, ForkActivation, ForkConfig, ProtocolFork, StatelessInput,
-        new_payload_request::*,
+        ChainConfig, ExecutionWitness, ProtocolFork, StatelessInput, new_payload_request::*,
     };
 
     fn payload_v1() -> ExecutionPayloadV1 {
@@ -457,18 +487,73 @@ mod tests {
         vec![[9; 32]].try_into().unwrap()
     }
 
-    fn execution_requests() -> ExecutionRequests {
-        ExecutionRequests {
-            deposits: vec![DepositRequest {
-                pubkey: [1; 48],
-                withdrawal_credentials: [2; 32],
-                amount: 3,
-                signature: [4; 96],
-                index: 5,
-            }]
-            .try_into()
-            .unwrap(),
-            ..Default::default()
+    fn deposit_requests() -> DepositRequests {
+        vec![DepositRequest {
+            pubkey: [1; 48],
+            withdrawal_credentials: [2; 32],
+            amount: 3,
+            signature: [4; 96],
+            index: 5,
+        }]
+        .try_into()
+        .unwrap()
+    }
+
+    fn withdrawal_requests() -> WithdrawalRequests {
+        vec![WithdrawalRequest {
+            source_address: [1; 20],
+            validator_pubkey: [2; 48],
+            amount: 3,
+        }]
+        .try_into()
+        .unwrap()
+    }
+
+    fn consolidation_requests() -> ConsolidationRequests {
+        vec![ConsolidationRequest {
+            source_address: [1; 20],
+            source_pubkey: [2; 48],
+            target_pubkey: [3; 48],
+        }]
+        .try_into()
+        .unwrap()
+    }
+
+    fn builder_deposit_requests() -> BuilderDepositRequests {
+        vec![BuilderDepositRequest {
+            pubkey: [1; 48],
+            withdrawal_credentials: [2; 32],
+            amount: 3,
+            signature: [4; 96],
+        }]
+        .try_into()
+        .unwrap()
+    }
+
+    fn builder_exit_requests() -> BuilderExitRequests {
+        vec![BuilderExitRequest {
+            source_address: [1; 20],
+            pubkey: [2; 48],
+        }]
+        .try_into()
+        .unwrap()
+    }
+
+    fn execution_requests_electra_fulu() -> ExecutionRequestsElectraFulu {
+        ExecutionRequestsElectraFulu {
+            deposits: deposit_requests(),
+            withdrawals: withdrawal_requests(),
+            consolidations: consolidation_requests(),
+        }
+    }
+
+    fn execution_requests_gloas() -> ExecutionRequestsGloas {
+        ExecutionRequestsGloas {
+            deposits: deposit_requests(),
+            withdrawals: withdrawal_requests(),
+            consolidations: consolidation_requests(),
+            builder_deposits: builder_deposit_requests(),
+            builder_exits: builder_exit_requests(),
         }
     }
 
@@ -497,7 +582,7 @@ mod tests {
             execution_payload: payload_v3(),
             versioned_hashes: versioned_hashes(),
             parent_beacon_block_root: [10; 32],
-            execution_requests: execution_requests(),
+            execution_requests: execution_requests_electra_fulu(),
         })
     }
 
@@ -506,21 +591,15 @@ mod tests {
             execution_payload: payload_v4(),
             versioned_hashes: versioned_hashes(),
             parent_beacon_block_root: [10; 32],
-            execution_requests: execution_requests(),
+            execution_requests: execution_requests_gloas(),
         })
     }
 
-    fn stateless_input(
-        new_payload_request: NewPayloadRequest,
-        fork: ProtocolFork,
-    ) -> StatelessInput {
+    fn stateless_input(new_payload_request: NewPayloadRequest) -> StatelessInput {
         StatelessInput {
             new_payload_request,
             witness: ExecutionWitness::default(),
-            chain_config: ChainConfig {
-                chain_id: 0,
-                active_fork: ForkConfig::new(fork, ForkActivation::default(), None),
-            },
+            chain_config: ChainConfig::default(),
             public_keys: Default::default(),
         }
     }
@@ -552,12 +631,15 @@ mod tests {
             (electra_fulu(), ELECTRA_FULU_FORKS),
             (gloas(), [ProtocolFork::Amsterdam].as_slice()),
         ] {
-            for fork in 0..=ProtocolFork::Amsterdam.as_u64() {
+            for fork in 1..=ProtocolFork::Amsterdam.as_u64() {
                 let fork = ProtocolFork::from_u64(fork).unwrap();
-                let input = stateless_input(request.clone(), fork);
-                let result = StatelessInput::from_ssz_bytes(&input.to_ssz());
+                let input = stateless_input(request.clone());
+                let result =
+                    StatelessInput::from_schema_prefixed_ssz(&input.to_schema_prefixed_ssz(fork));
                 if matching.contains(&fork) {
-                    assert_eq!(result.unwrap().new_payload_request, request);
+                    let (decoded_fork, decoded) = result.unwrap();
+                    assert_eq!(decoded_fork, fork);
+                    assert_eq!(decoded.new_payload_request, request);
                 } else {
                     assert!(result.is_err());
                 }

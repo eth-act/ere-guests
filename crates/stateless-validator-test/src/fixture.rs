@@ -16,20 +16,18 @@ use walkdir::{DirEntry, WalkDir};
 
 /// Release hosting the EEST fixtures filled by `ethereum/execution-specs`.
 const EEST_FIXTURES_BASE_URL: &str =
-    "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v0.4.1";
+    "https://github.com/ethereum/execution-specs/releases/download";
 /// Release hosting the RPC-derived fixtures from `witness-generator-spec-cli`.
 const RPC_FIXTURES_BASE_URL: &str =
-    "https://github.com/han0110/ere-guests/releases/download/rpc-fixtures@v0.1.0";
+    "https://github.com/han0110/ere-guests/releases/download/rpc-fixtures@v0.2.0";
 
 /// A preset fixture set identifying both its source archive and its format.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FixturePreset {
+    /// EEST `blockchain_test` fixtures based on `tests-zkevm@v0.6.2`.
+    EestGlamsterdamDevnet7,
     /// RPC-derived fixtures from the `mainnet`.
     RpcBpo2,
-    /// RPC-derived fixtures from the `glamsterdam-devnet-5`.
-    RpcGlamsterdamDevnet5,
-    /// EEST `blockchain_test` fixtures based on `bal-devnet-7`.
-    EestBalDevnet7,
 }
 
 /// Download and on-disk layout details for a [`FixturePreset`].
@@ -45,20 +43,15 @@ struct FixtureSource {
 impl FixturePreset {
     fn source(self) -> FixtureSource {
         match self {
-            Self::EestBalDevnet7 => FixtureSource {
-                url: format!("{EEST_FIXTURES_BASE_URL}/fixtures_zkevm.tar.gz"),
-                dir: "eest-bal-devnet-7",
+            Self::EestGlamsterdamDevnet7 => FixtureSource {
+                url: format!("{EEST_FIXTURES_BASE_URL}/tests-zkevm@v0.6.2/fixtures_zkevm.tar.gz"),
+                dir: "eest-glamsterdam-devnet-7",
                 archive_dir: "fixtures/blockchain_tests",
             },
             Self::RpcBpo2 => FixtureSource {
                 url: format!("{RPC_FIXTURES_BASE_URL}/rpc-bpo2.tar.zst"),
                 dir: "rpc-bpo2",
                 archive_dir: "rpc-bpo2",
-            },
-            Self::RpcGlamsterdamDevnet5 => FixtureSource {
-                url: format!("{RPC_FIXTURES_BASE_URL}/rpc-glamsterdam-devnet-5.tar.zst"),
-                dir: "rpc-glamsterdam-devnet-5",
-                archive_dir: "rpc-glamsterdam-devnet-5",
             },
         }
     }
