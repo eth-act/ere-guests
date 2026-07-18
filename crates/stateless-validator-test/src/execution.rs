@@ -115,22 +115,22 @@ pub fn run_execution(
 
 macro_rules! declare_matches_output {
     ($name:ident, $stateless_validator_common_crate:ident) => {
-        fn $name(got_bytes: Vec<u8>, expectecd_bytes: Vec<u8>) -> anyhow::Result<()> {
+        fn $name(got_bytes: Vec<u8>, expected_bytes: Vec<u8>) -> anyhow::Result<()> {
             use $stateless_validator_common_crate::{SszDecode, guest::StatelessValidationResult};
 
-            let Some(got_bytes) = got_bytes.split_at_checked(expectecd_bytes.len()).and_then(
+            let Some(got_bytes) = got_bytes.split_at_checked(expected_bytes.len()).and_then(
                 |(got_bytes, trailing)| trailing.iter().all(|byte| *byte == 0).then_some(got_bytes),
             ) else {
                 bail!(
                     "Output bytes mismatch, expected {}, got {}",
-                    const_hex::encode_prefixed(expectecd_bytes),
+                    const_hex::encode_prefixed(expected_bytes),
                     const_hex::encode_prefixed(got_bytes)
                 )
             };
 
             let got = StatelessValidationResult::from_ssz_bytes(got_bytes)
                 .map_err(|err| anyhow!("Decode execute output bytes failure: {err:?}"))?;
-            let expected = StatelessValidationResult::from_ssz_bytes(&expectecd_bytes)
+            let expected = StatelessValidationResult::from_ssz_bytes(&expected_bytes)
                 .map_err(|err| anyhow!("Decode fixture output bytes failure: {err:?}"))?;
 
             match (
