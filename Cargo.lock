@@ -5774,20 +5774,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "stateless-validator-common"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere-guests?tag=v0.13.0#cffc3f1a299e0e5f097305775d6ba1141b5f9546"
-dependencies = [
- "const-hex",
- "libssz",
- "libssz-derive",
- "libssz-merkle",
- "libssz-types",
- "sha2",
- "thiserror",
-]
-
-[[package]]
 name = "stateless-validator-debug"
 version = "0.13.0"
 dependencies = [
@@ -5798,7 +5784,7 @@ dependencies = [
  "ere-platform-core",
  "serde",
  "serde_json",
- "stateless-validator-common 0.13.0",
+ "stateless-validator-common",
  "stateless-validator-ethrex",
  "stateless-validator-reth",
  "tracing",
@@ -5826,7 +5812,7 @@ dependencies = [
  "openvm-sha2",
  "p256 0.13.2 (git+https://github.com/openvm-org/openvm.git?tag=v2.0.0)",
  "paste",
- "stateless-validator-common 0.13.0",
+ "stateless-validator-common",
  "stateless-validator-test",
  "thiserror",
  "zkvm-interface",
@@ -5854,7 +5840,7 @@ dependencies = [
  "reth-primitives-traits",
  "revm",
  "stateless",
- "stateless-validator-common 0.13.0",
+ "stateless-validator-common",
  "stateless-validator-test",
  "thiserror",
  "tries",
@@ -5878,8 +5864,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
- "stateless-validator-common 0.13.0",
- "stateless-validator-common 0.13.0 (git+https://github.com/eth-act/ere-guests?tag=v0.13.0)",
+ "stateless-validator-common",
  "tar",
  "tempfile",
  "tracing",
