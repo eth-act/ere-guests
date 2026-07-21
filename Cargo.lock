@@ -56,7 +56,7 @@ dependencies = [
  "alloy-rlp",
  "num_enum",
  "serde",
- "strum",
+ "strum 0.27.2",
 ]
 
 [[package]]
@@ -301,7 +301,7 @@ dependencies = [
  "derive_more 2.1.1",
  "rand 0.8.6",
  "serde",
- "strum",
+ "strum 0.27.2",
 ]
 
 [[package]]
@@ -1628,7 +1628,7 @@ source = "git+https://github.com/eth-act/ere?rev=58ca85beaee2fa8acd31dbf33b90bb7
 dependencies = [
  "ere-util-build",
  "serde",
- "strum",
+ "strum 0.27.2",
 ]
 
 [[package]]
@@ -1679,7 +1679,7 @@ dependencies = [
  "ere-verifier-core",
  "indexmap 2.14.0",
  "serde",
- "strum",
+ "strum 0.27.2",
  "thiserror",
 ]
 
@@ -1877,7 +1877,7 @@ dependencies = [
  "malachite",
  "rustc-hash",
  "serde",
- "strum",
+ "strum 0.27.2",
  "thiserror",
 ]
 
@@ -4761,7 +4761,7 @@ source = "git+https://github.com/han0110/reth?rev=c5dff62a8804b207659f5d1f30f13e
 dependencies = [
  "alloy-primitives",
  "derive_more 2.1.1",
- "strum",
+ "strum 0.27.2",
  "thiserror",
  "tracing",
 ]
@@ -4785,7 +4785,7 @@ dependencies = [
  "fixed-map",
  "reth-stages-types",
  "serde",
- "strum",
+ "strum 0.27.2",
 ]
 
 [[package]]
@@ -5759,6 +5759,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "stateless-validator-catalog"
+version = "0.13.0"
+dependencies = [
+ "ere-util-build",
+ "serde",
+ "strum 0.28.0",
+]
+
+[[package]]
 name = "stateless-validator-common"
 version = "0.13.0"
 dependencies = [
@@ -5798,7 +5807,6 @@ dependencies = [
  "bls12_381 0.8.0 (git+https://github.com/zkcrypto/bls12_381?rev=6bb96951d5c2035caf4989b6e4a018435379590f)",
  "ere-dockerized",
  "ere-platform-core",
- "ere-util-build",
  "ethrex-common",
  "ethrex-crypto",
  "ethrex-guest-program",
@@ -5829,7 +5837,6 @@ dependencies = [
  "alloy-rpc-types-engine",
  "ere-dockerized",
  "ere-platform-core",
- "ere-util-build",
  "once_cell",
  "openvm-sha2",
  "paste",
@@ -5895,6 +5902,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "strum"
+version = "0.28.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9628de9b8791db39ceda2b119bbe13134770b56c138ec1d3af810d045c04f9bd"
+dependencies = [
+ "strum_macros 0.28.0",
+]
+
+[[package]]
 name = "strum_macros"
 version = "0.26.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5912,6 +5928,18 @@ name = "strum_macros"
 version = "0.27.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7695ce3845ea4b33927c055a39dc438a45b059f7c1b3d91d38d10355fb8cbca7"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.118",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.28.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab85eea0270ee17587ed4156089e10b9e6880ee688791d45a905f5b1ca36f664"
 dependencies = [
  "heck",
  "proc-macro2",
