@@ -43,9 +43,6 @@ paste.workspace = true
 ere-dockerized.workspace = true
 stateless-validator-test.workspace = true
 
-[build-dependencies]
-ere-util-build.workspace = true
-
 [features]
 # guest
 default = ["std"]
