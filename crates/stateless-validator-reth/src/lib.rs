@@ -5,6 +5,3 @@
 extern crate alloc;
 
 pub mod guest;
-
-/// Reth version.
-pub const EL_VERSION: &str = env!("EL_VERSION");

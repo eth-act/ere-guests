@@ -125,6 +125,7 @@ jobs:
   republish:
     name: Republish stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
     needs: republish-setup
+    if: fromJson(needs.republish-setup.outputs.matrix).include[0] != null
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -172,7 +173,11 @@ jobs:
 
   check-git-tag:
     name: Check whether git tag exists
-    needs: compile
+    needs: [compile, republish]
+    if: >-
+      ${{ !cancelled()
+          && needs.compile.result == 'success'
+          && (needs.republish.result == 'success' || needs.republish.result == 'skipped') }}
     runs-on: ubuntu-latest
     outputs:
       exists: ${{ steps.check-git-tag.outputs.exists }}
@@ -188,7 +193,7 @@ jobs:
 
   update-release-with-artifacts:
     name: Update release with artifacts
-    needs: [compile, republish, check-git-tag]
+    needs: check-git-tag
     if: needs.check-git-tag.outputs.exists == 'true'
     runs-on: ubuntu-latest
     steps:
