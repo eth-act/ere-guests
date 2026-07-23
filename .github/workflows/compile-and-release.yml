@@ -18,14 +18,14 @@ permissions:
 
 jobs:
   compile:
-    name: Compile stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
+    name: Compile stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}
     runs-on: ubuntu-latest
     outputs:
       ere_tag: ${{ steps.get_ere_tag.outputs.ere_tag }}
     strategy:
       fail-fast: false
       matrix:
-        el:
+        stateless_validator:
           - ethrex
           - reth
         zkvm:
@@ -33,7 +33,7 @@ jobs:
           - sp1
           - zisk
         include:
-          - el: ethrex
+          - stateless_validator: ethrex
             zkvm: zisk
             ere_profile: ethrex
     steps:
@@ -66,9 +66,9 @@ jobs:
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
             --compiler-kind rust-customized \
-            --guest-dir /ere-guests/bin/stateless-validator-${{ matrix.el }}/${{ matrix.zkvm }} \
+            --guest-dir /ere-guests/bin/stateless-validator-${{ matrix.stateless_validator }}/${{ matrix.zkvm }} \
             --output-dir /output \
-            --elf-name stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.elf
+            --elf-name stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.elf
 
       - name: Compile ZisK guest with feature cycle-scope enabled
         if: ${{ matrix.zkvm == 'zisk' }}
@@ -81,9 +81,9 @@ jobs:
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-compiler-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
             --compiler-kind rust-customized \
-            --guest-dir /ere-guests/bin/stateless-validator-${{ matrix.el }}/${{ matrix.zkvm }} \
+            --guest-dir /ere-guests/bin/stateless-validator-${{ matrix.stateless_validator }}/${{ matrix.zkvm }} \
             --output-dir /output \
-            --elf-name stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}-profiling.elf \
+            --elf-name stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}-profiling.elf \
             -- \
             --features cycle-scope
 
@@ -93,17 +93,17 @@ jobs:
             -e RUST_LOG=info \
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
-            --elf-path /output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.elf \
+            --elf-path /output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.elf \
             keygen \
-            --program-vk-path /output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
+            --program-vk-path /output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.vk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
+          name: stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}
           path: |
-            output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}*.elf
-            output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
+            output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}*.elf
+            output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.vk
           if-no-files-found: error
 
   republish-setup:
@@ -118,12 +118,12 @@ jobs:
       - name: Build matrix from artifact-registry.json
         id: set-matrix
         run: |
-          MATRIX=$(jq -c '{ include: [.stateless_validator_elf | keys[] | (. / "-") as $p | { el: ($p[:-1] | join("-")), zkvm: $p[-1] }] }' artifact-registry.json)
+          MATRIX=$(jq -c '{ include: [.stateless_validators[] as $sv | $sv.elfs[] | { stateless_validator: $sv.name, zkvm: .zkvm }] }' artifact-registry.json)
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
           echo "Matrix: ${MATRIX}"
 
   republish:
-    name: Republish stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
+    name: Republish stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}
     needs: republish-setup
     if: fromJson(needs.republish-setup.outputs.matrix).include[0] != null
     runs-on: ubuntu-latest
@@ -150,7 +150,7 @@ jobs:
           docker pull ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
 
       - name: Download ELF
-        run: bash .github/scripts/fetch-elf-for-republish.sh ${{ matrix.el }}-${{ matrix.zkvm }}
+        run: bash .github/scripts/fetch-elf-for-republish.sh ${{ matrix.stateless_validator }} ${{ matrix.zkvm }}
 
       - name: Generate program VK
         run: |
@@ -158,17 +158,17 @@ jobs:
             -e RUST_LOG=info \
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
-            --elf-path /output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.elf \
+            --elf-path /output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.elf \
             keygen \
-            --program-vk-path /output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
+            --program-vk-path /output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.vk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}
+          name: stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}
           path: |
-            output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}*.elf
-            output/stateless-validator-${{ matrix.el }}-${{ matrix.zkvm }}.vk
+            output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}*.elf
+            output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.vk
           if-no-files-found: error
 
   check-git-tag:
@@ -194,7 +194,6 @@ jobs:
   update-release-with-artifacts:
     name: Update release with artifacts
     needs: check-git-tag
-    if: needs.check-git-tag.outputs.exists == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -257,11 +256,13 @@ jobs:
           ls -R artifacts
 
       - name: Upload artifacts to release
+        if: needs.check-git-tag.outputs.exists == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload --repo "${{ github.repository }}" "${{ needs.check-git-tag.outputs.tag }}" artifacts/* --clobber
 
       - name: Append artifact info to release notes
+        if: needs.check-git-tag.outputs.exists == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

@@ -72,5 +72,5 @@ declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 39);
 
 // Zesu
 
-// ZisK `zkvm-interface` impl bug + Zesu alignment issue.
-// declare_test!(Zesu, Zisk, EestGlamsterdamDevnet5, failures = 121);
+// ZisK `zkvm-interface` impl bug.
+declare_test!(Zesu, Zisk, EestGlamsterdamDevnet7, failures = 22);

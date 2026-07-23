@@ -9,28 +9,28 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from subprocess import DEVNULL, PIPE, STDOUT
+from subprocess import DEVNULL, PIPE
 
 ROOT = Path(__file__).resolve().parents[2]
 TARGET_DIR = ROOT / "target"
 
 REPOSITORY = "eth-act/ere-guests"
 GUEST_PREFIX = "stateless-validator-"
-COMPILED_ELS = ("ethrex", "reth")
+COMPILED_STATELESS_VALIDATORS = ("ethrex", "reth")
 ZKVMS = ("openvm", "sp1", "zisk")
 
 TABLE_HEADER = (
-    "| EL | EL Version | zkVM | zkVM Version | Target | ELF | Program VK |",
+    "| Stateless Validator | Version | zkVM | zkVM Version | Target | ELF | Program VK |",
     "| --- | --- | --- | --- | --- | --- | --- |",
 )
 
 
 @dataclass(frozen=True)
 class Guest:
-    """A guest program keyed by execution layer and zkVM, with display versions."""
+    """A guest program keyed by stateless validator and zkVM, with display versions."""
 
-    el: str
-    el_version: str
+    stateless_validator: str
+    version: str
     zkvm: str
     zkvm_version: str
     source_url: str | None = None
@@ -84,8 +84,8 @@ def read_catalog_versions(package: str, version_file: str) -> dict[str, str]:
     return {kind.lower(): version for kind, version in versions}
 
 
-def read_compiled_el_versions() -> dict[str, str]:
-    """Returns EL versions parsed from the `stateless-validator-catalog` build script."""
+def read_compiled_versions() -> dict[str, str]:
+    """Returns versions parsed from the `stateless-validator-catalog` build script."""
     return read_catalog_versions("stateless-validator-catalog", "version_impl.rs")
 
 
@@ -110,8 +110,8 @@ def read_elf_word_size(elf_path: Path) -> int:
 
 def render_row(guest: Guest, artifacts_dir: Path, release_url: str) -> str | None:
     """Renders `guest` as a Markdown table row, or None when its ELF or VK is absent."""
-    elf = f"{GUEST_PREFIX}{guest.el}-{guest.zkvm}.elf"
-    vk = f"{GUEST_PREFIX}{guest.el}-{guest.zkvm}.vk"
+    elf = f"{GUEST_PREFIX}{guest.stateless_validator}-{guest.zkvm}.elf"
+    vk = f"{GUEST_PREFIX}{guest.stateless_validator}-{guest.zkvm}.vk"
     elf_path = artifacts_dir / elf
     vk_path = artifacts_dir / vk
     if not (elf_path.is_file() and vk_path.is_file()):
@@ -122,18 +122,18 @@ def render_row(guest: Guest, artifacts_dir: Path, release_url: str) -> str | Non
     if guest.source_url:
         elf_cell += f" / [Source]({guest.source_url})"
     return (
-        f"| `{guest.el}` | `{guest.el_version}` "
+        f"| `{guest.stateless_validator}` | `{guest.version}` "
         f"| `{guest.zkvm}` | `{guest.zkvm_version}` "
         f"| `{target}` | {elf_cell} | [Link]({release_url}/{vk}) |"
     )
 
 
 def compiled_guests(zkvm_versions: dict[str, str]) -> list[Guest]:
-    """Returns the COMPILED_ELS x ZKVMS guests, with versions from the build scripts."""
-    el_versions = read_compiled_el_versions()
+    """Returns the COMPILED_STATELESS_VALIDATORS x ZKVMS guests, versioned by the build scripts."""
+    versions = read_compiled_versions()
     return [
-        Guest(el, el_versions[el], zkvm, zkvm_versions[zkvm])
-        for el in COMPILED_ELS
+        Guest(name, versions[name], zkvm, zkvm_versions[zkvm])
+        for name in COMPILED_STATELESS_VALIDATORS
         for zkvm in ZKVMS
     ]
 
@@ -141,14 +141,20 @@ def compiled_guests(zkvm_versions: dict[str, str]) -> list[Guest]:
 def republished_guests(
     artifact_registry: Path, zkvm_versions: dict[str, str]
 ) -> list[Guest]:
-    """Returns the registry guests, ordered by key, with zkVM versions from the SDK."""
-    registry = json.loads(artifact_registry.read_text())["stateless_validator_elf"]
+    """Returns the registry guests, ordered by name then zkVM, with zkVM versions from the SDK."""
+    registry = json.loads(artifact_registry.read_text())["stateless_validators"]
     guests = []
-    for key, entry in sorted(registry.items()):
-        el, zkvm = key.rsplit("-", 1)
-        guests.append(
-            Guest(el, entry["el_version"], zkvm, zkvm_versions[zkvm], entry["url"])
-        )
+    for validator in sorted(registry, key=lambda entry: entry["name"]):
+        for elf in sorted(validator["elfs"], key=lambda entry: entry["zkvm"]):
+            guests.append(
+                Guest(
+                    validator["name"],
+                    validator["version"],
+                    elf["zkvm"],
+                    zkvm_versions[elf["zkvm"]],
+                    elf["url"],
+                )
+            )
     return guests
 
 
@@ -175,7 +181,7 @@ def republished_rows(
         row = render_row(guest, artifacts_dir, release_url)
         if row is None:
             raise RuntimeError(
-                f"republished guest {GUEST_PREFIX}{guest.el}-{guest.zkvm}.elf is missing"
+                f"republished guest {GUEST_PREFIX}{guest.stateless_validator}-{guest.zkvm}.elf is missing"
             )
         rows.append(row)
     return rows

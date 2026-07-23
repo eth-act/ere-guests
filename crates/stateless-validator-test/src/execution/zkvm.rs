@@ -1,6 +1,6 @@
 //! Helpers for compiling guest programs and asserting their zkVM execution.
 
-use std::{collections::BTreeMap, fs, path::PathBuf, sync::LazyLock};
+use std::{fs, path::PathBuf, sync::LazyLock};
 
 use dashmap::DashMap;
 use ere_dockerized::{
@@ -50,11 +50,18 @@ pub fn compile_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
 pub fn download_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
     #[derive(Deserialize)]
     struct ArtifactRegistry {
-        stateless_validator_elf: BTreeMap<String, GuestSoure>,
+        stateless_validators: Vec<StatelessValidator>,
     }
 
     #[derive(Deserialize)]
-    struct GuestSoure {
+    struct StatelessValidator {
+        name: String,
+        elfs: Vec<GuestElf>,
+    }
+
+    #[derive(Deserialize)]
+    struct GuestElf {
+        zkvm: String,
         url: String,
     }
 
@@ -63,11 +70,18 @@ pub fn download_guest(guest_kind: GuestKind, zkvm_kind: zkVMKind) -> Elf {
         serde_json::from_slice::<ArtifactRegistry>(&json).unwrap()
     };
     let guest = format!("{}-{}", guest_kind.as_str(), zkvm_kind.as_str());
-    let source = &registry
-        .stateless_validator_elf
-        .get(&guest)
+    let elf = registry
+        .stateless_validators
+        .iter()
+        .find(|validator| validator.name == guest_kind.as_str())
+        .and_then(|validator| {
+            validator
+                .elfs
+                .iter()
+                .find(|elf| elf.zkvm == zkvm_kind.as_str())
+        })
         .unwrap_or_else(|| panic!("{guest} not found in artifact-registry.json"));
-    let bytes = reqwest::blocking::get(&source.url)
+    let bytes = reqwest::blocking::get(&elf.url)
         .unwrap()
         .error_for_status()
         .unwrap()
