@@ -17,28 +17,6 @@ use crate::fixture::StatelessValidatorFixture;
 pub mod host;
 pub mod zkvm;
 
-/// A stateless validator guest program.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GuestKind {
-    /// The ethrex guest.
-    Ethrex,
-    /// The reth guest.
-    Reth,
-    /// The zesu guest.
-    Zesu,
-}
-
-impl GuestKind {
-    /// Returns the guest name in lower-case.
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Ethrex => "ethrex",
-            Self::Reth => "reth",
-            Self::Zesu => "zesu",
-        }
-    }
-}
-
 /// A fixture that failed to execute or match its expected output.
 #[derive(Debug, Clone)]
 pub struct ExecutionFailure {
@@ -63,17 +41,22 @@ impl Display for ExecutionFailures<'_> {
     }
 }
 
-/// Runs `execute` over every fixture in parallel, returning the failures.
-pub fn run_execution(
-    fixtures: impl IntoIterator<Item = StatelessValidatorFixture>,
-    execute: &(impl Fn(Vec<u8>) -> anyhow::Result<Vec<u8>> + Sync),
-) -> Vec<ExecutionFailure> {
+/// Initializes the tracing subscriber, doing nothing after the first call.
+pub fn init_tracing() {
     static INIT_TRACING: Once = Once::new();
     INIT_TRACING.call_once(|| {
         let _ = tracing_subscriber::fmt()
             .with_env_filter(EnvFilter::from_default_env())
             .try_init();
     });
+}
+
+/// Runs `execute` over every fixture in parallel, returning the failures.
+pub fn run_execution(
+    fixtures: impl IntoIterator<Item = StatelessValidatorFixture>,
+    execute: &(impl Fn(Vec<u8>) -> anyhow::Result<Vec<u8>> + Sync),
+) -> Vec<ExecutionFailure> {
+    init_tracing();
 
     let fixtures = fixtures.into_iter().collect::<Vec<_>>();
     let total = fixtures.len();

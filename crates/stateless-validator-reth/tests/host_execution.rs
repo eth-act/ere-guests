@@ -5,6 +5,9 @@ use stateless_validator_test::declare_test_host_execution;
 
 declare_test_host_execution!(RpcBpo2, run_stateless_guest);
 // NOTE:
+// - 1 EIP-8025 (in-block created-code resolution)
+declare_test_host_execution!(RpcGlamsterdamDevnet7, run_stateless_guest, failures = 1);
+// NOTE:
 // - 12 EIP-7610
 //    - test_init_collision_create_tx
 //    - test_init_collision_create_opcode

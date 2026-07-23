@@ -20,6 +20,9 @@ const EEST_FIXTURES_BASE_URL: &str =
 /// Release hosting the RPC-derived fixtures from `witness-generator-spec-cli`.
 const RPC_FIXTURES_BASE_URL: &str =
     "https://github.com/han0110/ere-guests/releases/download/rpc-fixtures@v0.2.0";
+/// R2 hosting the `glamsterdam-devnet-7` stateless inputs.
+pub const R2_FIXTURES_BASE_URL: &str =
+    "https://pub-df22334654034ebab51bc096137a59d8.r2.dev/devnets/glamsterdam-devnet-7";
 
 /// A preset fixture set identifying both its source archive and its format.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -28,6 +31,8 @@ pub enum FixturePreset {
     EestGlamsterdamDevnet7,
     /// RPC-derived fixtures from the `mainnet`.
     RpcBpo2,
+    /// RPC-derived fixtures from the `glamsterdam-devnet-7`.
+    RpcGlamsterdamDevnet7,
 }
 
 /// Download and on-disk layout details for a [`FixturePreset`].
@@ -53,6 +58,11 @@ impl FixturePreset {
                 dir: "rpc-bpo2",
                 archive_dir: "rpc-bpo2",
             },
+            Self::RpcGlamsterdamDevnet7 => FixtureSource {
+                url: format!("{R2_FIXTURES_BASE_URL}/exports/batches/56040-56049.tar.zst"),
+                dir: "rpc-glamsterdam-devnet-7/56040-56049",
+                archive_dir: "blockchain_tests",
+            },
         }
     }
 }
@@ -73,15 +83,14 @@ pub struct StatelessValidatorFixture {
 /// Returns every fixture of `preset`, downloading and unpacking its archive into
 /// the local cache on first use. Fixtures are sorted by name for determinism.
 pub fn preset_fixtures(preset: FixturePreset) -> Vec<StatelessValidatorFixture> {
-    let mut fixtures = WalkDir::new(ensure_preset(preset))
-        .into_iter()
-        .par_bridge()
-        .filter_map(Result::ok)
-        .filter(is_fixture_file)
-        .flat_map(|entry| load_fixtures(entry.path()))
-        .collect::<Vec<_>>();
-    fixtures.sort_by(|a, b| a.name.cmp(&b.name));
-    fixtures
+    let source = preset.source();
+    archive_fixtures(source.dir, &source.url, source.archive_dir)
+}
+
+/// Returns every fixture of the archive at `url`, unpacking its `archive_dir`
+/// subdirectory into `<crate>/fixtures/<dir>` on first use.
+pub fn archive_fixtures(dir: &str, url: &str, archive_dir: &str) -> Vec<StatelessValidatorFixture> {
+    load_fixtures_from_dir(ensure_fixtures(dir, url, archive_dir))
 }
 
 /// Returns whether `entry` is a recognised fixture file, namely a `.json` or
@@ -95,9 +104,22 @@ fn is_fixture_file(entry: &DirEntry) -> bool {
             .is_some_and(|name| name.ends_with(".json") || name.ends_with(".json.zst"))
 }
 
+/// Returns every fixture under `dir`, sorted by name for determinism.
+fn load_fixtures_from_dir(dir: impl AsRef<Path>) -> Vec<StatelessValidatorFixture> {
+    let mut fixtures = WalkDir::new(dir)
+        .into_iter()
+        .par_bridge()
+        .filter_map(Result::ok)
+        .filter(is_fixture_file)
+        .flat_map(|entry| load_fixtures_from_file(entry.path()))
+        .collect::<Vec<_>>();
+    fixtures.sort_by(|a, b| a.name.cmp(&b.name));
+    fixtures
+}
+
 /// Loads every fixture from a single JSON file, transparently decompressing a
 /// `.zst` file and auto-detecting the EEST or RPC layout.
-pub fn load_fixtures(path: impl AsRef<Path>) -> Vec<StatelessValidatorFixture> {
+pub fn load_fixtures_from_file(path: impl AsRef<Path>) -> Vec<StatelessValidatorFixture> {
     let path = path.as_ref();
     let bytes = fs::read(path).unwrap();
     let bytes = if path.extension().is_some_and(|ext| ext == "zst") {
@@ -139,27 +161,27 @@ pub fn load_fixtures(path: impl AsRef<Path>) -> Vec<StatelessValidatorFixture> {
         .collect()
 }
 
-/// Ensures the cached fixture directory for `preset` exists, downloading and
-/// unpacking the release archive when missing. Returns the directory.
-fn ensure_preset(preset: FixturePreset) -> PathBuf {
+/// Ensures `dir` under `<crate>/fixtures/` holds the `archive_dir` subdirectory
+/// of the archive at `url`, downloading and unpacking it when missing. Returns
+/// the directory.
+fn ensure_fixtures(dir: &str, url: &str, archive_dir: &str) -> PathBuf {
     static LOCK: Mutex<()> = Mutex::new(());
     let _guard = LOCK.lock().unwrap_or_else(|err| err.into_inner());
 
-    let source = preset.source();
     let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("fixtures")
-        .join(source.dir);
+        .join(dir);
     if !dir.exists() {
-        download_and_unpack(&source, &dir);
+        download_and_unpack(url, archive_dir, &dir);
     }
     dir
 }
 
-/// Downloads the preset's release archive and moves its `archive_dir`
-/// subdirectory to `dir`, discarding the rest of the archive.
-fn download_and_unpack(source: &FixtureSource, dir: &Path) {
-    info!("Downloading fixture archive {}", source.url);
-    let bytes = reqwest::blocking::get(&source.url)
+/// Downloads the archive at `url` and moves its `archive_dir` subdirectory to
+/// `dir`, discarding the rest of the archive.
+fn download_and_unpack(url: &str, archive_dir: &str, dir: &Path) {
+    info!("Downloading fixture archive {url}");
+    let bytes = reqwest::blocking::get(url)
         .unwrap()
         .error_for_status()
         .unwrap()
@@ -168,11 +190,11 @@ fn download_and_unpack(source: &FixtureSource, dir: &Path) {
 
     fs::create_dir_all(dir.parent().unwrap()).unwrap();
     let tempdir = tempfile::tempdir_in(dir.parent().unwrap()).unwrap();
-    if source.url.ends_with(".tar.gz") {
+    if url.ends_with(".tar.gz") {
         Archive::new(flate2::read::GzDecoder::new(&bytes[..]))
             .unpack(tempdir.path())
             .unwrap();
-    } else if source.url.ends_with(".tar.zst") {
+    } else if url.ends_with(".tar.zst") {
         Archive::new(zstd::stream::read::Decoder::new(&bytes[..]).unwrap())
             .unpack(tempdir.path())
             .unwrap();
@@ -180,7 +202,7 @@ fn download_and_unpack(source: &FixtureSource, dir: &Path) {
         unreachable!()
     }
 
-    fs::rename(tempdir.path().join(source.archive_dir), dir).unwrap();
+    fs::rename(tempdir.path().join(archive_dir), dir).unwrap();
 }
 
 /// Wire shape of an RPC artifact produced by `witness-generator-spec-cli`.

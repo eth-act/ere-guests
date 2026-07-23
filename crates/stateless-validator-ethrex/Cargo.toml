@@ -43,6 +43,10 @@ paste.workspace = true
 ere-dockerized.workspace = true
 stateless-validator-test.workspace = true
 
+[[test]]
+name = "host_execution"
+required-features = ["host"]
+
 [features]
 # guest
 default = ["std"]
