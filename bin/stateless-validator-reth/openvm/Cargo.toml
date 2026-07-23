@@ -37,7 +37,7 @@ openvm-kzg = { git = "https://github.com/axiom-crypto/openvm-eth", rev = "aa8bbe
 aurora-engine-modexp = { version = "1.2.0", default-features = false }
 
 # ere
-ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "58ca85beaee2fa8acd31dbf33b90bb765aac9010", features = [
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "a25f1aed9664c3b63e73ef05360090a4c41da31b", features = [
     "std",
 ] }
 
