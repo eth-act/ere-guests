@@ -1,11 +1,13 @@
 //! Runs the latest blocks published in the devnet catalog through a stateless
-//! validator guest program in a zkVM, reporting the failures on stdout.
+//! validator guest program in a zkVM, reporting the failures.
 //!
 //! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built
 //! image as the executor.
 //!
 //! Run with env `OPENVM_RUST_TOOLCHAIN=nightly-2026-01-18` for OpenVM to
 //! compile Reth guest.
+
+use std::{fs, path::PathBuf};
 
 use clap::Parser;
 use ere_dockerized::zkVMKind;
@@ -20,7 +22,7 @@ use stateless_validator_test::{
 const DEVNET_FIXTURES_DIR: &str = "rpc-glamsterdam-devnet-7";
 
 /// CLI options for the devnet zkVM execution runner.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, Parser)]
 #[command(
     name = "zkvm_execution_devnet",
     about = "Run the latest devnet blocks through a stateless validator guest in a zkVM.",
@@ -37,13 +39,18 @@ struct Cli {
     /// Number of latest published block artifacts to run.
     #[arg(long, default_value_t = 100)]
     blocks: usize,
+    /// Path to write the execution failures to.
+    #[arg(long)]
+    output: Option<PathBuf>,
 }
 
 fn main() {
     let cli = Cli::parse();
     let fixtures = latest_devnet_fixtures(cli.blocks);
     let failures = run_stateless_validator_execution(cli.stateless_validator, cli.zkvm, fixtures);
-    print!("{}", ExecutionFailures(&failures));
+    if let Some(output) = cli.output {
+        fs::write(output, ExecutionFailures(&failures).to_string()).unwrap();
+    }
 }
 
 /// Returns the fixtures of the latest `count` block artifacts published in the
