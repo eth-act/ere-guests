@@ -12,7 +12,7 @@ fn main() {
 
     let version_impl = format!(
         r#"impl crate::StatelessValidatorKind {{
-    /// Returns the execution client version.
+    /// Returns the stateless validator version.
     pub const fn version(&self) -> &'static str {{
         match self {{
             Self::Ethrex => "{ethrex_version}",

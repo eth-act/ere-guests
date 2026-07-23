@@ -8,6 +8,7 @@ use ere_dockerized::{
     ProverResource, zkVMKind,
 };
 use serde::Deserialize;
+use sha2::{Digest, Sha256};
 use stateless_validator_catalog::StatelessValidatorKind;
 
 use crate::{
@@ -76,6 +77,7 @@ pub fn download_guest(
     struct GuestElf {
         zkvm: String,
         url: String,
+        sha256: String,
     }
 
     let registry = {
@@ -105,6 +107,8 @@ pub fn download_guest(
         .bytes()
         .unwrap()
         .to_vec();
+    let sha256 = const_hex::encode(Sha256::digest(&bytes));
+    assert_eq!(sha256, elf.sha256, "{guest} ELF sha256 mismatch");
     Elf(bytes)
 }
 
@@ -119,8 +123,8 @@ pub fn init_zkvm(zkvm_kind: zkVMKind, elf: Elf) -> DockerizedzkVM {
     .unwrap()
 }
 
-/// Builds the guest, then runs `fixtures` through it on `zkvm_kind`, returning
-/// the failures.
+/// Resolves the guest ELF, then runs `fixtures` through it on `zkvm_kind`,
+/// returning the failures.
 pub fn run_stateless_validator_execution(
     stateless_validator_kind: StatelessValidatorKind,
     zkvm_kind: zkVMKind,

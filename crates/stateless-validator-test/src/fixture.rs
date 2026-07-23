@@ -20,7 +20,7 @@ const EEST_FIXTURES_BASE_URL: &str =
 /// Release hosting the RPC-derived fixtures from `witness-generator-spec-cli`.
 const RPC_FIXTURES_BASE_URL: &str =
     "https://github.com/han0110/ere-guests/releases/download/rpc-fixtures@v0.2.0";
-/// R2 hosting the `glamsterdam-devnet-7` stateless inputs.
+/// R2 bucket hosting the `glamsterdam-devnet-7` fixtures and their batch index.
 pub const R2_FIXTURES_BASE_URL: &str =
     "https://pub-df22334654034ebab51bc096137a59d8.r2.dev/devnets/glamsterdam-devnet-7";
 

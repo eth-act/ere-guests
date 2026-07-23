@@ -12,12 +12,11 @@ use ere_dockerized::zkVMKind;
 use serde::Deserialize;
 use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
-    execution::{ExecutionFailures, init_tracing, zkvm::run_stateless_validator_execution},
+    execution::{ExecutionFailures, zkvm::run_stateless_validator_execution},
     fixture::{R2_FIXTURES_BASE_URL, StatelessValidatorFixture, archive_fixtures},
 };
-use tracing::info;
 
-/// Subdirectory under `<crate>/fixtures/` caching the devnet batch archives.
+/// Subdirectory under `<crate>/fixtures/` holding the unpacked devnet batches.
 const DEVNET_FIXTURES_DIR: &str = "rpc-glamsterdam-devnet-7";
 
 /// CLI options for the devnet zkVM execution runner.
@@ -42,7 +41,6 @@ struct Cli {
 
 fn main() {
     let cli = Cli::parse();
-    init_tracing();
     let fixtures = latest_devnet_fixtures(cli.blocks);
     let failures = run_stateless_validator_execution(cli.stateless_validator, cli.zkvm, fixtures);
     print!("{}", ExecutionFailures(&failures));
@@ -70,10 +68,10 @@ fn latest_devnet_fixtures(count: usize) -> Vec<StatelessValidatorFixture> {
 }
 
 /// Returns the latest batches of the devnet catalog covering at least `count`
-/// block artifacts, in ascending block order.
+/// block artifacts, keeping the order of `batches.jsonl`.
 fn latest_devnet_batches(count: usize) -> Vec<DevnetBatch> {
     let url = format!("{R2_FIXTURES_BASE_URL}/batches.jsonl");
-    info!("Downloading devnet batch index {url}");
+    println!("Downloading devnet batch index {url}");
     let index = reqwest::blocking::get(&url)
         .unwrap()
         .error_for_status()

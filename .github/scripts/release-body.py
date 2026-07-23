@@ -62,12 +62,15 @@ def run_command(
 
 
 def read_ere_version() -> str:
-    """Returns the Ere version pinned by git tag in the workspace Cargo.toml."""
+    """Returns the Ere version pinned by git tag or revision in the workspace Cargo.toml."""
     cargo_toml = (ROOT / "Cargo.toml").read_text()
-    match = re.search(r'eth-act/ere"[^}]*?\btag\s*=\s*"(v[^"]+)"', cargo_toml)
-    if not match:
-        raise RuntimeError('no `eth-act/ere` git `tag = "vX.Y.Z"` found in Cargo.toml')
-    return match.group(1)
+    tag = re.search(r'eth-act/ere"[^}]*?\btag\s*=\s*"v([^"]+)"', cargo_toml)
+    if tag:
+        return tag.group(1)
+    rev = re.search(r'eth-act/ere"[^}]*?\brev\s*=\s*"([0-9a-f]{7,40})"', cargo_toml)
+    if rev:
+        return rev.group(1)[:7]
+    raise RuntimeError("no `eth-act/ere` git `tag` or `rev` found in Cargo.toml")
 
 
 def read_catalog_versions(package: str, version_file: str) -> dict[str, str]:
