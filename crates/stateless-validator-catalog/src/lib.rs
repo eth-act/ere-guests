@@ -47,6 +47,8 @@ pub enum StatelessValidatorKind {
     Ethrex,
     /// Reth stateless validator.
     Reth,
+    /// Zesu stateless validator.
+    Zesu,
 }
 
 impl StatelessValidatorKind {
@@ -131,6 +133,7 @@ mod tests {
         for (ss, kind) in [
             (["ethrex", "Ethrex"], StatelessValidatorKind::Ethrex),
             (["reth", "Reth"], StatelessValidatorKind::Reth),
+            (["zesu", "Zesu"], StatelessValidatorKind::Zesu),
         ] {
             ss.iter().for_each(|s| assert_eq!(s.parse(), Ok(kind)));
             assert_eq!(kind.as_str(), ss[0]);
@@ -143,7 +146,8 @@ mod tests {
         );
         assert_eq!(
             ParseError::from("xxx").to_string(),
-            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth]".to_string()
+            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu]"
+                .to_string()
         );
     }
 }

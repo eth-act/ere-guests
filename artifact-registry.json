@@ -1,5 +1,15 @@
 {
-    "stateless_validator_elf": {},
-    "stateless_validator_static_library": {},
-    "zkvm_static_library": {}
+    "stateless_validators": [
+        {
+            "name": "zesu",
+            "version": "glamsterdam-devnet-7.2",
+            "elfs": [
+                {
+                    "zkvm": "zisk",
+                    "url": "https://github.com/Consensys/zesu-zkvm/releases/download/glamsterdam-devnet-7.2/stateless-validator-zesu-zisk.elf",
+                    "sha256": "7c30f33339eecf05f47c104b1d18e74d5ce4ed12c8596cf63002c33b25c6f81f"
+                }
+            ]
+        }
+    ]
 }

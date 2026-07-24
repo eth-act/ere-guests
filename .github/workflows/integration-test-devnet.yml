@@ -1,20 +1,15 @@
-name: Integration test
+name: Integration test devnet
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test_zkvm_execution:
+  test_zkvm_execution_devnet:
     name: ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}
     runs-on: ubuntu-latest
     strategy:
@@ -69,84 +64,33 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bin-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}-
 
-      - name: Set rayon threads
-        if: matrix.threads != ''
-        env:
-          RAYON_NUM_THREADS: ${{ matrix.threads }}
-        run: echo "RAYON_NUM_THREADS=$RAYON_NUM_THREADS" >> "$GITHUB_ENV"
-
       - name: Enable Ere profile
         if: matrix.ere_profile != ''
         env:
           ERE_PROFILE: ${{ matrix.ere_profile }}
         run: echo "ERE_PROFILE=$ERE_PROFILE" >> "$GITHUB_ENV"
 
-      - name: Test zkVM execution (RPC fixtures)
+      - name: Run zkVM execution of the latest devnet blocks
         env:
           RUST_LOG: info,ere_server=error
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
           OPENVM_RUST_TOOLCHAIN: nightly-2026-01-18
         run: |
-          cargo test --release --package stateless-validator-test --test zkvm_execution -- ${{ matrix.stateless_validator }}_${{ matrix.zkvm }}_rpc --test-threads=1
-
-      - name: Test zkVM execution (EEST fixtures)
-        env:
-          RUST_LOG: info,ere_server=error
-          ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
-          OPENVM_RUST_TOOLCHAIN: nightly-2026-01-18
-        run: |
-          cargo test --release --package stateless-validator-test --test zkvm_execution -- ${{ matrix.stateless_validator }}_${{ matrix.zkvm }}_eest --test-threads=1
+          cargo run --release --package stateless-validator-test --bin zkvm_execution_devnet -- \
+            --zkvm ${{ matrix.zkvm }} \
+            --stateless-validator ${{ matrix.stateless_validator }} \
+            --output failures.txt
+          {
+            echo "### ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}"
+            echo '```'
+            cat failures.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Chown
         if: matrix.external != true
         run: |
           sudo chown -R $(id -u):$(id -g) bin/stateless-validator-${{ matrix.stateless_validator }}/${{ matrix.zkvm }}/target || true
-
-      - name: Run sccache stat for check
-        shell: bash
-        run: ${SCCACHE_PATH} --show-stats
-
-  test_host_execution:
-    name: ${{ matrix.stateless_validator }} on host
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        stateless_validator:
-          - ethrex
-          - reth
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Setup sccache
-        uses: mozilla/sccache-action@v0.0.9
-
-      - name: Configure sccache
-        run: |
-          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
-
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-registry-
-
-      - name: Test host execution
-        env:
-          RUST_LOG: info
-          CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS: true
-        run: |
-          cargo test --release --package stateless-validator-${{ matrix.stateless_validator }} --features host --test host_execution -- --test-threads=1
 
       - name: Run sccache stat for check
         shell: bash

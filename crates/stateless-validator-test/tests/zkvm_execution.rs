@@ -7,18 +7,20 @@
 //! compile Reth guest.
 
 use ere_dockerized::zkVMKind;
+use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
-    execution::{ExecutionFailures, GuestKind, zkvm::run_stateless_validator_execution},
-    fixture::FixturePreset,
+    execution::{ExecutionFailures, zkvm::run_stateless_validator_execution},
+    fixture::{FixturePreset, preset_fixtures},
 };
 
 fn test_execution(
-    guest_kind: GuestKind,
+    stateless_validator: StatelessValidatorKind,
     zkvm_kind: zkVMKind,
     preset: FixturePreset,
     expected_failures: usize,
 ) {
-    let failures = run_stateless_validator_execution(guest_kind, zkvm_kind, preset);
+    let failures =
+        run_stateless_validator_execution(stateless_validator, zkvm_kind, preset_fixtures(preset));
     assert_eq!(
         failures.len(),
         expected_failures,
@@ -29,12 +31,12 @@ fn test_execution(
 }
 
 macro_rules! declare_test {
-    ($guest_kind:ident, $zkvm_kind:ident, $preset:ident, failures = $expected_failures:expr) => {
+    ($stateless_validator:ident, $zkvm_kind:ident, $preset:ident, failures = $expected_failures:expr) => {
         paste::paste! {
             #[test]
-            fn [<test_execution_ $guest_kind:lower _ $zkvm_kind:lower _ $preset:snake>]() {
+            fn [<test_execution_ $stateless_validator:lower _ $zkvm_kind:lower _ $preset:snake>]() {
                 test_execution(
-                    GuestKind::$guest_kind,
+                    StatelessValidatorKind::$stateless_validator,
                     zkVMKind::$zkvm_kind,
                     FixturePreset::$preset,
                     $expected_failures,
@@ -42,35 +44,45 @@ macro_rules! declare_test {
             }
         }
     };
-    ($guest_kind:ident, $zkvm_kind:ident, $preset:ident) => {
-        declare_test!($guest_kind, $zkvm_kind, $preset, failures = 0);
+    ($stateless_validator:ident, $zkvm_kind:ident, $preset:ident) => {
+        declare_test!($stateless_validator, $zkvm_kind, $preset, failures = 0);
     };
 }
 
 // Ethrex
 
 declare_test!(Ethrex, OpenVM, RpcBpo2);
+declare_test!(Ethrex, OpenVM, RpcGlamsterdamDevnet7);
 // Ethrex arithmetic overflow on 32-bit targets + OOM.
 declare_test!(Ethrex, OpenVM, EestGlamsterdamDevnet7, failures = 5);
 declare_test!(Ethrex, SP1, RpcBpo2);
+declare_test!(Ethrex, SP1, RpcGlamsterdamDevnet7);
 declare_test!(Ethrex, SP1, EestGlamsterdamDevnet7);
 declare_test!(Ethrex, Zisk, RpcBpo2);
+declare_test!(Ethrex, Zisk, RpcGlamsterdamDevnet7);
 // Ethrex OOM + ZisK `zkvm-interface` impl bug.
 declare_test!(Ethrex, Zisk, EestGlamsterdamDevnet7, failures = 26);
 
 // Reth
 
 declare_test!(Reth, OpenVM, RpcBpo2);
+// Reth divergences (in-block created-code resolution from EIP-8025).
+declare_test!(Reth, OpenVM, RpcGlamsterdamDevnet7, failures = 1);
 // Reth divergences.
 declare_test!(Reth, OpenVM, EestGlamsterdamDevnet7, failures = 17);
 declare_test!(Reth, SP1, RpcBpo2);
+// Reth divergences (in-block created-code resolution from EIP-8025).
+declare_test!(Reth, SP1, RpcGlamsterdamDevnet7, failures = 1);
 // Reth divergences.
 declare_test!(Reth, SP1, EestGlamsterdamDevnet7, failures = 17);
 declare_test!(Reth, Zisk, RpcBpo2);
+// Reth divergences (in-block created-code resolution from EIP-8025).
+declare_test!(Reth, Zisk, RpcGlamsterdamDevnet7, failures = 1);
 // Reth divergences + ZisK `zkvm-interface` impl bug.
 declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 39);
 
 // Zesu
 
-// ZisK `zkvm-interface` impl bug + Zesu alignment issue.
-// declare_test!(Zesu, Zisk, EestGlamsterdamDevnet5, failures = 121);
+declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet7);
+// ZisK `zkvm-interface` impl bug.
+declare_test!(Zesu, Zisk, EestGlamsterdamDevnet7, failures = 22);

@@ -17,28 +17,6 @@ use crate::fixture::StatelessValidatorFixture;
 pub mod host;
 pub mod zkvm;
 
-/// A stateless validator guest program.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GuestKind {
-    /// The ethrex guest.
-    Ethrex,
-    /// The reth guest.
-    Reth,
-    /// The zesu guest.
-    Zesu,
-}
-
-impl GuestKind {
-    /// Returns the guest name in lower-case.
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Ethrex => "ethrex",
-            Self::Reth => "reth",
-            Self::Zesu => "zesu",
-        }
-    }
-}
-
 /// A fixture that failed to execute or match its expected output.
 #[derive(Debug, Clone)]
 pub struct ExecutionFailure {
