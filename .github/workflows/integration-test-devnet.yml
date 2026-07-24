@@ -95,3 +95,57 @@ jobs:
       - name: Run sccache stat for check
         shell: bash
         run: ${SCCACHE_PATH} --show-stats
+
+  test_host_execution_devnet:
+    name: ${{ matrix.stateless_validator }} on host
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stateless_validator:
+          - ethrex
+          - reth
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup sccache
+        uses: mozilla/sccache-action@v0.0.9
+
+      - name: Configure sccache
+        run: |
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Run host execution of the latest devnet blocks
+        env:
+          RUST_LOG: info
+          CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS: true
+        run: |
+          cargo run --release --package stateless-validator-test --bin zkvm_execution_devnet -- \
+            --stateless-validator ${{ matrix.stateless_validator }} \
+            --output failures.txt
+          {
+            echo "### ${{ matrix.stateless_validator }} on host"
+            echo '```'
+            cat failures.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run sccache stat for check
+        shell: bash
+        run: ${SCCACHE_PATH} --show-stats
