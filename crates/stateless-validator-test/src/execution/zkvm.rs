@@ -125,7 +125,7 @@ pub fn init_zkvm(zkvm_kind: zkVMKind, elf: Elf) -> DockerizedzkVM {
 
 /// Resolves the guest ELF, then runs `fixtures` through it on `zkvm_kind`,
 /// returning the failures.
-pub fn run_stateless_validator_execution(
+pub fn run_zkvm_execution(
     stateless_validator_kind: StatelessValidatorKind,
     zkvm_kind: zkVMKind,
     fixtures: impl IntoIterator<Item = StatelessValidatorFixture>,

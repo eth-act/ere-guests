@@ -3,10 +3,11 @@
 use std::io::{self, Write};
 
 use ere_platform_core::Platform;
+use stateless_validator_catalog::StatelessValidatorKind;
 
 use crate::{
-    execution::{ExecutionFailures, run_execution},
-    fixture::{FixturePreset, preset_fixtures},
+    execution::{ExecutionFailure, ExecutionFailures, run_execution},
+    fixture::{FixturePreset, StatelessValidatorFixture, preset_fixtures},
 };
 
 /// A platform for host-side guest execution.
@@ -30,13 +31,34 @@ impl Platform for HostPlatform {
     }
 }
 
-/// Test execution on host.
+/// Resolves the native guest entrypoint for `stateless_validator_kind`, then runs `fixtures`
+/// through it on the host, returning the failures.
+pub fn run_host_execution(
+    stateless_validator_kind: StatelessValidatorKind,
+    fixtures: impl IntoIterator<Item = StatelessValidatorFixture>,
+) -> Vec<ExecutionFailure> {
+    let execute: fn(&[u8]) -> Vec<u8> = match stateless_validator_kind {
+        StatelessValidatorKind::Ethrex => {
+            stateless_validator_ethrex::guest::run_stateless_guest::<HostPlatform>
+        }
+        StatelessValidatorKind::Reth => {
+            stateless_validator_reth::guest::run_stateless_guest::<HostPlatform>
+        }
+        StatelessValidatorKind::Zesu => {
+            panic!("host execution is not supported for the zesu guest")
+        }
+    };
+    run_execution(fixtures, &|input| Ok(execute(&input)))
+}
+
+/// Runs `preset` on the host through the `stateless_validator_kind` guest, asserting the failure
+/// count matches `expected_failures`.
 pub fn test_host_execution(
+    stateless_validator_kind: StatelessValidatorKind,
     preset: FixturePreset,
-    execute: fn(&[u8]) -> Vec<u8>,
     expected_failures: usize,
 ) {
-    let failures = run_execution(preset_fixtures(preset), &|input| Ok(execute(&input)));
+    let failures = run_host_execution(stateless_validator_kind, preset_fixtures(preset));
     assert_eq!(
         failures.len(),
         expected_failures,
@@ -46,26 +68,22 @@ pub fn test_host_execution(
     );
 }
 
-/// Declares a host execution test for a fixture preset and guest entrypoint.
+/// Declares a host execution test for a guest kind and fixture preset.
 #[macro_export]
 macro_rules! declare_test_host_execution {
-    ($preset:ident, $execute:ident, failures = $expected_failures:expr) => {
+    ($kind:ident, $preset:ident, failures = $expected_failures:expr) => {
         paste::paste! {
             #[test]
             fn [<test_host_execution_ $preset:snake>]() {
-                use $crate::{
-                    execution::host::{HostPlatform, test_host_execution},
-                    fixture::FixturePreset,
-                };
-                test_host_execution(
-                    FixturePreset::$preset,
-                    $execute::<HostPlatform>,
+                $crate::execution::host::test_host_execution(
+                    $crate::StatelessValidatorKind::$kind,
+                    $crate::fixture::FixturePreset::$preset,
                     $expected_failures,
                 );
             }
         }
     };
-    ($preset:ident, $execute:ident) => {
-        $crate::declare_test_host_execution!($preset, $execute, failures = 0);
+    ($kind:ident, $preset:ident) => {
+        $crate::declare_test_host_execution!($kind, $preset, failures = 0);
     };
 }
