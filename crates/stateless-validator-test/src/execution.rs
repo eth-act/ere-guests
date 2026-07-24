@@ -41,17 +41,22 @@ impl Display for ExecutionFailures<'_> {
     }
 }
 
-/// Runs `execute` over every fixture in parallel, returning the failures.
-pub fn run_execution(
-    fixtures: impl IntoIterator<Item = StatelessValidatorFixture>,
-    execute: &(impl Fn(Vec<u8>) -> anyhow::Result<Vec<u8>> + Sync),
-) -> Vec<ExecutionFailure> {
+/// Installs a global tracing subscriber.
+pub fn init_tracing() {
     static INIT_TRACING: Once = Once::new();
     INIT_TRACING.call_once(|| {
         let _ = tracing_subscriber::fmt()
             .with_env_filter(EnvFilter::from_default_env())
             .try_init();
     });
+}
+
+/// Runs `execute` over every fixture in parallel, returning the failures.
+pub fn run_execution(
+    fixtures: impl IntoIterator<Item = StatelessValidatorFixture>,
+    execute: &(impl Fn(Vec<u8>) -> anyhow::Result<Vec<u8>> + Sync),
+) -> Vec<ExecutionFailure> {
+    init_tracing();
 
     let fixtures = fixtures.into_iter().collect::<Vec<_>>();
     let total = fixtures.len();

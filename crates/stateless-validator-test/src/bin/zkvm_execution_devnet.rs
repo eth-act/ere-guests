@@ -1,5 +1,6 @@
 //! Runs the latest blocks published in the devnet catalog through a stateless
-//! validator guest program in a zkVM, reporting the failures.
+//! validator guest program, in a zkVM or, when no zkVM is selected, natively on
+//! the host, reporting the failures.
 //!
 //! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built
 //! image as the executor.
@@ -14,9 +15,12 @@ use ere_dockerized::zkVMKind;
 use serde::Deserialize;
 use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
-    execution::{ExecutionFailures, zkvm::run_stateless_validator_execution},
+    execution::{
+        ExecutionFailures, host::run_host_execution, init_tracing, zkvm::run_zkvm_execution,
+    },
     fixture::{R2_FIXTURES_BASE_URL, StatelessValidatorFixture, archive_fixtures},
 };
+use tracing::info;
 
 /// Subdirectory under `<crate>/fixtures/` holding the unpacked devnet batches.
 const DEVNET_FIXTURES_DIR: &str = "rpc-glamsterdam-devnet-7";
@@ -25,14 +29,14 @@ const DEVNET_FIXTURES_DIR: &str = "rpc-glamsterdam-devnet-7";
 #[derive(Debug, Clone, PartialEq, Eq, Parser)]
 #[command(
     name = "zkvm_execution_devnet",
-    about = "Run the latest devnet blocks through a stateless validator guest in a zkVM.",
+    about = "Run the latest devnet blocks through a stateless validator guest in a zkVM or on host.",
     long_about = None,
     arg_required_else_help = true
 )]
 struct Cli {
-    /// zkVM to execute the guest on.
+    /// zkVM to execute the guest on, omit to execute the guest natively on host.
     #[arg(long)]
-    zkvm: zkVMKind,
+    zkvm: Option<zkVMKind>,
     /// Stateless validator guest to execute.
     #[arg(long)]
     stateless_validator: StatelessValidatorKind,
@@ -46,8 +50,18 @@ struct Cli {
 
 fn main() {
     let cli = Cli::parse();
+    init_tracing();
     let fixtures = latest_devnet_fixtures(cli.blocks);
-    let failures = run_stateless_validator_execution(cli.stateless_validator, cli.zkvm, fixtures);
+    info!(
+        "Running {} blocks from {} to {}",
+        fixtures.len(),
+        fixtures.first().unwrap().name,
+        fixtures.last().unwrap().name,
+    );
+    let failures = match cli.zkvm {
+        Some(zkvm) => run_zkvm_execution(cli.stateless_validator, zkvm, fixtures),
+        None => run_host_execution(cli.stateless_validator, fixtures),
+    };
     if let Some(output) = cli.output {
         fs::write(output, ExecutionFailures(&failures).to_string()).unwrap();
     }

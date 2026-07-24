@@ -36,6 +36,8 @@ ere-platform-core.workspace = true
 # local
 stateless-validator-catalog.workspace = true
 stateless-validator-common = { workspace = true, features = ["host"] }
+stateless-validator-ethrex = { workspace = true, features = ["host"] }
+stateless-validator-reth = { workspace = true, features = ["host"] }
 
 [dev-dependencies]
 paste.workspace = true

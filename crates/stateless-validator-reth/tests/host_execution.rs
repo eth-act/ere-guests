@@ -1,12 +1,11 @@
 //! Execution tests for `stateless-validator-reth` guest program on host
 
-use stateless_validator_reth::guest::run_stateless_guest;
 use stateless_validator_test::declare_test_host_execution;
 
-declare_test_host_execution!(RpcBpo2, run_stateless_guest);
+declare_test_host_execution!(Reth, RpcBpo2);
 // NOTE:
 // - 1 EIP-8025 (in-block created-code resolution)
-declare_test_host_execution!(RpcGlamsterdamDevnet7, run_stateless_guest, failures = 1);
+declare_test_host_execution!(Reth, RpcGlamsterdamDevnet7, failures = 1);
 // NOTE:
 // - 12 EIP-7610
 //    - test_init_collision_create_tx
@@ -22,4 +21,4 @@ declare_test_host_execution!(RpcGlamsterdamDevnet7, run_stateless_guest, failure
 //    - test_witness_codes_create_same_hash_then_read
 // - 1 EIP-8037 (state creation gas for set code)
 //    - test_same_tx_clear_then_reset_pre_delegated
-declare_test_host_execution!(EestGlamsterdamDevnet7, run_stateless_guest, failures = 17);
+declare_test_host_execution!(Reth, EestGlamsterdamDevnet7, failures = 17);

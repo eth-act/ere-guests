@@ -9,7 +9,7 @@
 use ere_dockerized::zkVMKind;
 use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
-    execution::{ExecutionFailures, zkvm::run_stateless_validator_execution},
+    execution::{ExecutionFailures, zkvm::run_zkvm_execution},
     fixture::{FixturePreset, preset_fixtures},
 };
 
@@ -19,8 +19,7 @@ fn test_execution(
     preset: FixturePreset,
     expected_failures: usize,
 ) {
-    let failures =
-        run_stateless_validator_execution(stateless_validator, zkvm_kind, preset_fixtures(preset));
+    let failures = run_zkvm_execution(stateless_validator, zkvm_kind, preset_fixtures(preset));
     assert_eq!(
         failures.len(),
         expected_failures,

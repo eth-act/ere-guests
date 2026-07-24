@@ -5875,6 +5875,8 @@ dependencies = [
  "sha2",
  "stateless-validator-catalog",
  "stateless-validator-common",
+ "stateless-validator-ethrex",
+ "stateless-validator-reth",
  "tar",
  "tempfile",
  "tracing",
