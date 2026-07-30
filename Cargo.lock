@@ -1623,8 +1623,8 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-catalog"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "ere-util-build",
  "serde",
@@ -1633,21 +1633,21 @@ dependencies = [
 
 [[package]]
 name = "ere-codec"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 
 [[package]]
 name = "ere-compiler-core"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "ere-dockerized"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "anyhow",
  "ere-catalog",
@@ -1663,13 +1663,13 @@ dependencies = [
 
 [[package]]
 name = "ere-platform-core"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 
 [[package]]
 name = "ere-prover-core"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "anyhow",
  "auto_impl",
@@ -1685,8 +1685,8 @@ dependencies = [
 
 [[package]]
 name = "ere-server-api"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "prost",
  "serde",
@@ -1695,8 +1695,8 @@ dependencies = [
 
 [[package]]
 name = "ere-server-client"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "bincode 2.0.1",
  "ere-prover-core",
@@ -1707,24 +1707,24 @@ dependencies = [
 
 [[package]]
 name = "ere-util-build"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "cargo_metadata",
 ]
 
 [[package]]
 name = "ere-util-tokio"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "tokio",
 ]
 
 [[package]]
 name = "ere-verifier-core"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "auto_impl",
  "ere-codec",
@@ -1770,8 +1770,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-common"
-version = "21.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
+version = "23.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v23.0.0#d906f10655f0ae746af46abef38fb212b48acaca"
 dependencies = [
  "bytes",
  "crc32fast",
@@ -1802,8 +1802,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-crypto"
-version = "21.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
+version = "23.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v23.0.0#d906f10655f0ae746af46abef38fb212b48acaca"
 dependencies = [
  "ark-bn254",
  "ark-ec",
@@ -1825,8 +1825,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-guest-program"
-version = "21.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
+version = "23.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v23.0.0#d906f10655f0ae746af46abef38fb212b48acaca"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -1848,8 +1848,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-l2-common"
-version = "21.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
+version = "23.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v23.0.0#d906f10655f0ae746af46abef38fb212b48acaca"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -1866,8 +1866,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-levm"
-version = "21.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
+version = "23.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v23.0.0#d906f10655f0ae746af46abef38fb212b48acaca"
 dependencies = [
  "bytes",
  "derive_more 1.0.0",
@@ -1883,8 +1883,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-rlp"
-version = "21.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
+version = "23.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v23.0.0#d906f10655f0ae746af46abef38fb212b48acaca"
 dependencies = [
  "bytes",
  "ethereum-types",
@@ -1893,8 +1893,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-trie"
-version = "21.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
+version = "23.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v23.0.0#d906f10655f0ae746af46abef38fb212b48acaca"
 dependencies = [
  "anyhow",
  "bytes",
@@ -1912,8 +1912,8 @@ dependencies = [
 
 [[package]]
 name = "ethrex-vm"
-version = "21.0.0"
-source = "git+https://github.com/lambdaclass/ethrex.git?rev=e8860d2918921603afa67f62687e9a39f197367e#e8860d2918921603afa67f62687e9a39f197367e"
+version = "23.0.0"
+source = "git+https://github.com/lambdaclass/ethrex.git?tag=v23.0.0#d906f10655f0ae746af46abef38fb212b48acaca"
 dependencies = [
  "bytes",
  "derive_more 1.0.0",
