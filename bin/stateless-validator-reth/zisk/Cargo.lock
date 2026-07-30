@@ -1140,13 +1140,13 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-platform-core"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 
 [[package]]
 name = "ere-platform-zisk"
-version = "0.13.0"
-source = "git+https://github.com/eth-act/ere?rev=a25f1aed9664c3b63e73ef05360090a4c41da31b#a25f1aed9664c3b63e73ef05360090a4c41da31b"
+version = "0.14.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.14.0#2ef473c4a6ba5aefb29dc6718b9deeef5119b8bb"
 dependencies = [
  "ere-platform-core",
  "ziskos",

@@ -2,12 +2,14 @@
     "stateless_validators": [
         {
             "name": "zesu",
-            "version": "glamsterdam-devnet-7.2",
-            "elfs": [
+            "version": "glamsterdam-devnet-7.2-2026-07-29",
+            "artifacts": [
                 {
                     "zkvm": "zisk",
-                    "url": "https://github.com/Consensys/zesu-zkvm/releases/download/glamsterdam-devnet-7.2/stateless-validator-zesu-zisk.elf",
-                    "sha256": "7c30f33339eecf05f47c104b1d18e74d5ce4ed12c8596cf63002c33b25c6f81f"
+                    "elf_url": "https://github.com/Consensys/zesu-zkvm/releases/download/glamsterdam-devnet-7.2-2026-07-29/stateless-validator-zesu-zisk-1.0.0-alpha.elf",
+                    "elf_sha256": "088a71b8ff69630de88b970a6a633911c2ecaaeb4be7cb9ca5b356f6e622f89d",
+                    "vk_url": "https://github.com/Consensys/zesu-zkvm/releases/download/glamsterdam-devnet-7.2-2026-07-29/stateless-validator-zesu-zisk-1.0.0-alpha.vk",
+                    "vk_sha256": "8566ed4034e5dbb540e6e7c0316decd93705d0f39444c9dbcb722b9ed0064d55"
                 }
             ]
         }

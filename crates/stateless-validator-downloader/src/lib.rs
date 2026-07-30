@@ -3,11 +3,13 @@
 use std::{collections::BTreeMap, io::ErrorKind};
 
 use anyhow::{Context, ensure};
+use ere_catalog::zkVMKind;
 use reqwest::{
     Client, ClientBuilder, IntoUrl, RequestBuilder,
     header::{ACCEPT, HeaderMap, HeaderValue},
 };
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use stateless_validator_catalog::StatelessValidatorKind;
 use tempfile::tempdir;
 use tokio::{fs, process::Command};
 
@@ -22,7 +24,7 @@ pub struct CompiledGuest {
     /// Raw Program VK bytes.
     pub program_vk: Vec<u8>,
     /// Raw ELF bytes of a ZisK guest compiled with feature `cycle-scope` enabled. `Some` only when
-    /// a `{guest_name}-profiling.elf` artifact is released.
+    /// a `-profiling.elf` artifact is released for the guest.
     pub profiling_elf: Option<Vec<u8>>,
 }
 
@@ -64,12 +66,22 @@ impl Downloader {
         })
     }
 
-    /// Downloads the compiled guest by name.
-    pub async fn download(&self, guest_name: &str) -> anyhow::Result<CompiledGuest> {
+    /// Downloads the compiled guest of `stateless_validator_kind` on `zkvm_kind`.
+    pub async fn download(
+        &self,
+        stateless_validator_kind: StatelessValidatorKind,
+        zkvm_kind: zkVMKind,
+    ) -> anyhow::Result<CompiledGuest> {
+        let artifact_name = format!(
+            "stateless-validator-{stateless_validator_kind}-{zkvm_kind}-{}",
+            zkvm_kind.sdk_version()
+        );
         match &self.source {
-            DownloadSource::Tag { assets } => self.download_from_release(assets, guest_name).await,
+            DownloadSource::Tag { assets } => {
+                self.download_from_release(assets, &artifact_name).await
+            }
             DownloadSource::Rev { artifacts } => {
-                self.download_from_action(artifacts, guest_name).await
+                self.download_from_action(artifacts, &artifact_name).await
             }
         }
     }
@@ -77,19 +89,20 @@ impl Downloader {
     async fn download_from_release(
         &self,
         assets: &BTreeMap<String, String>,
-        guest_name: &str,
+        artifact_name: &str,
     ) -> anyhow::Result<CompiledGuest> {
         let elf_url = assets
-            .get(&format!("{guest_name}.elf"))
-            .with_context(|| format!("ELF not found: {guest_name}.elf"))?;
+            .get(&format!("{artifact_name}.elf"))
+            .with_context(|| format!("ELF not found: {artifact_name}.elf"))?;
         let program_vk_url = assets
-            .get(&format!("{guest_name}.vk"))
-            .with_context(|| format!("Program VK not found: {guest_name}.vk"))?;
+            .get(&format!("{artifact_name}.vk"))
+            .with_context(|| format!("Program VK not found: {artifact_name}.vk"))?;
 
         let elf = get_bytes(&self.client, elf_url).await?;
         let program_vk = get_bytes(&self.client, program_vk_url).await?;
 
-        let profiling_elf = if let Some(url) = assets.get(&format!("{guest_name}-profiling.elf")) {
+        let profiling_elf = if let Some(url) = assets.get(&format!("{artifact_name}-profiling.elf"))
+        {
             Some(get_bytes(&self.client, url).await?)
         } else {
             None
@@ -105,11 +118,11 @@ impl Downloader {
     async fn download_from_action(
         &self,
         artifacts: &BTreeMap<String, String>,
-        guest_name: &str,
+        artifact_name: &str,
     ) -> anyhow::Result<CompiledGuest> {
         let artifact_url = artifacts
-            .get(guest_name)
-            .with_context(|| format!("Guest not found: {guest_name}"))?;
+            .get(artifact_name)
+            .with_context(|| format!("Guest not found: {artifact_name}"))?;
 
         let tempdir = tempdir().context("Failed to create temp dir")?;
         let zip_path = tempdir.path().join("artifact.zip");
@@ -127,9 +140,11 @@ impl Downloader {
             .context("Failed to run unzip")?;
         ensure!(output.status.success(), "Unzip exited with non-zero status");
 
-        let elf_path = tempdir.path().join(format!("{guest_name}.elf"));
-        let program_vk_path = tempdir.path().join(format!("{guest_name}.vk"));
-        let profiling_elf_path = tempdir.path().join(format!("{guest_name}-profiling.elf"));
+        let elf_path = tempdir.path().join(format!("{artifact_name}.elf"));
+        let program_vk_path = tempdir.path().join(format!("{artifact_name}.vk"));
+        let profiling_elf_path = tempdir
+            .path()
+            .join(format!("{artifact_name}-profiling.elf"));
         let elf = fs::read(&elf_path)
             .await
             .with_context(|| format!("Failed to read ELF: {}", elf_path.display()))?;
@@ -289,13 +304,17 @@ async fn send(builder: RequestBuilder) -> anyhow::Result<reqwest::Response> {
 
 #[cfg(test)]
 mod tests {
+    use ere_catalog::zkVMKind;
+    use stateless_validator_catalog::StatelessValidatorKind;
+
     use crate::Downloader;
 
     #[tokio::test]
+    #[ignore = "no tag to download yet"]
     async fn download_from_tag() -> anyhow::Result<()> {
-        let guest = Downloader::from_tag("v0.11.0")
+        let guest = Downloader::from_tag("v0.14.0")
             .await?
-            .download("empty-zisk")
+            .download(StatelessValidatorKind::Reth, zkVMKind::Zisk)
             .await?;
         assert!(!guest.elf.is_empty());
         assert!(!guest.program_vk.is_empty());
@@ -304,14 +323,15 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "no commit to download yet"]
     async fn download_from_commit() -> anyhow::Result<()> {
         let Ok(github_token) = std::env::var("GITHUB_TOKEN") else {
             return Ok(());
         };
 
-        let guest = Downloader::from_commit("f245755", &github_token)
+        let guest = Downloader::from_commit("9d3d4b9", &github_token)
             .await?
-            .download("empty-zisk")
+            .download(StatelessValidatorKind::Reth, zkVMKind::Zisk)
             .await?;
         assert!(!guest.elf.is_empty());
         assert!(!guest.program_vk.is_empty());

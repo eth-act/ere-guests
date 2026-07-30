@@ -33,7 +33,7 @@ pub fn resolve_guest(stateless_validator_kind: StatelessValidatorKind, zkvm_kind
             StatelessValidatorKind::Ethrex | StatelessValidatorKind::Reth => {
                 compile_guest(stateless_validator_kind, zkvm_kind)
             }
-            StatelessValidatorKind::Zesu => download_guest(stateless_validator_kind, zkvm_kind),
+            StatelessValidatorKind::Zesu => download_elf(stateless_validator_kind, zkvm_kind),
         })
         .clone()
 }
@@ -57,59 +57,90 @@ pub fn compile_guest(stateless_validator_kind: StatelessValidatorKind, zkvm_kind
     compiler.compile(&dir, &[]).unwrap()
 }
 
-/// Downloads the prebuilt guest ELF listed in `artifact-registry.json`.
-pub fn download_guest(
+/// Wire shape of `artifact-registry.json`.
+#[derive(Deserialize)]
+struct ArtifactRegistry {
+    stateless_validators: Vec<StatelessValidator>,
+}
+
+#[derive(Deserialize)]
+struct StatelessValidator {
+    name: String,
+    artifacts: Vec<StatelessValidatorArtifact>,
+}
+
+#[derive(Deserialize)]
+struct StatelessValidatorArtifact {
+    zkvm: String,
+    elf_url: String,
+    elf_sha256: String,
+    vk_url: Option<String>,
+    vk_sha256: Option<String>,
+}
+
+/// Returns the `artifact-registry.json` entry of the guest.
+fn registry_artifact(
     stateless_validator_kind: StatelessValidatorKind,
     zkvm_kind: zkVMKind,
-) -> Elf {
-    #[derive(Deserialize)]
-    struct ArtifactRegistry {
-        stateless_validators: Vec<StatelessValidator>,
-    }
-
-    #[derive(Deserialize)]
-    struct StatelessValidator {
-        name: String,
-        elfs: Vec<GuestElf>,
-    }
-
-    #[derive(Deserialize)]
-    struct GuestElf {
-        zkvm: String,
-        url: String,
-        sha256: String,
-    }
-
-    let registry = {
-        let json = fs::read(workspace().join("artifact-registry.json")).unwrap();
-        serde_json::from_slice::<ArtifactRegistry>(&json).unwrap()
-    };
-    let guest = format!(
-        "{}-{}",
-        stateless_validator_kind.as_str(),
-        zkvm_kind.as_str()
-    );
-    let elf = registry
+) -> StatelessValidatorArtifact {
+    let json = fs::read(workspace().join("artifact-registry.json")).unwrap();
+    serde_json::from_slice::<ArtifactRegistry>(&json)
+        .unwrap()
         .stateless_validators
-        .iter()
+        .into_iter()
         .find(|validator| validator.name == stateless_validator_kind.as_str())
         .and_then(|validator| {
             validator
-                .elfs
-                .iter()
-                .find(|elf| elf.zkvm == zkvm_kind.as_str())
+                .artifacts
+                .into_iter()
+                .find(|artifact| artifact.zkvm == zkvm_kind.as_str())
         })
-        .unwrap_or_else(|| panic!("{guest} not found in artifact-registry.json"));
-    let bytes = reqwest::blocking::get(&elf.url)
+        .unwrap_or_else(|| {
+            panic!(
+                "{}-{} not found in artifact-registry.json",
+                stateless_validator_kind.as_str(),
+                zkvm_kind.as_str()
+            )
+        })
+}
+
+/// Downloads the artifact at `url`, asserting its sha256 matches `sha256`.
+fn download_artifact(url: &str, sha256: &str) -> Vec<u8> {
+    let bytes = reqwest::blocking::get(url)
         .unwrap()
         .error_for_status()
         .unwrap()
         .bytes()
         .unwrap()
         .to_vec();
-    let sha256 = const_hex::encode(Sha256::digest(&bytes));
-    assert_eq!(sha256, elf.sha256, "{guest} ELF sha256 mismatch");
-    Elf(bytes)
+    assert_eq!(
+        const_hex::encode(Sha256::digest(&bytes)),
+        sha256,
+        "sha256 mismatch of {url}"
+    );
+    bytes
+}
+
+/// Downloads the ELF listed in `artifact-registry.json`.
+pub fn download_elf(stateless_validator_kind: StatelessValidatorKind, zkvm_kind: zkVMKind) -> Elf {
+    let artifact = registry_artifact(stateless_validator_kind, zkvm_kind);
+    Elf(download_artifact(&artifact.elf_url, &artifact.elf_sha256))
+}
+
+/// Downloads the VK listed in `artifact-registry.json`.
+pub fn download_vk(
+    stateless_validator_kind: StatelessValidatorKind,
+    zkvm_kind: zkVMKind,
+) -> Vec<u8> {
+    let artifact = registry_artifact(stateless_validator_kind, zkvm_kind);
+    let (url, sha256) = artifact.vk_url.zip(artifact.vk_sha256).unwrap_or_else(|| {
+        panic!(
+            "{}-{} lists no VK in artifact-registry.json",
+            stateless_validator_kind.as_str(),
+            zkvm_kind.as_str()
+        )
+    });
+    download_artifact(&url, &sha256)
 }
 
 /// Initializes a CPU-backed zkVM for `elf`.

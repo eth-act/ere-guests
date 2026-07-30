@@ -1,5 +1,5 @@
 [package]
-name = "downloader"
+name = "stateless-validator-downloader"
 edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
@@ -14,3 +14,9 @@ reqwest = { workspace = true, features = ["json"] }
 serde = { workspace = true, features = ["derive"] }
 tempfile.workspace = true
 tokio = { workspace = true, features = ["fs", "process", "rt-multi-thread", "macros"] }
+
+# ere
+ere-catalog.workspace = true
+
+# local
+stateless-validator-catalog.workspace = true

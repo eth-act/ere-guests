@@ -29,7 +29,7 @@ TABLE_HEADER = (
 class Guest:
     """A guest program keyed by stateless validator and zkVM, with display versions."""
 
-    stateless_validator: str
+    name: str
     version: str
     zkvm: str
     zkvm_version: str
@@ -111,10 +111,15 @@ def read_elf_word_size(elf_path: Path) -> int:
     raise RuntimeError(f"unknown ELF class {ei_class} in {elf_path}")
 
 
+def artifact_name(guest: Guest, extension: str) -> str:
+    """Returns the release asset name of `guest` for `extension`."""
+    return f"{GUEST_PREFIX}{guest.name}-{guest.zkvm}-{guest.zkvm_version}.{extension}"
+
+
 def render_row(guest: Guest, artifacts_dir: Path, release_url: str) -> str | None:
     """Renders `guest` as a Markdown table row, or None when its ELF or VK is absent."""
-    elf = f"{GUEST_PREFIX}{guest.stateless_validator}-{guest.zkvm}.elf"
-    vk = f"{GUEST_PREFIX}{guest.stateless_validator}-{guest.zkvm}.vk"
+    elf = artifact_name(guest, "elf")
+    vk = artifact_name(guest, "vk")
     elf_path = artifacts_dir / elf
     vk_path = artifacts_dir / vk
     if not (elf_path.is_file() and vk_path.is_file()):
@@ -125,7 +130,7 @@ def render_row(guest: Guest, artifacts_dir: Path, release_url: str) -> str | Non
     if guest.source_url:
         elf_cell += f" / [Source]({guest.source_url})"
     return (
-        f"| `{guest.stateless_validator}` | `{guest.version}` "
+        f"| `{guest.name}` | `{guest.version}` "
         f"| `{guest.zkvm}` | `{guest.zkvm_version}` "
         f"| `{target}` | {elf_cell} | [Link]({release_url}/{vk}) |"
     )
@@ -148,14 +153,14 @@ def republished_guests(
     registry = json.loads(artifact_registry.read_text())["stateless_validators"]
     guests = []
     for validator in sorted(registry, key=lambda entry: entry["name"]):
-        for elf in sorted(validator["elfs"], key=lambda entry: entry["zkvm"]):
+        for artifact in sorted(validator["artifacts"], key=lambda entry: entry["zkvm"]):
             guests.append(
                 Guest(
                     validator["name"],
                     validator["version"],
-                    elf["zkvm"],
-                    zkvm_versions[elf["zkvm"]],
-                    elf["url"],
+                    artifact["zkvm"],
+                    zkvm_versions[artifact["zkvm"]],
+                    artifact["elf_url"],
                 )
             )
     return guests
@@ -184,7 +189,7 @@ def republished_rows(
         row = render_row(guest, artifacts_dir, release_url)
         if row is None:
             raise RuntimeError(
-                f"republished guest {GUEST_PREFIX}{guest.stateless_validator}-{guest.zkvm}.elf is missing"
+                f"republished guest {artifact_name(guest, 'elf')} is missing"
             )
         rows.append(row)
     return rows
