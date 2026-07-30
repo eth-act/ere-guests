@@ -111,7 +111,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}
+          name: ${{ steps.get_artifact_name.outputs.artifact_name }}
           path: |
             output/${{ steps.get_artifact_name.outputs.artifact_name }}*.elf
             output/${{ steps.get_artifact_name.outputs.artifact_name }}.vk
@@ -197,7 +197,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}
+          name: ${{ steps.get_artifact_name.outputs.artifact_name }}
           path: |
             output/${{ steps.get_artifact_name.outputs.artifact_name }}*.elf
             output/${{ steps.get_artifact_name.outputs.artifact_name }}.vk

@@ -1502,17 +1502,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "downloader"
-version = "0.13.0"
-dependencies = [
- "anyhow",
- "reqwest",
- "serde",
- "tempfile",
- "tokio",
-]
-
-[[package]]
 name = "dunce"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5799,6 +5788,19 @@ dependencies = [
  "stateless-validator-reth",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "stateless-validator-downloader"
+version = "0.13.0"
+dependencies = [
+ "anyhow",
+ "ere-catalog",
+ "reqwest",
+ "serde",
+ "stateless-validator-catalog",
+ "tempfile",
+ "tokio",
 ]
 
 [[package]]
