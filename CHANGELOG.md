@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.14.0](https://github.com/eth-act/ere-guests/compare/v0.13.0...v0.14.0) (2026-07-30)
+
+
+### Features
+
+* add zesu and R2 glasmterdam-devnet-7 fixtures ([#67](https://github.com/eth-act/ere-guests/issues/67)) ([25dc8a8](https://github.com/eth-act/ere-guests/commit/25dc8a80a38c07863f46be878e3f3d1504455eab))
+* do host execution in devnet fixture tests ([#68](https://github.com/eth-act/ere-guests/issues/68)) ([9d3d4b9](https://github.com/eth-act/ere-guests/commit/9d3d4b9157cd0818abf68ebf7213ba041d1e83e9))
+* stateless-validator-catalog ([#66](https://github.com/eth-act/ere-guests/issues/66)) ([a52609d](https://github.com/eth-act/ere-guests/commit/a52609d4553405ab46d2dbda60dffd59b47e2082))
+* update ere to v0.14.0 ([#69](https://github.com/eth-act/ere-guests/issues/69)) ([5d5578e](https://github.com/eth-act/ere-guests/commit/5d5578efad0b71c31d19c91cbedef6522994a1d4))
+* update to tests-zkevm@0.6.2 ([#64](https://github.com/eth-act/ere-guests/issues/64)) ([b2ed4d8](https://github.com/eth-act/ere-guests/commit/b2ed4d88a30174b1eb5d75c55b63deab8516e8bd))
+
 ## [0.13.0](https://github.com/eth-act/ere-guests/compare/v0.12.1...v0.13.0) (2026-07-07)
 
 
