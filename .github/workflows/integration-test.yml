@@ -98,7 +98,6 @@ jobs:
           cargo test --release --package stateless-validator-test --test zkvm_execution -- ${{ matrix.stateless_validator }}_${{ matrix.zkvm }}_eest --test-threads=1
 
       - name: Test VK regeneration
-        if: matrix.external == true
         env:
           RUST_LOG: info,ere_server=error
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere

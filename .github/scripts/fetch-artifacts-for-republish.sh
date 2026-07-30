@@ -36,7 +36,7 @@ mkdir -p "$OUTPUT_DIR"
 # Downloads the artifact at $1, verifies it against sha256 $2, and moves it to $3.
 fetch() {
     curl -fsSL --proto '=https' --tlsv1.2 --retry 3 "$1" -o "$WORKSPACE/download"
-    echo "$2 $WORKSPACE/download" | sha256sum -c -
+    echo "$2 $WORKSPACE/download" | sha256sum -c --strict -
     mv "$WORKSPACE/download" "$3"
     echo "Prepared $3"
 }
