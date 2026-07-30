@@ -110,9 +110,9 @@ bls12_381 = { git = "https://github.com/zkcrypto/bls12_381", rev = "6bb96951d5c2
 zkvm-interface = { git = "https://github.com/eth-act/zkvm-standards", rev = "282cd356c3a0498416bb0619f9c8a347ce9933fb" }
 
 # ere
-ere-dockerized = { git = "https://github.com/eth-act/ere", rev = "a25f1aed9664c3b63e73ef05360090a4c41da31b" }
-ere-platform-core = { git = "https://github.com/eth-act/ere", rev = "a25f1aed9664c3b63e73ef05360090a4c41da31b" }
-ere-util-build = { git = "https://github.com/eth-act/ere", rev = "a25f1aed9664c3b63e73ef05360090a4c41da31b" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.14.0" }
+ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.14.0" }
+ere-util-build = { git = "https://github.com/eth-act/ere", tag = "v0.14.0" }
 
 # local
 stateless-validator-catalog = { path = "crates/stateless-validator-catalog" }
