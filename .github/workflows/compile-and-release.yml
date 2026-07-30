@@ -44,12 +44,23 @@ jobs:
         if: matrix.zkvm == 'zisk'
         run: bash .github/scripts/free-up-disk-space.sh
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Get Ere tag
         id: get_ere_tag
         run: |
           ERE_TAG=$(cargo tree -p ere-platform-core | head -n 1 | sed -E -e 's/.*\?rev=(.{7}).*/\1/' -e 's/.*\?tag=v([0-9.]+).*/\1/')
           echo "ere_tag=${ERE_TAG}" >> $GITHUB_OUTPUT
           echo "Ere tag: ${ERE_TAG}"
+
+      - name: Get artifact name
+        id: get_artifact_name
+        run: |
+          ZKVM_VERSION=$(.github/scripts/zkvm-version.sh ${{ matrix.zkvm }})
+          ARTIFACT_NAME=stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}-${ZKVM_VERSION}
+          echo "artifact_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+          echo "Artifact name: ${ARTIFACT_NAME}"
 
       - name: Pull Ere images
         run: |
@@ -68,7 +79,7 @@ jobs:
             --compiler-kind rust-customized \
             --guest-dir /ere-guests/bin/stateless-validator-${{ matrix.stateless_validator }}/${{ matrix.zkvm }} \
             --output-dir /output \
-            --elf-name stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.elf
+            --elf-name ${{ steps.get_artifact_name.outputs.artifact_name }}.elf
 
       - name: Compile ZisK guest with feature cycle-scope enabled
         if: ${{ matrix.zkvm == 'zisk' }}
@@ -83,7 +94,7 @@ jobs:
             --compiler-kind rust-customized \
             --guest-dir /ere-guests/bin/stateless-validator-${{ matrix.stateless_validator }}/${{ matrix.zkvm }} \
             --output-dir /output \
-            --elf-name stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}-profiling.elf \
+            --elf-name ${{ steps.get_artifact_name.outputs.artifact_name }}-profiling.elf \
             -- \
             --features cycle-scope
 
@@ -93,17 +104,17 @@ jobs:
             -e RUST_LOG=info \
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
-            --elf-path /output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.elf \
+            --elf-path /output/${{ steps.get_artifact_name.outputs.artifact_name }}.elf \
             keygen \
-            --program-vk-path /output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.vk
+            --program-vk-path /output/${{ steps.get_artifact_name.outputs.artifact_name }}.vk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}
           path: |
-            output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}*.elf
-            output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.vk
+            output/${{ steps.get_artifact_name.outputs.artifact_name }}*.elf
+            output/${{ steps.get_artifact_name.outputs.artifact_name }}.vk
           if-no-files-found: error
 
   republish-setup:
@@ -118,7 +129,7 @@ jobs:
       - name: Build matrix from artifact-registry.json
         id: set-matrix
         run: |
-          MATRIX=$(jq -c '{ include: [.stateless_validators[] as $sv | $sv.elfs[] | { stateless_validator: $sv.name, zkvm: .zkvm }] }' artifact-registry.json)
+          MATRIX=$(jq -c '{ include: [.stateless_validators[] as $sv | $sv.artifacts[] | { stateless_validator: $sv.name, zkvm: .zkvm }] }' artifact-registry.json)
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
           echo "Matrix: ${MATRIX}"
 
@@ -138,6 +149,9 @@ jobs:
         if: matrix.zkvm == 'zisk'
         run: bash .github/scripts/free-up-disk-space.sh
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Get Ere tag
         id: get_ere_tag
         run: |
@@ -145,30 +159,48 @@ jobs:
           echo "ere_tag=${ERE_TAG}" >> $GITHUB_OUTPUT
           echo "Ere tag: ${ERE_TAG}"
 
+      - name: Get artifact name
+        id: get_artifact_name
+        run: |
+          ZKVM_VERSION=$(.github/scripts/zkvm-version.sh ${{ matrix.zkvm }})
+          ARTIFACT_NAME=stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}-${ZKVM_VERSION}
+          echo "zkvm_version=${ZKVM_VERSION}" >> $GITHUB_OUTPUT
+          echo "artifact_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+          echo "Artifact name: ${ARTIFACT_NAME}"
+
       - name: Pull Ere images
         run: |
           docker pull ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
 
-      - name: Download ELF
-        run: bash .github/scripts/fetch-elf-for-republish.sh ${{ matrix.stateless_validator }} ${{ matrix.zkvm }}
-
-      - name: Generate program VK
+      - name: Download artifacts
         run: |
+          bash .github/scripts/fetch-artifacts-for-republish.sh \
+            ${{ matrix.stateless_validator }} \
+            ${{ matrix.zkvm }} \
+            ${{ steps.get_artifact_name.outputs.zkvm_version }}
+
+      - name: Generate program VK when unpublished
+        run: |
+          VK=output/${{ steps.get_artifact_name.outputs.artifact_name }}.vk
+          if [[ -f $VK ]]; then
+            echo "Republishing the VK listed in artifact-registry.json"
+            exit 0
+          fi
           docker run \
             -e RUST_LOG=info \
             -v $PWD/output:/output \
             ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }} \
-            --elf-path /output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.elf \
+            --elf-path /output/${{ steps.get_artifact_name.outputs.artifact_name }}.elf \
             keygen \
-            --program-vk-path /output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.vk
+            --program-vk-path /output/${{ steps.get_artifact_name.outputs.artifact_name }}.vk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}
           path: |
-            output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}*.elf
-            output/stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}.vk
+            output/${{ steps.get_artifact_name.outputs.artifact_name }}*.elf
+            output/${{ steps.get_artifact_name.outputs.artifact_name }}.vk
           if-no-files-found: error
 
   check-git-tag:
