@@ -93,15 +93,14 @@ pub fn archive_fixtures(dir: &str, url: &str, archive_dir: &str) -> Vec<Stateles
     load_fixtures_from_dir(ensure_fixtures(dir, url, archive_dir))
 }
 
-/// Returns whether `entry` is a recognised fixture file, namely a `.json` or
-/// zstd-compressed `.json.zst` file.
-fn is_fixture_file(entry: &DirEntry) -> bool {
+/// Returns whether `entry` is a `.json` file.
+fn is_json_file(entry: &DirEntry) -> bool {
     entry.file_type().is_file()
         && entry
             .path()
             .file_name()
             .and_then(|name| name.to_str())
-            .is_some_and(|name| name.ends_with(".json") || name.ends_with(".json.zst"))
+            .is_some_and(|name| name.ends_with(".json"))
 }
 
 /// Returns every fixture under `dir`, sorted by name for determinism.
@@ -110,24 +109,17 @@ fn load_fixtures_from_dir(dir: impl AsRef<Path>) -> Vec<StatelessValidatorFixtur
         .into_iter()
         .par_bridge()
         .filter_map(Result::ok)
-        .filter(is_fixture_file)
+        .filter(is_json_file)
         .flat_map(|entry| load_fixtures_from_file(entry.path()))
         .collect::<Vec<_>>();
     fixtures.sort_by(|a, b| a.name.cmp(&b.name));
     fixtures
 }
 
-/// Loads every fixture from a single JSON file, transparently decompressing a
-/// `.zst` file and auto-detecting the EEST or RPC layout.
+/// Loads every fixture from a single JSON file. Every preset uses the EEST `blockchain_test`
+/// layout, including the RPC-derived ones.
 pub fn load_fixtures_from_file(path: impl AsRef<Path>) -> Vec<StatelessValidatorFixture> {
-    let path = path.as_ref();
     let bytes = fs::read(path).unwrap();
-    let bytes = if path.extension().is_some_and(|ext| ext == "zst") {
-        zstd::stream::decode_all(bytes.as_slice()).unwrap()
-    } else {
-        bytes
-    };
-
     let tests: EestFixture = serde_json::from_slice(&bytes).unwrap();
     tests
         .into_iter()
