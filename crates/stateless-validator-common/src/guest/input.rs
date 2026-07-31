@@ -12,7 +12,7 @@
 use alloc::vec::Vec;
 use core::fmt::{self, Debug};
 
-use libssz::{SszDecode, SszEncode};
+use libssz::{DecodeError, SszDecode, SszEncode};
 use libssz_derive::{SszDecode, SszEncode};
 use libssz_types::SszList;
 
@@ -56,7 +56,7 @@ pub struct ExecutionWitness {
 
 /// Execution-layer fork identifiers used by stateless schemas.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-#[repr(u64)]
+#[repr(u8)]
 pub enum ProtocolFork {
     Frontier = 0x01,
     Homestead = 0x02,
@@ -83,7 +83,7 @@ pub enum ProtocolFork {
 
 impl ProtocolFork {
     /// Converts an SSZ enum value into a [`ProtocolFork`].
-    pub fn from_u64(value: u64) -> Option<Self> {
+    pub fn from_u8(value: u8) -> Option<Self> {
         Some(match value {
             0x01 => Self::Frontier,
             0x02 => Self::Homestead,
@@ -111,8 +111,47 @@ impl ProtocolFork {
     }
 
     /// Returns the SSZ enum value of this fork.
-    pub fn as_u64(self) -> u64 {
-        self as u64
+    pub fn as_u8(self) -> u8 {
+        self as u8
+    }
+}
+
+impl SszEncode for ProtocolFork {
+    #[inline(always)]
+    fn is_fixed_size() -> bool {
+        true
+    }
+
+    #[inline(always)]
+    fn fixed_size() -> usize {
+        1
+    }
+
+    #[inline(always)]
+    fn encoded_len(&self) -> usize {
+        1
+    }
+
+    #[inline(always)]
+    fn ssz_append(&self, buf: &mut Vec<u8>) {
+        self.as_u8().ssz_append(buf);
+    }
+}
+
+impl SszDecode for ProtocolFork {
+    #[inline(always)]
+    fn is_fixed_size() -> bool {
+        true
+    }
+
+    #[inline(always)]
+    fn fixed_size() -> usize {
+        1
+    }
+
+    fn from_ssz_bytes(bytes: &[u8]) -> Result<Self, DecodeError> {
+        let value = u8::from_ssz_bytes(bytes)?;
+        Self::from_u8(value).ok_or(DecodeError::InvalidUnionSelector(value))
     }
 }
 
@@ -245,7 +284,7 @@ impl StatelessInput {
     /// [`stateless_host.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/stateless_host.py
     pub fn to_schema_prefixed_ssz(&self, fork: ProtocolFork) -> Vec<u8> {
         let mut out = Vec::with_capacity(STATELESS_INPUT_SCHEMA_ID_SIZE + self.encoded_len());
-        let schema_id = ((fork.as_u64() as u16) << 8) | u16::from(STATELESS_INPUT_SCHEMA_REVISION);
+        let schema_id = ((fork.as_u8() as u16) << 8) | u16::from(STATELESS_INPUT_SCHEMA_REVISION);
         out.extend_from_slice(&schema_id.to_be_bytes());
         self.ssz_append(&mut out);
         out
@@ -265,7 +304,7 @@ impl StatelessInput {
         if (schema_id & 0xff) as u8 != STATELESS_INPUT_SCHEMA_REVISION {
             return Err(Error::UnsupportedSchemaId(schema_id));
         }
-        let fork = ProtocolFork::from_u64(u64::from(schema_id >> 8))
+        let fork = ProtocolFork::from_u8((schema_id >> 8) as u8)
             .ok_or(Error::UnsupportedSchemaId(schema_id))?;
         let input = match fork {
             Paris => StatelessInputBellatrix::from_ssz_bytes(body)?.into(),
