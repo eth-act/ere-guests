@@ -631,8 +631,8 @@ mod tests {
             (electra_fulu(), ELECTRA_FULU_FORKS),
             (gloas(), [ProtocolFork::Amsterdam].as_slice()),
         ] {
-            for fork in 1..=ProtocolFork::Amsterdam.as_u64() {
-                let fork = ProtocolFork::from_u64(fork).unwrap();
+            for fork in 1..=ProtocolFork::Amsterdam.as_u8() {
+                let fork = ProtocolFork::from_u8(fork).unwrap();
                 let input = stateless_input(request.clone());
                 let result =
                     StatelessInput::from_schema_prefixed_ssz(&input.to_schema_prefixed_ssz(fork));
