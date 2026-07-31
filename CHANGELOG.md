@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/eth-act/ere-guests/compare/v0.14.0...v0.14.1) (2026-07-31)
+
+
+### Bug Fixes
+
+* add missing ssz impl for protocol fork ([#70](https://github.com/eth-act/ere-guests/issues/70)) ([823e15f](https://github.com/eth-act/ere-guests/commit/823e15f0875217ca8f4348c273eba12044c4dec0))
+
 ## [0.14.0](https://github.com/eth-act/ere-guests/compare/v0.13.0...v0.14.0) (2026-07-30)
 
 
