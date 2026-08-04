@@ -310,7 +310,6 @@ mod tests {
     use crate::Downloader;
 
     #[tokio::test]
-    #[ignore = "no tag to download yet"]
     async fn download_from_tag() -> anyhow::Result<()> {
         let guest = Downloader::from_tag("v0.14.0")
             .await?
@@ -323,13 +322,12 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore = "no commit to download yet"]
     async fn download_from_commit() -> anyhow::Result<()> {
         let Ok(github_token) = std::env::var("GITHUB_TOKEN") else {
             return Ok(());
         };
 
-        let guest = Downloader::from_commit("9d3d4b9", &github_token)
+        let guest = Downloader::from_commit("229ffa8", &github_token)
             .await?
             .download(StatelessValidatorKind::Reth, zkVMKind::Zisk)
             .await?;
