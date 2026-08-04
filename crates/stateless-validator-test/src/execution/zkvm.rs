@@ -54,7 +54,12 @@ pub fn compile_guest(stateless_validator_kind: StatelessValidatorKind, zkvm_kind
             stateless_validator_kind.as_str()
         ))
         .join(zkvm_kind.as_str());
-    compiler.compile(&dir, &[]).unwrap()
+    let options = match stateless_validator_kind {
+        StatelessValidatorKind::Ethrex => vec![],
+        StatelessValidatorKind::Reth => vec!["--ignore-rust-version".to_string()],
+        _ => unreachable!(),
+    };
+    compiler.compile(&dir, &options).unwrap()
 }
 
 /// Wire shape of `artifact-registry.json`.

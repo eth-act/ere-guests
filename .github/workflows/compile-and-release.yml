@@ -36,6 +36,8 @@ jobs:
           - stateless_validator: ethrex
             zkvm: zisk
             ere_profile: ethrex
+          - stateless_validator: reth
+            compiler_args: --ignore-rust-version
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -79,7 +81,9 @@ jobs:
             --compiler-kind rust-customized \
             --guest-dir /ere-guests/bin/stateless-validator-${{ matrix.stateless_validator }}/${{ matrix.zkvm }} \
             --output-dir /output \
-            --elf-name ${{ steps.get_artifact_name.outputs.artifact_name }}.elf
+            --elf-name ${{ steps.get_artifact_name.outputs.artifact_name }}.elf \
+            -- \
+            ${{ matrix.compiler_args }}
 
       - name: Compile ZisK guest with feature cycle-scope enabled
         if: ${{ matrix.zkvm == 'zisk' }}
@@ -96,7 +100,8 @@ jobs:
             --output-dir /output \
             --elf-name ${{ steps.get_artifact_name.outputs.artifact_name }}-profiling.elf \
             -- \
-            --features cycle-scope
+            --features cycle-scope \
+            ${{ matrix.compiler_args }}
 
       - name: Generate program VK
         run: |
