@@ -68,17 +68,17 @@ declare_test!(Reth, OpenVM, RpcBpo2);
 // Reth divergences (in-block created-code resolution from EIP-8025).
 declare_test!(Reth, OpenVM, RpcGlamsterdamDevnet7, failures = 1);
 // Reth divergences.
-declare_test!(Reth, OpenVM, EestGlamsterdamDevnet7, failures = 17);
+declare_test!(Reth, OpenVM, EestGlamsterdamDevnet7, failures = 13);
 declare_test!(Reth, SP1, RpcBpo2);
 // Reth divergences (in-block created-code resolution from EIP-8025).
 declare_test!(Reth, SP1, RpcGlamsterdamDevnet7, failures = 1);
 // Reth divergences.
-declare_test!(Reth, SP1, EestGlamsterdamDevnet7, failures = 17);
+declare_test!(Reth, SP1, EestGlamsterdamDevnet7, failures = 13);
 declare_test!(Reth, Zisk, RpcBpo2);
 // Reth divergences (in-block created-code resolution from EIP-8025).
 declare_test!(Reth, Zisk, RpcGlamsterdamDevnet7, failures = 1);
 // Reth divergences + ZisK `zkvm-interface` impl bug.
-declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 39);
+declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 35);
 
 // Zesu
 
