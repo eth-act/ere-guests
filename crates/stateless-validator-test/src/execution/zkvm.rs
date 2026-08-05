@@ -1,6 +1,6 @@
 //! Helpers for compiling guest programs and asserting their zkVM execution.
 
-use std::{fs, path::PathBuf, sync::LazyLock};
+use std::{fs, path::PathBuf, sync::LazyLock, time::Duration};
 
 use dashmap::DashMap;
 use ere_dockerized::{
@@ -150,13 +150,12 @@ pub fn download_vk(
 
 /// Initializes a CPU-backed zkVM for `elf`.
 pub fn init_zkvm(zkvm_kind: zkVMKind, elf: Elf) -> DockerizedzkVM {
-    DockerizedzkVM::new(
-        zkvm_kind,
-        elf,
-        ProverResource::Cpu,
-        DockerizedzkVMConfig::default(),
-    )
-    .unwrap()
+    let resource = ProverResource::Cpu;
+    let config = DockerizedzkVMConfig {
+        health_timeout: Duration::from_mins(10),
+        ..Default::default()
+    };
+    DockerizedzkVM::new(zkvm_kind, elf, resource, config).unwrap()
 }
 
 /// Resolves the guest ELF, then runs `fixtures` through it on `zkvm_kind`,
