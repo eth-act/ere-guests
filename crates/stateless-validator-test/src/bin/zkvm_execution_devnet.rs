@@ -4,9 +4,6 @@
 //!
 //! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built
 //! image as the executor.
-//!
-//! Run with env `OPENVM_RUST_TOOLCHAIN=nightly-2026-01-18` for OpenVM to
-//! compile Reth guest.
 
 use std::{fs, path::PathBuf};
 

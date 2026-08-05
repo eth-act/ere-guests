@@ -76,7 +76,6 @@ jobs:
         env:
           RUST_LOG: info,ere_server=error
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
-          OPENVM_RUST_TOOLCHAIN: nightly-2026-01-18
         run: |
           cargo run --release --package stateless-validator-test --bin zkvm_execution_devnet -- \
             --zkvm ${{ matrix.zkvm }} \
