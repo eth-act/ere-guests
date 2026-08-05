@@ -2,9 +2,6 @@
 //!
 //! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built
 //! image as the executor.
-//!
-//! Run with env `OPENVM_RUST_TOOLCHAIN=nightly-2026-01-18` for OpenVM to
-//! compile Reth guest.
 
 use ere_dockerized::zkVMKind;
 use stateless_validator_catalog::StatelessValidatorKind;
@@ -52,8 +49,8 @@ macro_rules! declare_test {
 
 declare_test!(Ethrex, OpenVM, RpcBpo2);
 declare_test!(Ethrex, OpenVM, RpcGlamsterdamDevnet7);
-// Ethrex arithmetic overflow on 32-bit targets + OOM.
-declare_test!(Ethrex, OpenVM, EestGlamsterdamDevnet7, failures = 5);
+// Ethrex OOM.
+declare_test!(Ethrex, OpenVM, EestGlamsterdamDevnet7, failures = 4);
 declare_test!(Ethrex, SP1, RpcBpo2);
 declare_test!(Ethrex, SP1, RpcGlamsterdamDevnet7);
 declare_test!(Ethrex, SP1, EestGlamsterdamDevnet7);
