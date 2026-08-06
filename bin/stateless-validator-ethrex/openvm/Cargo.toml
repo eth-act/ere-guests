@@ -6,16 +6,10 @@ edition = "2024"
 version = "0.1.0"
 
 [dependencies]
-# openvm
-openvm = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.1.0-preview", features = [
-    "std",
-] }
-openvm-algebra-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.1.0-preview" }
-openvm-ecc-guest = { git = "https://github.com/openvm-org/openvm.git", tag = "v2.1.0-preview" }
-
 # ere
-ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "c8d621df229526fbab3c8012656c38213e079b50", features = [
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", rev = "153b092064a11e4c9c031a89940cbb232c98d59d", features = [
     "std",
+    "zkvm-accelerator",
 ] }
 
 # local
@@ -23,26 +17,6 @@ stateless-validator-ethrex = { path = "../../../crates/stateless-validator-ethre
     "std",
     "openvm",
 ] }
-
-[patch."https://github.com/openvm-org/openvm.git"]
-openvm = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-algebra-complex-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-algebra-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-algebra-moduli-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-custom-insn = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-ecc-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-ecc-sw-macros = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-k256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview", package = "k256" }
-openvm-keccak256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-keccak256-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-macros-common = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-p256 = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview", package = "p256" }
-openvm-pairing = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-pairing-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-platform = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-riscv-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-sha2 = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
-openvm-sha2-guest = { git = "https://github.com/openvm-org//openvm.git", tag = "v2.1.0-preview" }
 
 [profile.release]
 codegen-units = 1
