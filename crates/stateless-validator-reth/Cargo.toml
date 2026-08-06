@@ -31,9 +31,6 @@ reth-primitives-traits.workspace = true
 reth-stateless.workspace = true
 reth-tries.workspace = true
 
-# openvm
-openvm-sha2 = { workspace = true, optional = true }
-
 # zkvm-standard
 zkvm-interface = { workspace = true, optional = true }
 
@@ -56,7 +53,7 @@ required-features = ["host"]
 # guest
 default = ["std"]
 std = ["once_cell/std", "stateless-validator-common/std"]
-openvm = ["dep:openvm-sha2"]
+openvm = ["zkvm-interface"]
 sp1 = ["zkvm-interface"]
 zisk = ["zkvm-interface"]
 zkvm-interface = ["alloy-consensus/crypto-backend", "dep:zkvm-interface"]

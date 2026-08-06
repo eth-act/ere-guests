@@ -7,7 +7,7 @@ version = "0.1.0"
 
 [dependencies]
 # ere
-ere-platform-sp1 = { git = "https://github.com/eth-act/ere", rev = "c8d621df229526fbab3c8012656c38213e079b50" }
+ere-platform-sp1 = { git = "https://github.com/eth-act/ere", rev = "153b092064a11e4c9c031a89940cbb232c98d59d" }
 
 # local
 stateless-validator-ethrex = { path = "../../../crates/stateless-validator-ethrex", features = [

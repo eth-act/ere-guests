@@ -1,7 +1,5 @@
 //! Crypto provider selection for the guest.
 
-#[cfg(feature = "openvm")]
-mod openvm;
 #[cfg(feature = "zkvm-interface")]
 mod zkvm_interface;
 
@@ -11,13 +9,10 @@ use ethrex_crypto::Crypto;
 use stateless_validator_common::Sha256Hasher;
 
 /// Returns the [`Crypto`] implementation for the active zkVM feature.
-#[allow(unreachable_code)]
 pub(crate) fn crypto() -> Arc<dyn Crypto> {
-    #[cfg(feature = "openvm")]
-    return openvm::crypto();
     #[cfg(feature = "zkvm-interface")]
     return zkvm_interface::crypto();
-    #[cfg(not(any(feature = "openvm", feature = "zkvm-interface")))]
+    #[cfg(not(feature = "zkvm-interface"))]
     return Arc::new(ethrex_guest_program::crypto::NativeCrypto);
 }
 
