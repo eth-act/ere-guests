@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.15.0](https://github.com/eth-act/ere-guests/compare/v0.14.1...v0.15.0) (2026-08-06)
+
+
+### Features
+
+* bump ere to v0.15.0 ([#76](https://github.com/eth-act/ere-guests/issues/76)) ([9e08663](https://github.com/eth-act/ere-guests/commit/9e08663abd6be9c099be045bdd4246c5980c17ff))
+* remove reth patch ([#72](https://github.com/eth-act/ere-guests/issues/72)) ([3b7c9f7](https://github.com/eth-act/ere-guests/commit/3b7c9f726a79affd263196e2073ce10d247d5eeb))
+* update openvm to v2.1.0-preview ([#74](https://github.com/eth-act/ere-guests/issues/74)) ([c0e1110](https://github.com/eth-act/ere-guests/commit/c0e111032878843b496715d4b4903c7cd0ad2043))
+* use openvm zkvm accelerator from ere ([#75](https://github.com/eth-act/ere-guests/issues/75)) ([d537fcd](https://github.com/eth-act/ere-guests/commit/d537fcd1d17e79452747e4670cbdfc2effe5656f))
+
 ## [0.14.1](https://github.com/eth-act/ere-guests/compare/v0.14.0...v0.14.1) (2026-07-31)
 
 
