@@ -5354,7 +5354,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-catalog"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "ere-util-build",
  "serde",
@@ -5364,7 +5364,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-common"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "const-hex",
@@ -5379,7 +5379,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-debug"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "alloy-eips",
  "alloy-primitives",
@@ -5397,7 +5397,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-downloader"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "ere-catalog",
@@ -5410,7 +5410,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-ethrex"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "ere-dockerized",
  "ere-platform-core",
@@ -5427,7 +5427,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-reth"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
@@ -5454,7 +5454,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-test"
-version = "0.14.1"
+version = "0.15.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
