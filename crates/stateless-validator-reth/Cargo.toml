@@ -38,6 +38,7 @@ zkvm-interface = { workspace = true, optional = true }
 ere-platform-core.workspace = true
 
 # local
+recursive-execution-proof.workspace = true
 stateless-validator-common.workspace = true
 
 [dev-dependencies]
@@ -52,7 +53,7 @@ required-features = ["host"]
 [features]
 # guest
 default = ["std"]
-std = ["once_cell/std", "stateless-validator-common/std"]
+std = ["once_cell/std", "recursive-execution-proof/std", "stateless-validator-common/std"]
 openvm = ["zkvm-interface"]
 sp1 = ["zkvm-interface"]
 zisk = ["zkvm-interface"]

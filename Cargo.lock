@@ -3983,6 +3983,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "recursive-execution-proof"
+version = "0.15.0"
+dependencies = [
+ "hex-literal 1.1.0",
+ "libssz",
+ "libssz-derive",
+ "libssz-merkle",
+ "libssz-types",
+ "stateless-validator-common",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5368,6 +5380,7 @@ version = "0.15.0"
 dependencies = [
  "anyhow",
  "const-hex",
+ "hex-literal 1.1.0",
  "libssz",
  "libssz-derive",
  "libssz-merkle",
@@ -5419,6 +5432,7 @@ dependencies = [
  "ethrex-guest-program",
  "hex-literal 1.1.0",
  "paste",
+ "recursive-execution-proof",
  "stateless-validator-common",
  "stateless-validator-test",
  "thiserror",
@@ -5438,6 +5452,7 @@ dependencies = [
  "ere-platform-core",
  "once_cell",
  "paste",
+ "recursive-execution-proof",
  "reth-chainspec",
  "reth-ethereum-primitives",
  "reth-evm-ethereum",
@@ -5464,8 +5479,10 @@ dependencies = [
  "ere-dockerized",
  "ere-platform-core",
  "flate2",
+ "libssz-merkle",
  "paste",
  "rayon",
+ "recursive-execution-proof",
  "reqwest",
  "serde",
  "serde_json",

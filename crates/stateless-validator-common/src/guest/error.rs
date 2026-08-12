@@ -28,6 +28,16 @@ pub enum Error {
     /// `InactiveForkConfigError`.
     #[error("ChainConfig active_fork is not active for the target payload")]
     InactiveForkConfig,
+    /// A progressive Gloas list exceeded its consensus runtime limit.
+    #[error("{field} length {length} exceeds runtime maximum {max}")]
+    ProgressiveListTooLong {
+        /// Consensus field name.
+        field: &'static str,
+        /// Decoded list length.
+        length: usize,
+        /// Consensus runtime maximum.
+        max: usize,
+    },
 }
 
 impl From<DecodeError> for Error {

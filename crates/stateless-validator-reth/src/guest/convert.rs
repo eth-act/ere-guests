@@ -28,7 +28,7 @@ use stateless_validator_common::{
             new_payload_request::{
                 ExecutionPayloadV1, ExecutionPayloadV2, ExecutionPayloadV3, ExecutionPayloadV4,
                 ExecutionRequestsElectraFulu, ExecutionRequestsGloas, Hash32, NewPayloadRequest,
-                VersionedHashes, Withdrawals,
+                VersionedHashes, Withdrawal,
             },
         },
     },
@@ -282,7 +282,9 @@ fn to_alloy_payload_v4(payload: ExecutionPayloadV4) -> alloy_rpc_types_engine::E
 
 /// Converts canonical withdrawals into the alloy list. The list bound matches
 /// the canonical bound.
-fn to_alloy_withdrawals(withdrawals: Withdrawals) -> Vec<alloy_eips::eip4895::Withdrawal> {
+fn to_alloy_withdrawals(
+    withdrawals: impl IntoIterator<Item = Withdrawal>,
+) -> Vec<alloy_eips::eip4895::Withdrawal> {
     withdrawals
         .into_iter()
         .map(|withdrawal| alloy_eips::eip4895::Withdrawal {

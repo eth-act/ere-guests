@@ -7,5 +7,7 @@ extern crate alloc;
 pub use libssz::{DecodeError, SszDecode, SszEncode};
 pub use libssz_merkle::{HashTreeRoot, Sha2Hasher, Sha256Hasher};
 pub use libssz_types::{SszList, SszVector};
+pub use progressive_list::{ProgressiveList, merkleize_progressive};
 
 pub mod guest;
+mod progressive_list;

@@ -1,8 +1,12 @@
 //! Reth stateless validator guest program.
 
 use alloc::{format, vec::Vec};
+use core::marker::PhantomData;
 
 pub use ere_platform_core::Platform;
+use recursive_execution_proof::{
+    ExecutionProofVerifier, PrivateInput, PublicInput, StatelessNewPayloadVerifier,
+};
 use reth_stateless::{stateless_validation_with_trie, validation::StatelessValidationError};
 use reth_tries::zeth::SparseState;
 use stateless_validator_common::{
@@ -37,20 +41,51 @@ pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
         return StatelessValidationResult::default().to_ssz();
     };
 
+    let output = validate_stateless_input::<P>(fork, input);
+
+    P::cycle_scope("serialize_output", || output.to_ssz())
+}
+
+/// Runs one recursive EIP-8025 step using Reth for the stateless transition.
+///
+/// `proof_verifier` is proof-system specific and must bind the prior proof's
+/// `proof_type` to this exact guest program. Bid and envelope BLS signatures
+/// remain consensus-client checks, matching the specification's current
+/// signature boundary.
+pub fn process_recursive_input<P: Platform>(
+    input: PrivateInput,
+    proof_verifier: &impl ExecutionProofVerifier,
+) -> Result<PublicInput, recursive_execution_proof::Error> {
+    recursive_execution_proof::process_private_input(
+        proof_verifier,
+        &RethStatelessVerifier::<P>(PhantomData),
+        input,
+        &sha256_hasher(),
+    )
+}
+
+struct RethStatelessVerifier<P>(PhantomData<fn() -> P>);
+
+impl<P: Platform> StatelessNewPayloadVerifier for RethStatelessVerifier<P> {
+    fn verify_stateless_new_payload(&self, input: StatelessInput) -> StatelessValidationResult {
+        validate_stateless_input::<P>(ProtocolFork::Amsterdam, input)
+    }
+}
+
+fn validate_stateless_input<P: Platform>(
+    fork: ProtocolFork,
+    input: StatelessInput,
+) -> StatelessValidationResult {
     let new_payload_request_root = P::cycle_scope("new_payload_request_root", || {
         input.new_payload_request.hash_tree_root(&sha256_hasher())
     });
     let chain_config = input.chain_config.clone();
-
     let successful_validation = verify_stateless_new_payload::<P>(fork, input).is_ok();
-
-    let output = StatelessValidationResult::new(
+    StatelessValidationResult::new(
         new_payload_request_root,
         successful_validation,
         chain_config,
-    );
-
-    P::cycle_scope("serialize_output", || output.to_ssz())
+    )
 }
 
 /// Statelessly validates the execution payload, mirroring
@@ -59,6 +94,9 @@ fn verify_stateless_new_payload<P: Platform>(
     fork: ProtocolFork,
     input: StatelessInput,
 ) -> Result<(), Error> {
+    P::cycle_scope("validate_progressive_limits", || {
+        input.new_payload_request.validate_progressive_limits()
+    })?;
     P::cycle_scope("validate_chain_config", || {
         input.chain_config.validate(&input.new_payload_request)
     })?;

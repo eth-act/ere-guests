@@ -38,4 +38,3 @@ unexpected_cfgs = { level = "warn", check-cfg = [
     'cfg(zisk_hints_debug)',
     'cfg(target_vendor, values("zisk"))',
 ] }
-
