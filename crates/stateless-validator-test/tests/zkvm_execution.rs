@@ -56,8 +56,8 @@ declare_test!(Ethrex, SP1, RpcGlamsterdamDevnet7);
 declare_test!(Ethrex, SP1, EestGlamsterdamDevnet7);
 declare_test!(Ethrex, Zisk, RpcBpo2);
 declare_test!(Ethrex, Zisk, RpcGlamsterdamDevnet7);
-// Ethrex OOM + ZisK `zkvm-interface` impl bug.
-declare_test!(Ethrex, Zisk, EestGlamsterdamDevnet7, failures = 26);
+// Ethrex OOM.
+declare_test!(Ethrex, Zisk, EestGlamsterdamDevnet7, failures = 4);
 
 // Reth
 
@@ -74,8 +74,8 @@ declare_test!(Reth, SP1, EestGlamsterdamDevnet7, failures = 13);
 declare_test!(Reth, Zisk, RpcBpo2);
 // Reth divergences (in-block created-code resolution from EIP-8025).
 declare_test!(Reth, Zisk, RpcGlamsterdamDevnet7, failures = 1);
-// Reth divergences + ZisK `zkvm-interface` impl bug.
-declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 35);
+// Reth divergences.
+declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 13);
 
 // Zesu
 
