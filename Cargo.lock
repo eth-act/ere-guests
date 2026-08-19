@@ -1697,7 +1697,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 [[package]]
 name = "ere-catalog"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 dependencies = [
  "ere-util-build",
  "serde",
@@ -1707,12 +1707,12 @@ dependencies = [
 [[package]]
 name = "ere-codec"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 
 [[package]]
 name = "ere-compiler-core"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 dependencies = [
  "serde",
 ]
@@ -1720,7 +1720,7 @@ dependencies = [
 [[package]]
 name = "ere-dockerized"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 dependencies = [
  "anyhow",
  "ere-catalog",
@@ -1737,12 +1737,12 @@ dependencies = [
 [[package]]
 name = "ere-platform-core"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 
 [[package]]
 name = "ere-prover-core"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 dependencies = [
  "anyhow",
  "auto_impl",
@@ -1759,7 +1759,7 @@ dependencies = [
 [[package]]
 name = "ere-server-api"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 dependencies = [
  "prost",
  "serde",
@@ -1769,7 +1769,7 @@ dependencies = [
 [[package]]
 name = "ere-server-client"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 dependencies = [
  "bincode 2.0.1",
  "ere-prover-core",
@@ -1781,7 +1781,7 @@ dependencies = [
 [[package]]
 name = "ere-util-build"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 dependencies = [
  "cargo_metadata",
 ]
@@ -1789,7 +1789,7 @@ dependencies = [
 [[package]]
 name = "ere-util-tokio"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 dependencies = [
  "tokio",
 ]
@@ -1797,7 +1797,7 @@ dependencies = [
 [[package]]
 name = "ere-verifier-core"
 version = "0.15.0"
-source = "git+https://github.com/eth-act/ere?tag=v0.15.0#552595938b48884d87cfada24f29d39223695c1e"
+source = "git+https://github.com/eth-act/ere?rev=8295d94b4598ef14e6c35fff3dd4935f60f2f7ff#8295d94b4598ef14e6c35fff3dd4935f60f2f7ff"
 dependencies = [
  "auto_impl",
  "ere-codec",
