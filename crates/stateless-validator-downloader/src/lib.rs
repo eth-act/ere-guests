@@ -311,13 +311,18 @@ mod tests {
 
     #[tokio::test]
     async fn download_from_tag() -> anyhow::Result<()> {
-        let guest = Downloader::from_tag("v0.14.0")
+        let stateless_validator_kind = StatelessValidatorKind::Reth;
+        let zkvm_kind = zkVMKind::OpenVM;
+        let guest = Downloader::from_tag("v0.15.0")
             .await?
-            .download(StatelessValidatorKind::Reth, zkVMKind::Zisk)
+            .download(stateless_validator_kind, zkvm_kind)
             .await?;
         assert!(!guest.elf.is_empty());
         assert!(!guest.program_vk.is_empty());
-        assert!(guest.profiling_elf.is_some_and(|elf| !elf.is_empty()));
+        match zkvm_kind {
+            zkVMKind::OpenVM | zkVMKind::SP1 => assert!(guest.profiling_elf.is_none()),
+            zkVMKind::Zisk => assert!(guest.profiling_elf.is_some_and(|elf| !elf.is_empty())),
+        };
         Ok(())
     }
 
@@ -327,13 +332,18 @@ mod tests {
             return Ok(());
         };
 
-        let guest = Downloader::from_commit("229ffa8", &github_token)
+        let stateless_validator_kind = StatelessValidatorKind::Reth;
+        let zkvm_kind = zkVMKind::OpenVM;
+        let guest = Downloader::from_commit("817fae8", &github_token)
             .await?
-            .download(StatelessValidatorKind::Reth, zkVMKind::Zisk)
+            .download(stateless_validator_kind, zkvm_kind)
             .await?;
         assert!(!guest.elf.is_empty());
         assert!(!guest.program_vk.is_empty());
-        assert!(guest.profiling_elf.is_some_and(|elf| !elf.is_empty()));
+        match zkvm_kind {
+            zkVMKind::OpenVM | zkVMKind::SP1 => assert!(guest.profiling_elf.is_none()),
+            zkVMKind::Zisk => assert!(guest.profiling_elf.is_some_and(|elf| !elf.is_empty())),
+        };
         Ok(())
     }
 }
