@@ -149,7 +149,7 @@ def compiled_guests(zkvm_versions: dict[str, str]) -> list[Guest]:
 def republished_guests(
     artifact_registry: Path, zkvm_versions: dict[str, str]
 ) -> list[Guest]:
-    """Returns the registry guests, ordered by name then zkVM, with zkVM versions from the SDK."""
+    """Returns the registry guests, ordered by name then zkVM, versioned by the entry or the SDK."""
     registry = json.loads(artifact_registry.read_text())["stateless_validators"]
     guests = []
     for validator in sorted(registry, key=lambda entry: entry["name"]):
@@ -159,7 +159,7 @@ def republished_guests(
                     validator["name"],
                     validator["version"],
                     artifact["zkvm"],
-                    zkvm_versions[artifact["zkvm"]],
+                    artifact.get("zkvm_version") or zkvm_versions[artifact["zkvm"]],
                     artifact["elf_url"],
                 )
             )

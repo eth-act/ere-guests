@@ -6,6 +6,7 @@
             "artifacts": [
                 {
                     "zkvm": "zisk",
+                    "zkvm_version": "v1.0.0-alpha",
                     "elf_url": "https://github.com/Consensys/zesu-zkvm/releases/download/glamsterdam-devnet-7.2-2026-07-29/stateless-validator-zesu-zisk-1.0.0-alpha.elf",
                     "elf_sha256": "088a71b8ff69630de88b970a6a633911c2ecaaeb4be7cb9ca5b356f6e622f89d",
                     "vk_url": "https://github.com/Consensys/zesu-zkvm/releases/download/glamsterdam-devnet-7.2-2026-07-29/stateless-validator-zesu-zisk-1.0.0-alpha.vk",

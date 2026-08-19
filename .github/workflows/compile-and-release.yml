@@ -132,7 +132,7 @@ jobs:
       - name: Build matrix from artifact-registry.json
         id: set-matrix
         run: |
-          MATRIX=$(jq -c '{ include: [.stateless_validators[] as $sv | $sv.artifacts[] | { stateless_validator: $sv.name, zkvm: .zkvm }] }' artifact-registry.json)
+          MATRIX=$(jq -c '{ include: [.stateless_validators[] as $sv | $sv.artifacts[] | { stateless_validator: $sv.name, zkvm: .zkvm, zkvm_version: (.zkvm_version // "") }] }' artifact-registry.json)
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
           echo "Matrix: ${MATRIX}"
 
@@ -165,15 +165,14 @@ jobs:
       - name: Get artifact name
         id: get_artifact_name
         run: |
-          ZKVM_VERSION=$(.github/scripts/zkvm-version.sh ${{ matrix.zkvm }})
+          ZKVM_VERSION="${{ matrix.zkvm_version }}"
+          if [[ -z $ZKVM_VERSION ]]; then
+            ZKVM_VERSION=$(.github/scripts/zkvm-version.sh ${{ matrix.zkvm }})
+          fi
           ARTIFACT_NAME=stateless-validator-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}-${ZKVM_VERSION}
           echo "zkvm_version=${ZKVM_VERSION}" >> $GITHUB_OUTPUT
           echo "artifact_name=${ARTIFACT_NAME}" >> $GITHUB_OUTPUT
           echo "Artifact name: ${ARTIFACT_NAME}"
-
-      - name: Pull Ere images
-        run: |
-          docker pull ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
 
       - name: Download artifacts
         run: |
@@ -189,6 +188,7 @@ jobs:
             echo "Republishing the VK listed in artifact-registry.json"
             exit 0
           fi
+          docker pull ghcr.io/eth-act/ere/ere-server-${{ matrix.zkvm }}:${{ steps.get_ere_tag.outputs.ere_tag }}
           docker run \
             -e RUST_LOG=info \
             -v $PWD/output:/output \
