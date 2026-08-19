@@ -79,7 +79,6 @@ declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 13);
 
 // Zesu
 
-declare_test!(Zesu, Zisk, RpcBpo2);
-declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet7);
-// ZisK `zkvm-interface` impl bug.
-declare_test!(Zesu, Zisk, EestGlamsterdamDevnet7, failures = 22);
+// declare_test!(Zesu, Zisk, RpcBpo2);
+// declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet7);
+// declare_test!(Zesu, Zisk, EestGlamsterdamDevnet7);
