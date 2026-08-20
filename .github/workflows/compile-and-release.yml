@@ -33,11 +33,9 @@ jobs:
           - sp1
           - zisk
         include:
-          - stateless_validator: ethrex
-            zkvm: zisk
-            ere_profile: ethrex
-          - stateless_validator: reth
-            compiler_args: --ignore-rust-version
+          - { stateless_validator: ethrex, zkvm: zisk, ere_profile: ethrex }
+          - { stateless_validator: reth, compiler_args: --ignore-rust-version }
+          - { zkvm: zisk, ere_rustflags: "-C target-feature=+unaligned-scalar-mem" }
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -73,6 +71,7 @@ jobs:
         run: |
           docker run \
             ${{ matrix.ere_profile && format('-e ERE_PROFILE={0}', matrix.ere_profile) || '' }} \
+            ${{ matrix.ere_rustflags && format('-e ERE_RUSTFLAGS="{0}"', matrix.ere_rustflags) || '' }} \
             -e RUST_LOG=info \
             -v $PWD:/ere-guests \
             -v $PWD/output:/output \
@@ -89,6 +88,7 @@ jobs:
         run: |
           docker run \
             ${{ matrix.ere_profile && format('-e ERE_PROFILE={0}', matrix.ere_profile) || '' }} \
+            ${{ matrix.ere_rustflags && format('-e ERE_RUSTFLAGS="{0}"', matrix.ere_rustflags) || '' }} \
             -e RUST_LOG=info \
             -v $PWD:/ere-guests \
             -v $PWD/output:/output \

@@ -25,6 +25,7 @@ jobs:
         include:
           - { zkvm: zisk, external: true, stateless_validator: zesu }
           - { zkvm: zisk, stateless_validator: ethrex, ere_profile: ethrex }
+          - { zkvm: zisk, ere_rustflags: "-C target-feature=+unaligned-scalar-mem" }
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -71,6 +72,12 @@ jobs:
         env:
           ERE_PROFILE: ${{ matrix.ere_profile }}
         run: echo "ERE_PROFILE=$ERE_PROFILE" >> "$GITHUB_ENV"
+
+      - name: Enable Ere rustflags
+        if: matrix.ere_rustflags != ''
+        env:
+          ERE_RUSTFLAGS: ${{ matrix.ere_rustflags }}
+        run: echo "ERE_RUSTFLAGS=$ERE_RUSTFLAGS" >> "$GITHUB_ENV"
 
       - name: Run zkVM execution of the latest devnet blocks
         env:
