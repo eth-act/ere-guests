@@ -146,10 +146,8 @@ def compiled_guests(zkvm_versions: dict[str, str]) -> list[Guest]:
     ]
 
 
-def republished_guests(
-    artifact_registry: Path, zkvm_versions: dict[str, str]
-) -> list[Guest]:
-    """Returns the registry guests, ordered by name then zkVM, versioned by the entry or the SDK."""
+def republished_guests(artifact_registry: Path) -> list[Guest]:
+    """Returns the registry guests, ordered by name then zkVM, versioned by their entries."""
     registry = json.loads(artifact_registry.read_text())["stateless_validators"]
     guests = []
     for validator in sorted(registry, key=lambda entry: entry["name"]):
@@ -159,7 +157,7 @@ def republished_guests(
                     validator["name"],
                     validator["version"],
                     artifact["zkvm"],
-                    artifact.get("zkvm_version") or zkvm_versions[artifact["zkvm"]],
+                    artifact["zkvm_version"],
                     artifact["elf_url"],
                 )
             )
@@ -181,11 +179,10 @@ def republished_rows(
     artifacts_dir: Path,
     artifact_registry: Path,
     release_url: str,
-    zkvm_versions: dict[str, str],
 ) -> list[str]:
     """Returns rows for registry guests, requiring every artifact to be present."""
     rows = []
-    for guest in republished_guests(artifact_registry, zkvm_versions):
+    for guest in republished_guests(artifact_registry):
         row = render_row(guest, artifacts_dir, release_url)
         if row is None:
             raise RuntimeError(
@@ -202,9 +199,7 @@ def render_release_body(tag: str, artifacts_dir: Path, artifact_registry: Path) 
     ere_version = read_ere_version()
     zkvm_versions = read_zkvm_versions()
     compiled = compiled_rows(artifacts_dir, release_url, zkvm_versions)
-    republished = republished_rows(
-        artifacts_dir, artifact_registry, release_url, zkvm_versions
-    )
+    republished = republished_rows(artifacts_dir, artifact_registry, release_url)
 
     body = [
         "## Compiled guest programs",

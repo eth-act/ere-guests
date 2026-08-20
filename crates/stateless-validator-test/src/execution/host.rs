@@ -6,7 +6,7 @@ use ere_platform_core::Platform;
 use stateless_validator_catalog::StatelessValidatorKind;
 
 use crate::{
-    execution::{ExecutionFailure, ExecutionFailures, run_execution},
+    execution::{ExecutionFailure, ExecutionFailures, init_tracing, run_execution},
     fixture::{FixturePreset, StatelessValidatorFixture, preset_fixtures},
 };
 
@@ -58,6 +58,8 @@ pub fn test_host_execution(
     preset: FixturePreset,
     expected_failures: usize,
 ) {
+    init_tracing();
+
     let failures = run_host_execution(stateless_validator_kind, preset_fixtures(preset));
     assert_eq!(
         failures.len(),

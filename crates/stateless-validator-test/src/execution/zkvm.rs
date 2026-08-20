@@ -12,6 +12,7 @@ use ere_dockerized::{
     Compiler, CompilerKind, DockerizedCompiler, DockerizedzkVM, DockerizedzkVMConfig, Elf, Input,
     ProverResource, zkVMKind,
 };
+use semver::Version;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use stateless_validator_catalog::StatelessValidatorKind::{self, *};
@@ -54,6 +55,32 @@ pub fn resolve_guest(
         .clone()
 }
 
+/// Returns whether the guest ELF is compatible with the zkVM version of Ere.
+pub fn is_guest_compatible(
+    stateless_validator_kind: StatelessValidatorKind,
+    zkvm_kind: zkVMKind,
+) -> bool {
+    match stateless_validator_kind {
+        Ethrex | Reth => true,
+        Zesu => differs_by_patch_at_most(
+            &registry_artifact(stateless_validator_kind, zkvm_kind).zkvm_version,
+            zkvm_kind.sdk_version(),
+        ),
+    }
+}
+
+/// Returns whether `version` and `other` are equal up to their patch level, comparing them
+/// verbatim when either is not a `v`-prefixed semantic version.
+fn differs_by_patch_at_most(version: &str, other: &str) -> bool {
+    let parse = |version: &str| Version::parse(version.strip_prefix('v')?).ok();
+    match (parse(version), parse(other)) {
+        (Some(version), Some(other)) => {
+            (version.major, version.minor, version.pre) == (other.major, other.minor, other.pre)
+        }
+        _ => version == other,
+    }
+}
+
 /// Compiles the guest program for `zkvm_kind` into an ELF.
 pub fn compile_guest(
     stateless_validator_kind: StatelessValidatorKind,
@@ -94,6 +121,7 @@ struct StatelessValidator {
 #[derive(Deserialize)]
 struct StatelessValidatorArtifact {
     zkvm: String,
+    zkvm_version: String,
     elf_url: String,
     elf_sha256: String,
     vk_url: Option<String>,
@@ -195,4 +223,32 @@ pub fn run_zkvm_execution(
     run_execution(fixtures, &|input| {
         Ok(zkvm.execute(&Input::new().with_stdin(input))?.0.to_vec())
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::execution::zkvm::differs_by_patch_at_most;
+
+    #[test]
+    fn compare_zkvm_versions() {
+        for (version, other) in [
+            ("v1.1.0-alpha", "v1.1.0-alpha"),
+            ("v1.1.0-alpha", "v1.1.9-alpha"),
+            ("v2.1.0", "v2.1.3"),
+            ("8295d94", "8295d94"),
+        ] {
+            assert!(differs_by_patch_at_most(version, other));
+        }
+
+        for (version, other) in [
+            ("v1.0.0-alpha", "v1.1.0-alpha"),
+            ("v1.1.0-alpha", "v1.1.0-beta"),
+            ("v1.1.0-alpha", "v1.1.0"),
+            ("v1.1.0", "v2.1.0"),
+            ("v1.1.0", "8295d94"),
+            ("8295d94", "4df3d26"),
+        ] {
+            assert!(!differs_by_patch_at_most(version, other));
+        }
+    }
 }
