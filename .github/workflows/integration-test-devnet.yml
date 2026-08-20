@@ -88,12 +88,15 @@ jobs:
             --zkvm ${{ matrix.zkvm }} \
             --stateless-validator ${{ matrix.stateless_validator }} \
             --output failures.txt
-          {
-            echo "### ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}"
-            echo '```'
-            cat failures.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          # No failures file means the guest was skipped as incompatible with the zkVM version.
+          if [[ -f failures.txt ]]; then
+            {
+              echo "### ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}"
+              echo '```'
+              cat failures.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Chown
         if: matrix.external != true

@@ -13,7 +13,10 @@ use serde::Deserialize;
 use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
     execution::{
-        ExecutionFailures, host::run_host_execution, init_tracing, zkvm::run_zkvm_execution,
+        ExecutionFailures,
+        host::run_host_execution,
+        init_tracing,
+        zkvm::{is_guest_compatible, run_zkvm_execution},
     },
     fixture::{R2_FIXTURES_BASE_URL, StatelessValidatorFixture, archive_fixtures},
 };
@@ -48,6 +51,18 @@ struct Cli {
 fn main() {
     let cli = Cli::parse();
     init_tracing();
+
+    if let Some(zkvm) = cli.zkvm
+        && !is_guest_compatible(cli.stateless_validator, zkvm)
+    {
+        info!(
+            "Skipping {} on {zkvm}, the published ELF is not compatible with zkVM version {} of Ere",
+            cli.stateless_validator,
+            zkvm.sdk_version()
+        );
+        return;
+    }
+
     let fixtures = latest_devnet_fixtures(cli.blocks);
     info!(
         "Running {} blocks from {} to {}",

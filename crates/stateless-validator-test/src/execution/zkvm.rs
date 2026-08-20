@@ -62,7 +62,7 @@ pub fn is_guest_compatible(
 ) -> bool {
     match stateless_validator_kind {
         Ethrex | Reth => true,
-        Zesu => differs_by_patch_at_most(
+        Zesu => matches_up_to_patch(
             &registry_artifact(stateless_validator_kind, zkvm_kind).zkvm_version,
             zkvm_kind.sdk_version(),
         ),
@@ -71,7 +71,7 @@ pub fn is_guest_compatible(
 
 /// Returns whether `version` and `other` are equal up to their patch level, comparing them
 /// verbatim when either is not a `v`-prefixed semantic version.
-fn differs_by_patch_at_most(version: &str, other: &str) -> bool {
+fn matches_up_to_patch(version: &str, other: &str) -> bool {
     let parse = |version: &str| Version::parse(version.strip_prefix('v')?).ok();
     match (parse(version), parse(other)) {
         (Some(version), Some(other)) => {
@@ -227,7 +227,7 @@ pub fn run_zkvm_execution(
 
 #[cfg(test)]
 mod tests {
-    use crate::execution::zkvm::differs_by_patch_at_most;
+    use crate::execution::zkvm::matches_up_to_patch;
 
     #[test]
     fn compare_zkvm_versions() {
@@ -237,7 +237,7 @@ mod tests {
             ("v2.1.0", "v2.1.3"),
             ("8295d94", "8295d94"),
         ] {
-            assert!(differs_by_patch_at_most(version, other));
+            assert!(matches_up_to_patch(version, other));
         }
 
         for (version, other) in [
@@ -248,7 +248,7 @@ mod tests {
             ("v1.1.0", "8295d94"),
             ("8295d94", "4df3d26"),
         ] {
-            assert!(!differs_by_patch_at_most(version, other));
+            assert!(!matches_up_to_patch(version, other));
         }
     }
 }
