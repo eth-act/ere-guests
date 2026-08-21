@@ -3206,7 +3206,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-common"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "const-hex",
  "libssz",
@@ -3220,7 +3220,7 @@ dependencies = [
 
 [[package]]
 name = "stateless-validator-reth"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "alloy-consensus",
  "alloy-eips",
