@@ -7,7 +7,7 @@ version = "0.1.0"
 
 [dependencies]
 # ere
-ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.16.1", features = [
+ere-platform-openvm = { git = "https://github.com/eth-act/ere", tag = "v0.16.2", features = [
     "std",
     "zkvm-accelerator",
 ] }
