@@ -7,19 +7,17 @@
 # The VK is optional and is written only when the registry lists one,
 # leaving the caller to generate it otherwise.
 #
-# The zkVM version is the one this repository builds against. Once republished
-# artifacts carry their own zkVM version, take it from artifact-registry.json instead.
+# The zkVM version is the zkvm_version of the registry entry.
 #
-# Usage: fetch-artifacts-for-republish.sh <stateless-validator> <zkvm> <zkvm-version>
+# Usage: fetch-artifacts-for-republish.sh <stateless-validator> <zkvm>
 #   REGISTRY    artifact-registry.json (default: artifact-registry.json)
 #   OUTPUT_DIR  output directory (default: output)
 
 set -euo pipefail
 
-USAGE="usage: fetch-artifacts-for-republish.sh <stateless-validator> <zkvm> <zkvm-version>"
+USAGE="usage: fetch-artifacts-for-republish.sh <stateless-validator> <zkvm>"
 NAME="${1:?$USAGE}"
 ZKVM="${2:?$USAGE}"
-ZKVM_VERSION="${3:?$USAGE}"
 REGISTRY="${REGISTRY:-artifact-registry.json}"
 OUTPUT_DIR="${OUTPUT_DIR:-output}"
 
@@ -40,6 +38,12 @@ fetch() {
     mv "$WORKSPACE/download" "$3"
     echo "Prepared $3"
 }
+
+ZKVM_VERSION="$(entry zkvm_version)"
+if [[ -z $ZKVM_VERSION ]]; then
+    echo "$NAME-$ZKVM lists no zkvm_version" >&2
+    exit 1
+fi
 
 OUT="$OUTPUT_DIR/stateless-validator-$NAME-$ZKVM-$ZKVM_VERSION"
 fetch "$(entry elf_url)" "$(entry elf_sha256)" "$OUT.elf"

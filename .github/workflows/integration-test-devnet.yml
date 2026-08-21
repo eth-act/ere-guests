@@ -25,6 +25,7 @@ jobs:
         include:
           - { zkvm: zisk, external: true, stateless_validator: zesu }
           - { zkvm: zisk, stateless_validator: ethrex, ere_profile: ethrex }
+          - { zkvm: zisk, ere_rustflags: "-C target-feature=+unaligned-scalar-mem" }
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -72,6 +73,12 @@ jobs:
           ERE_PROFILE: ${{ matrix.ere_profile }}
         run: echo "ERE_PROFILE=$ERE_PROFILE" >> "$GITHUB_ENV"
 
+      - name: Enable Ere rustflags
+        if: matrix.ere_rustflags != ''
+        env:
+          ERE_RUSTFLAGS: ${{ matrix.ere_rustflags }}
+        run: echo "ERE_RUSTFLAGS=$ERE_RUSTFLAGS" >> "$GITHUB_ENV"
+
       - name: Run zkVM execution of the latest devnet blocks
         env:
           RUST_LOG: info,ere_server=error
@@ -81,12 +88,15 @@ jobs:
             --zkvm ${{ matrix.zkvm }} \
             --stateless-validator ${{ matrix.stateless_validator }} \
             --output failures.txt
-          {
-            echo "### ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}"
-            echo '```'
-            cat failures.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          # No failures file means the guest was skipped as incompatible with the zkVM version.
+          if [[ -f failures.txt ]]; then
+            {
+              echo "### ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}"
+              echo '```'
+              cat failures.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Chown
         if: matrix.external != true

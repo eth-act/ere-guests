@@ -53,6 +53,7 @@ flate2 = "1.1.5"
 paste = "1.0"
 rayon = "1.11.0"
 reqwest = "0.12"
+semver = "1.0.28"
 serde_json = "1.0"
 tar = "0.4.44"
 tempfile = "3.6.0"
@@ -96,10 +97,10 @@ libssz-types = { version = "0.2.2", default-features = false, features = ["alloc
 zkvm-interface = { git = "https://github.com/eth-act/zkvm-standards", rev = "282cd356c3a0498416bb0619f9c8a347ce9933fb" }
 
 # ere
-ere-catalog = { git = "https://github.com/eth-act/ere", tag = "v0.15.0" }
-ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.15.0" }
-ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.15.0" }
-ere-util-build = { git = "https://github.com/eth-act/ere", tag = "v0.15.0" }
+ere-catalog = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
+ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
+ere-util-build = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
 
 # local
 stateless-validator-catalog = { path = "crates/stateless-validator-catalog" }

@@ -56,8 +56,6 @@ pub fn run_execution(
     fixtures: impl IntoIterator<Item = StatelessValidatorFixture>,
     execute: &(impl Fn(Vec<u8>) -> anyhow::Result<Vec<u8>> + Sync),
 ) -> Vec<ExecutionFailure> {
-    init_tracing();
-
     let fixtures = fixtures.into_iter().collect::<Vec<_>>();
     let total = fixtures.len();
     assert!(total > 0);

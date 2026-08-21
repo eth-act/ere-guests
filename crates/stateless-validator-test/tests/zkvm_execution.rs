@@ -6,9 +6,13 @@
 use ere_dockerized::zkVMKind;
 use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
-    execution::{ExecutionFailures, zkvm::run_zkvm_execution},
+    execution::{
+        ExecutionFailures, init_tracing,
+        zkvm::{is_guest_compatible, run_zkvm_execution},
+    },
     fixture::{FixturePreset, preset_fixtures},
 };
+use tracing::info;
 
 fn test_execution(
     stateless_validator: StatelessValidatorKind,
@@ -16,6 +20,17 @@ fn test_execution(
     preset: FixturePreset,
     expected_failures: usize,
 ) {
+    init_tracing();
+
+    if !is_guest_compatible(stateless_validator, zkvm_kind) {
+        info!(
+            "Skipping {stateless_validator} on {zkvm_kind}, the published ELF is not compatible \
+             with zkVM version {} of Ere",
+            zkvm_kind.sdk_version()
+        );
+        return;
+    }
+
     let failures = run_zkvm_execution(stateless_validator, zkvm_kind, preset_fixtures(preset));
     assert_eq!(
         failures.len(),
@@ -56,8 +71,8 @@ declare_test!(Ethrex, SP1, RpcGlamsterdamDevnet7);
 declare_test!(Ethrex, SP1, EestGlamsterdamDevnet7);
 declare_test!(Ethrex, Zisk, RpcBpo2);
 declare_test!(Ethrex, Zisk, RpcGlamsterdamDevnet7);
-// Ethrex OOM + ZisK `zkvm-interface` impl bug.
-declare_test!(Ethrex, Zisk, EestGlamsterdamDevnet7, failures = 26);
+// Ethrex OOM.
+declare_test!(Ethrex, Zisk, EestGlamsterdamDevnet7, failures = 4);
 
 // Reth
 
@@ -74,12 +89,11 @@ declare_test!(Reth, SP1, EestGlamsterdamDevnet7, failures = 13);
 declare_test!(Reth, Zisk, RpcBpo2);
 // Reth divergences (in-block created-code resolution from EIP-8025).
 declare_test!(Reth, Zisk, RpcGlamsterdamDevnet7, failures = 1);
-// Reth divergences + ZisK `zkvm-interface` impl bug.
-declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 35);
+// Reth divergences.
+declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 13);
 
 // Zesu
 
 declare_test!(Zesu, Zisk, RpcBpo2);
 declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet7);
-// ZisK `zkvm-interface` impl bug.
-declare_test!(Zesu, Zisk, EestGlamsterdamDevnet7, failures = 22);
+declare_test!(Zesu, Zisk, EestGlamsterdamDevnet7);
