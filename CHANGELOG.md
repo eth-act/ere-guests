@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/eth-act/ere-guests/compare/v0.15.0...v0.16.0) (2026-08-21)
+
+
+### Features
+
+* bump ere to v0.16.2 ([#78](https://github.com/eth-act/ere-guests/issues/78)) ([2cc73be](https://github.com/eth-act/ere-guests/commit/2cc73be5ce2d4b4d3ab93c4336babcb86da2f258))
+
 ## [0.15.0](https://github.com/eth-act/ere-guests/compare/v0.14.1...v0.15.0) (2026-08-06)
 
 
