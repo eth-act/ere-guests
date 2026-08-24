@@ -15,8 +15,10 @@ use alloc::vec::Vec;
 
 use libssz::{DecodeError, SszDecode, SszEncode};
 use libssz_derive::{HashTreeRoot, SszDecode, SszEncode};
-use libssz_merkle::{HashTreeRoot, Sha256Hasher};
+use libssz_merkle::{HashTreeRoot, Sha256Hasher, mix_in_active_fields};
 use libssz_types::SszList;
+
+use crate::{ProgressiveList, merkleize_progressive};
 
 /// Primitive types from the Amsterdam stateless schema.
 pub type Hash32 = [u8; 32];
@@ -39,9 +41,9 @@ pub const MAX_WITHDRAWAL_REQUESTS_PER_PAYLOAD: usize = 16;
 pub const MAX_CONSOLIDATION_REQUESTS_PER_PAYLOAD: usize = 2;
 pub const MAX_BUILDER_DEPOSIT_REQUESTS_PER_PAYLOAD: usize = 64;
 pub const MAX_BUILDER_EXIT_REQUESTS_PER_PAYLOAD: usize = 16;
+pub const MAX_BLOCK_ACCESS_LIST_BYTES: usize = 1 << 24;
 
-/// Composite types from the Amsterdam stateless schema.
-pub type BlockAccessList = SszList<u8, MAX_BYTES_PER_TRANSACTION>;
+/// Bounded composite types used before Gloas.
 pub type Transaction = SszList<u8, MAX_BYTES_PER_TRANSACTION>;
 pub type Transactions = SszList<Transaction, MAX_TRANSACTIONS_PER_PAYLOAD>;
 pub type Withdrawals = SszList<Withdrawal, MAX_WITHDRAWALS_PER_PAYLOAD>;
@@ -53,6 +55,76 @@ pub type ConsolidationRequests =
 pub type BuilderDepositRequests =
     SszList<BuilderDepositRequest, MAX_BUILDER_DEPOSIT_REQUESTS_PER_PAYLOAD>;
 pub type BuilderExitRequests = SszList<BuilderExitRequest, MAX_BUILDER_EXIT_REQUESTS_PER_PAYLOAD>;
+
+/// Progressive composite types introduced by Gloas/EIP-7688.
+pub type ProgressiveTransaction = ProgressiveList<u8>;
+pub type ProgressiveTransactions = ProgressiveList<ProgressiveTransaction>;
+pub type ProgressiveWithdrawals = ProgressiveList<Withdrawal>;
+pub type BlockAccessList = ProgressiveList<u8>;
+pub type ProgressiveDepositRequests = ProgressiveList<DepositRequest>;
+pub type ProgressiveWithdrawalRequests = ProgressiveList<WithdrawalRequest>;
+pub type ProgressiveConsolidationRequests = ProgressiveList<ConsolidationRequest>;
+pub type ProgressiveBuilderDepositRequests = ProgressiveList<BuilderDepositRequest>;
+pub type ProgressiveBuilderExitRequests = ProgressiveList<BuilderExitRequest>;
+
+/// A borrowed view over bounded pre-Gloas or progressive Gloas transactions.
+#[derive(Debug, Clone, Copy)]
+pub enum TransactionsRef<'a> {
+    Bounded(&'a Transactions),
+    Progressive(&'a ProgressiveTransactions),
+}
+
+impl TransactionsRef<'_> {
+    /// Returns the number of transactions.
+    pub fn len(self) -> usize {
+        match self {
+            Self::Bounded(transactions) => transactions.len(),
+            Self::Progressive(transactions) => transactions.len(),
+        }
+    }
+
+    /// Returns whether there are no transactions.
+    pub fn is_empty(self) -> bool {
+        self.len() == 0
+    }
+}
+
+impl<'a> TransactionsRef<'a> {
+    /// Iterates over transactions as byte slices.
+    pub fn iter(self) -> TransactionsIter<'a> {
+        match self {
+            Self::Bounded(transactions) => TransactionsIter::Bounded(transactions.iter()),
+            Self::Progressive(transactions) => TransactionsIter::Progressive(transactions.iter()),
+        }
+    }
+}
+
+impl<'a> IntoIterator for TransactionsRef<'a> {
+    type Item = &'a [u8];
+    type IntoIter = TransactionsIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+/// Iterator over either bounded pre-Gloas or progressive Gloas transactions.
+#[derive(Debug)]
+pub enum TransactionsIter<'a> {
+    Bounded(core::slice::Iter<'a, Transaction>),
+    Progressive(core::slice::Iter<'a, ProgressiveTransaction>),
+}
+
+impl<'a> Iterator for TransactionsIter<'a> {
+    type Item = &'a [u8];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            Self::Bounded(iter) => iter.next().map(|transaction| &transaction[..]),
+            Self::Progressive(iter) => iter.next().map(|transaction| &transaction[..]),
+        }
+    }
+}
 
 /// Withdrawals represent a transfer of ETH from the consensus layer (beacon chain) to the
 /// execution layer, as validated by the consensus layer. Each withdrawal is listed in the block's
@@ -123,13 +195,28 @@ pub struct ExecutionRequestsElectraFulu {
 
 /// Typed engine-API container of execution-layer triggered requests, as of Gloas, which
 /// EIP-8282 extends with the builder deposit and builder exit lists.
-#[derive(Debug, Clone, Default, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct ExecutionRequestsGloas {
-    pub deposits: DepositRequests,
-    pub withdrawals: WithdrawalRequests,
-    pub consolidations: ConsolidationRequests,
-    pub builder_deposits: BuilderDepositRequests,
-    pub builder_exits: BuilderExitRequests,
+    pub deposits: ProgressiveDepositRequests,
+    pub withdrawals: ProgressiveWithdrawalRequests,
+    pub consolidations: ProgressiveConsolidationRequests,
+    pub builder_deposits: ProgressiveBuilderDepositRequests,
+    pub builder_exits: ProgressiveBuilderExitRequests,
+}
+
+impl HashTreeRoot for ExecutionRequestsGloas {
+    fn hash_tree_root(&self, hasher: &impl Sha256Hasher) -> [u8; 32] {
+        progressive_container_root(
+            hasher,
+            &[
+                self.deposits.hash_tree_root(hasher),
+                self.withdrawals.hash_tree_root(hasher),
+                self.consolidations.hash_tree_root(hasher),
+                self.builder_deposits.hash_tree_root(hasher),
+                self.builder_exits.hash_tree_root(hasher),
+            ],
+        )
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
@@ -190,7 +277,7 @@ pub struct ExecutionPayloadV3 {
     pub excess_blob_gas: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+#[derive(Debug, Clone, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct ExecutionPayloadV4 {
     pub parent_hash: Hash32,
     pub fee_recipient: Address,
@@ -205,12 +292,73 @@ pub struct ExecutionPayloadV4 {
     pub extra_data: ExtraData,
     pub base_fee_per_gas: Uint256Bytes,
     pub block_hash: Hash32,
-    pub transactions: Transactions,
-    pub withdrawals: Withdrawals,
+    pub transactions: ProgressiveTransactions,
+    pub withdrawals: ProgressiveWithdrawals,
     pub blob_gas_used: u64,
     pub excess_blob_gas: u64,
     pub block_access_list: BlockAccessList,
     pub slot_number: u64,
+}
+
+impl Default for ExecutionPayloadV4 {
+    fn default() -> Self {
+        Self {
+            parent_hash: [0; 32],
+            fee_recipient: [0; 20],
+            state_root: [0; 32],
+            receipts_root: [0; 32],
+            logs_bloom: [0; 256],
+            prev_randao: [0; 32],
+            block_number: 0,
+            gas_limit: 0,
+            gas_used: 0,
+            timestamp: 0,
+            extra_data: Default::default(),
+            base_fee_per_gas: [0; 32],
+            block_hash: [0; 32],
+            transactions: Default::default(),
+            withdrawals: Default::default(),
+            blob_gas_used: 0,
+            excess_blob_gas: 0,
+            block_access_list: Default::default(),
+            slot_number: 0,
+        }
+    }
+}
+
+impl HashTreeRoot for ExecutionPayloadV4 {
+    fn hash_tree_root(&self, hasher: &impl Sha256Hasher) -> [u8; 32] {
+        progressive_container_root(
+            hasher,
+            &[
+                self.parent_hash.hash_tree_root(hasher),
+                self.fee_recipient.hash_tree_root(hasher),
+                self.state_root.hash_tree_root(hasher),
+                self.receipts_root.hash_tree_root(hasher),
+                self.logs_bloom.hash_tree_root(hasher),
+                self.prev_randao.hash_tree_root(hasher),
+                self.block_number.hash_tree_root(hasher),
+                self.gas_limit.hash_tree_root(hasher),
+                self.gas_used.hash_tree_root(hasher),
+                self.timestamp.hash_tree_root(hasher),
+                self.extra_data.hash_tree_root(hasher),
+                self.base_fee_per_gas.hash_tree_root(hasher),
+                self.block_hash.hash_tree_root(hasher),
+                self.transactions.hash_tree_root(hasher),
+                self.withdrawals.hash_tree_root(hasher),
+                self.blob_gas_used.hash_tree_root(hasher),
+                self.excess_blob_gas.hash_tree_root(hasher),
+                self.block_access_list.hash_tree_root(hasher),
+                self.slot_number.hash_tree_root(hasher),
+            ],
+        )
+    }
+}
+
+fn progressive_container_root(hasher: &impl Sha256Hasher, field_roots: &[[u8; 32]]) -> [u8; 32] {
+    let root = merkleize_progressive(hasher, field_roots);
+    let active_fields = alloc::vec![true; field_roots.len()];
+    mix_in_active_fields(hasher, &root, &active_fields)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
@@ -302,14 +450,93 @@ impl NewPayloadRequest {
     }
 
     /// Returns the transactions of the execution payload.
-    pub fn transactions(&self) -> &Transactions {
+    pub fn transactions(&self) -> TransactionsRef<'_> {
         match self {
-            Self::Bellatrix(request) => &request.execution_payload.transactions,
-            Self::Capella(request) => &request.execution_payload.transactions,
-            Self::Deneb(request) => &request.execution_payload.transactions,
-            Self::ElectraFulu(request) => &request.execution_payload.transactions,
-            Self::Gloas(request) => &request.execution_payload.transactions,
+            Self::Bellatrix(request) => {
+                TransactionsRef::Bounded(&request.execution_payload.transactions)
+            }
+            Self::Capella(request) => {
+                TransactionsRef::Bounded(&request.execution_payload.transactions)
+            }
+            Self::Deneb(request) => {
+                TransactionsRef::Bounded(&request.execution_payload.transactions)
+            }
+            Self::ElectraFulu(request) => {
+                TransactionsRef::Bounded(&request.execution_payload.transactions)
+            }
+            Self::Gloas(request) => {
+                TransactionsRef::Progressive(&request.execution_payload.transactions)
+            }
         }
+    }
+
+    /// Enforces the consensus maxima for Gloas progressive lists at runtime.
+    pub fn validate_progressive_limits(&self) -> Result<(), crate::guest::Error> {
+        let Self::Gloas(request) = self else {
+            return Ok(());
+        };
+        let payload = &request.execution_payload;
+        ensure_runtime_limit(
+            "execution_payload.transactions",
+            payload.transactions.len(),
+            MAX_TRANSACTIONS_PER_PAYLOAD,
+        )?;
+        for transaction in &payload.transactions {
+            ensure_runtime_limit(
+                "execution_payload.transactions[]",
+                transaction.len(),
+                MAX_BYTES_PER_TRANSACTION,
+            )?;
+        }
+        ensure_runtime_limit(
+            "execution_payload.withdrawals",
+            payload.withdrawals.len(),
+            MAX_WITHDRAWALS_PER_PAYLOAD,
+        )?;
+        ensure_runtime_limit(
+            "execution_payload.block_access_list",
+            payload.block_access_list.len(),
+            MAX_BLOCK_ACCESS_LIST_BYTES,
+        )?;
+
+        let requests = &request.execution_requests;
+        ensure_runtime_limit(
+            "execution_requests.deposits",
+            requests.deposits.len(),
+            MAX_DEPOSIT_REQUESTS_PER_PAYLOAD,
+        )?;
+        ensure_runtime_limit(
+            "execution_requests.withdrawals",
+            requests.withdrawals.len(),
+            MAX_WITHDRAWAL_REQUESTS_PER_PAYLOAD,
+        )?;
+        ensure_runtime_limit(
+            "execution_requests.consolidations",
+            requests.consolidations.len(),
+            MAX_CONSOLIDATION_REQUESTS_PER_PAYLOAD,
+        )?;
+        ensure_runtime_limit(
+            "execution_requests.builder_deposits",
+            requests.builder_deposits.len(),
+            MAX_BUILDER_DEPOSIT_REQUESTS_PER_PAYLOAD,
+        )?;
+        ensure_runtime_limit(
+            "execution_requests.builder_exits",
+            requests.builder_exits.len(),
+            MAX_BUILDER_EXIT_REQUESTS_PER_PAYLOAD,
+        )
+    }
+}
+
+fn ensure_runtime_limit(
+    field: &'static str,
+    length: usize,
+    max: usize,
+) -> Result<(), crate::guest::Error> {
+    if length > max {
+        Err(crate::guest::Error::ProgressiveListTooLong { field, length, max })
+    } else {
+        Ok(())
     }
 }
 
@@ -380,6 +607,7 @@ impl SszDecode for NewPayloadRequest {
 mod tests {
     use alloc::vec;
 
+    use hex_literal::hex;
     use libssz_merkle::Sha2Hasher;
 
     use crate::guest::input::{
@@ -474,11 +702,16 @@ mod tests {
             extra_data: v3.extra_data,
             base_fee_per_gas: v3.base_fee_per_gas,
             block_hash: v3.block_hash,
-            transactions: v3.transactions,
-            withdrawals: v3.withdrawals,
+            transactions: v3
+                .transactions
+                .into_iter()
+                .map(|transaction| ProgressiveTransaction::from(transaction.into_inner()))
+                .collect::<Vec<_>>()
+                .into(),
+            withdrawals: v3.withdrawals.into_inner().into(),
             blob_gas_used: v3.blob_gas_used,
             excess_blob_gas: v3.excess_blob_gas,
-            block_access_list: vec![0xba; 33].try_into().unwrap(),
+            block_access_list: vec![0xba; 33].into(),
             slot_number: 42,
         }
     }
@@ -549,11 +782,11 @@ mod tests {
 
     fn execution_requests_gloas() -> ExecutionRequestsGloas {
         ExecutionRequestsGloas {
-            deposits: deposit_requests(),
-            withdrawals: withdrawal_requests(),
-            consolidations: consolidation_requests(),
-            builder_deposits: builder_deposit_requests(),
-            builder_exits: builder_exit_requests(),
+            deposits: deposit_requests().into_inner().into(),
+            withdrawals: withdrawal_requests().into_inner().into(),
+            consolidations: consolidation_requests().into_inner().into(),
+            builder_deposits: builder_deposit_requests().into_inner().into(),
+            builder_exits: builder_exit_requests().into_inner().into(),
         }
     }
 
@@ -645,5 +878,46 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn gloas_progressive_roots_match_lighthouse_unstable() {
+        // Generated with Lighthouse `unstable` at
+        // e6a90c168436d8b8d6b5c779c9b0550bd56fb8c7.
+        assert_eq!(
+            ExecutionPayloadV4::default().hash_tree_root(&Sha2Hasher),
+            hex!("19e3b044dae3657cb2628406b78c61d8796fd490922f17441576a5bfbe8501df")
+        );
+        assert_eq!(
+            ExecutionRequestsGloas::default().hash_tree_root(&Sha2Hasher),
+            hex!("87b69a306c8e430d0857f7c4ac5e27cecffa1108d43c2e5df7388056fea7a423")
+        );
+    }
+
+    #[test]
+    fn rejects_gloas_progressive_list_over_runtime_limit() {
+        let mut request = gloas();
+        let NewPayloadRequest::Gloas(request) = &mut request else {
+            unreachable!();
+        };
+        request.execution_payload.withdrawals = vec![
+            Withdrawal {
+                index: 1,
+                validator_index: 2,
+                address: [3; 20],
+                amount: 4,
+            };
+            MAX_WITHDRAWALS_PER_PAYLOAD + 1
+        ]
+        .into();
+
+        assert!(matches!(
+            NewPayloadRequest::Gloas(request.clone()).validate_progressive_limits(),
+            Err(crate::guest::Error::ProgressiveListTooLong {
+                field: "execution_payload.withdrawals",
+                length,
+                max: MAX_WITHDRAWALS_PER_PAYLOAD,
+            }) if length == MAX_WITHDRAWALS_PER_PAYLOAD + 1
+        ));
     }
 }

@@ -1,0 +1,23 @@
+[package]
+name = "recursive-execution-proof"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+libssz.workspace = true
+libssz-derive.workspace = true
+libssz-merkle.workspace = true
+libssz-types.workspace = true
+stateless-validator-common.workspace = true
+
+[dev-dependencies]
+hex-literal.workspace = true
+
+[features]
+default = ["std"]
+std = ["stateless-validator-common/std"]

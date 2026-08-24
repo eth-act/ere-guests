@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "crates/recursive-execution-proof",
     "crates/stateless-validator-catalog",
     "crates/stateless-validator-debug",
     "crates/stateless-validator-common",
@@ -103,6 +104,7 @@ ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
 ere-util-build = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
 
 # local
+recursive-execution-proof = { path = "crates/recursive-execution-proof", default-features = false }
 stateless-validator-catalog = { path = "crates/stateless-validator-catalog" }
 stateless-validator-common = { path = "crates/stateless-validator-common", default-features = false }
 stateless-validator-debug = { path = "crates/stateless-validator-debug", default-features = false }

@@ -21,6 +21,9 @@ libssz-derive.workspace = true
 libssz-merkle = { workspace = true, features = ["sha2-backend"] }
 libssz-types.workspace = true
 
+[dev-dependencies]
+hex-literal.workspace = true
+
 [features]
 # guest
 default = ["std"]

@@ -1,11 +1,15 @@
 //! Ethrex stateless validator guest program.
 
 use alloc::{format, vec::Vec};
+use core::marker::PhantomData;
 
 pub use ere_platform_core::Platform;
 use ethrex_guest_program::{
     common::ExecutionError,
     l1::{DecodedEip8025, validate_eip8025_canonical_execution, validate_eip8025_execution},
+};
+use recursive_execution_proof::{
+    ExecutionProofVerifier, PrivateInput, PublicInput, StatelessNewPayloadVerifier,
 };
 use stateless_validator_common::{
     HashTreeRoot, SszEncode as _,
@@ -36,20 +40,51 @@ pub fn run_stateless_guest<P: Platform>(input_bytes: &[u8]) -> Vec<u8> {
         return StatelessValidationResult::default().to_ssz();
     };
 
+    let output = validate_stateless_input::<P>(fork, input);
+
+    P::cycle_scope("serialize_output", || output.to_ssz())
+}
+
+/// Runs one recursive EIP-8025 step using Ethrex for the stateless transition.
+///
+/// `proof_verifier` is proof-system specific and must bind the prior proof's
+/// `proof_type` to this exact guest program. Bid and envelope BLS signatures
+/// remain consensus-client checks, matching the specification's current
+/// signature boundary.
+pub fn process_recursive_input<P: Platform>(
+    input: PrivateInput,
+    proof_verifier: &impl ExecutionProofVerifier,
+) -> Result<PublicInput, recursive_execution_proof::Error> {
+    recursive_execution_proof::process_private_input(
+        proof_verifier,
+        &EthrexStatelessVerifier::<P>(PhantomData),
+        input,
+        &sha256_hasher(),
+    )
+}
+
+struct EthrexStatelessVerifier<P>(PhantomData<fn() -> P>);
+
+impl<P: Platform> StatelessNewPayloadVerifier for EthrexStatelessVerifier<P> {
+    fn verify_stateless_new_payload(&self, input: StatelessInput) -> StatelessValidationResult {
+        validate_stateless_input::<P>(ProtocolFork::Amsterdam, input)
+    }
+}
+
+fn validate_stateless_input<P: Platform>(
+    fork: ProtocolFork,
+    input: StatelessInput,
+) -> StatelessValidationResult {
     let new_payload_request_root = P::cycle_scope("new_payload_request_root", || {
         input.new_payload_request.hash_tree_root(&sha256_hasher())
     });
     let chain_config = input.chain_config.clone();
-
     let successful_validation = verify_stateless_new_payload::<P>(fork, input).is_ok();
-
-    let output = StatelessValidationResult::new(
+    StatelessValidationResult::new(
         new_payload_request_root,
         successful_validation,
         chain_config,
-    );
-
-    P::cycle_scope("serialize_output", || output.to_ssz())
+    )
 }
 
 /// Statelessly validates the execution payload, mirroring
@@ -58,12 +93,12 @@ fn verify_stateless_new_payload<P: Platform>(
     fork: ProtocolFork,
     input: StatelessInput,
 ) -> Result<(), Error> {
+    P::cycle_scope("validate_progressive_limits", || {
+        input.new_payload_request.validate_progressive_limits()
+    })?;
     P::cycle_scope("validate_chain_config", || {
         input.chain_config.validate(&input.new_payload_request)
     })?;
-
-    #[cfg(debug_assertions)]
-    let new_payload_request_root = input.new_payload_request.hash_tree_root(&sha256_hasher());
 
     let ethrex_input = P::cycle_scope("to_ethrex_input", || {
         to_ethrex_input(fork, input).map_err(|err| {
@@ -71,12 +106,6 @@ fn verify_stateless_new_payload<P: Platform>(
             err
         })
     })?;
-
-    #[cfg(debug_assertions)]
-    if fork == ProtocolFork::Amsterdam {
-        let ethrex_new_payload_request_root = ethrex_new_payload_request_root(&ethrex_input);
-        assert_eq!(ethrex_new_payload_request_root, new_payload_request_root);
-    }
 
     P::cycle_scope("run_validation", || {
         run_validation(ethrex_input).map_err(|err| {
@@ -100,19 +129,5 @@ fn run_validation(ethrex_input: DecodedEip8025) -> Result<(), ExecutionError> {
             stateless_input,
             chain_config,
         } => validate_eip8025_canonical_execution(stateless_input, chain_config, crypto::crypto()),
-    }
-}
-
-#[cfg(debug_assertions)]
-fn ethrex_new_payload_request_root(ethrex_input: &DecodedEip8025) -> [u8; 32] {
-    let hasher = sha256_hasher();
-    match ethrex_input {
-        DecodedEip8025::Legacy {
-            new_payload_request,
-            ..
-        } => new_payload_request.hash_tree_root(&hasher),
-        DecodedEip8025::Canonical {
-            stateless_input, ..
-        } => stateless_input.new_payload_request.hash_tree_root(&hasher),
     }
 }

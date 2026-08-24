@@ -20,14 +20,18 @@ use ethrex_guest_program::l1::{
 };
 use hex_literal::hex;
 use stateless_validator_common::{
-    SszList, SszVector,
+    ProgressiveList, SszList, SszVector,
     guest::{
         Error as CommonError,
         input::{
             ChainConfig, ExecutionWitness, ProtocolFork, StatelessInput,
             new_payload_request::{
-                ExecutionRequestsGloas, MAX_WITHDRAWALS_PER_PAYLOAD, NewPayloadRequest,
-                NewPayloadRequestElectraFulu, NewPayloadRequestGloas, Withdrawals,
+                ExecutionRequestsGloas, MAX_BLOCK_ACCESS_LIST_BYTES,
+                MAX_BUILDER_DEPOSIT_REQUESTS_PER_PAYLOAD, MAX_BUILDER_EXIT_REQUESTS_PER_PAYLOAD,
+                MAX_BYTES_PER_TRANSACTION, MAX_CONSOLIDATION_REQUESTS_PER_PAYLOAD,
+                MAX_DEPOSIT_REQUESTS_PER_PAYLOAD, MAX_TRANSACTIONS_PER_PAYLOAD,
+                MAX_WITHDRAWAL_REQUESTS_PER_PAYLOAD, MAX_WITHDRAWALS_PER_PAYLOAD,
+                NewPayloadRequest, NewPayloadRequestElectraFulu, NewPayloadRequestGloas,
             },
         },
     },
@@ -48,7 +52,7 @@ pub(crate) fn to_ethrex_input(
     Ok(match input.new_payload_request {
         NewPayloadRequest::Gloas(request) => DecodedEip8025::Canonical {
             stateless_input: CanonicalStatelessInput {
-                new_payload_request: to_ethrex_new_payload_request(request),
+                new_payload_request: to_ethrex_new_payload_request(request)?,
                 witness: to_ethrex_witness(input.witness),
                 chain_config: to_ethrex_canonical_chain_config(&input.chain_config),
                 public_keys: map_ssz_list(input.public_keys, array_to_ssz_vec),
@@ -74,8 +78,27 @@ pub(crate) fn to_ethrex_input(
 /// Converts the new payload request into the ethrex container.
 fn to_ethrex_new_payload_request(
     request: NewPayloadRequestGloas,
-) -> eip8025_ssz::NewPayloadRequestAmsterdam {
+) -> Result<eip8025_ssz::NewPayloadRequestAmsterdam, Error> {
     let payload = request.execution_payload;
+    let transactions_length = payload.transactions.len();
+    let transactions = payload
+        .transactions
+        .into_iter()
+        .map(|transaction| {
+            progressive_to_ssz_list(
+                "execution_payload.transactions[]",
+                transaction,
+                MAX_BYTES_PER_TRANSACTION,
+                core::convert::identity,
+            )
+        })
+        .collect::<Result<Vec<_>, Error>>()?;
+    let transactions =
+        SszList::try_from(transactions).map_err(|_| CommonError::ProgressiveListTooLong {
+            field: "execution_payload.transactions",
+            length: transactions_length,
+            max: MAX_TRANSACTIONS_PER_PAYLOAD,
+        })?;
     let execution_payload = eip8025_ssz::ExecutionPayloadV4 {
         parent_hash: payload.parent_hash,
         fee_recipient: payload.fee_recipient.into(),
@@ -90,74 +113,115 @@ fn to_ethrex_new_payload_request(
         extra_data: payload.extra_data,
         base_fee_per_gas: payload.base_fee_per_gas,
         block_hash: payload.block_hash,
-        transactions: payload.transactions,
-        withdrawals: to_ethrex_withdrawals(payload.withdrawals),
+        transactions,
+        withdrawals: to_ethrex_withdrawals(payload.withdrawals)?,
         blob_gas_used: payload.blob_gas_used,
         excess_blob_gas: payload.excess_blob_gas,
-        block_access_list: payload.block_access_list,
+        block_access_list: progressive_to_ssz_list(
+            "execution_payload.block_access_list",
+            payload.block_access_list,
+            MAX_BLOCK_ACCESS_LIST_BYTES,
+            core::convert::identity,
+        )?,
         slot_number: payload.slot_number,
     };
-    eip8025_ssz::NewPayloadRequestAmsterdam {
+    Ok(eip8025_ssz::NewPayloadRequestAmsterdam {
         execution_payload,
         versioned_hashes: request.versioned_hashes,
         parent_beacon_block_root: request.parent_beacon_block_root,
-        execution_requests: to_ethrex_execution_requests(request.execution_requests),
-    }
+        execution_requests: to_ethrex_execution_requests(request.execution_requests)?,
+    })
 }
 
 /// Converts canonical withdrawals into the ethrex list.
 fn to_ethrex_withdrawals(
-    withdrawals: Withdrawals,
-) -> SszList<eip8025_ssz::Withdrawal, MAX_WITHDRAWALS_PER_PAYLOAD> {
-    map_ssz_list(withdrawals, |withdrawal| eip8025_ssz::Withdrawal {
-        index: withdrawal.index,
-        validator_index: withdrawal.validator_index,
-        address: withdrawal.address.into(),
-        amount: withdrawal.amount,
-    })
+    withdrawals: ProgressiveList<
+        stateless_validator_common::guest::input::new_payload_request::Withdrawal,
+    >,
+) -> Result<SszList<eip8025_ssz::Withdrawal, MAX_WITHDRAWALS_PER_PAYLOAD>, Error> {
+    progressive_to_ssz_list(
+        "execution_payload.withdrawals",
+        withdrawals,
+        MAX_WITHDRAWALS_PER_PAYLOAD,
+        |withdrawal| eip8025_ssz::Withdrawal {
+            index: withdrawal.index,
+            validator_index: withdrawal.validator_index,
+            address: withdrawal.address.into(),
+            amount: withdrawal.amount,
+        },
+    )
 }
 
 /// Converts the canonical execution requests into the ethrex container.
 fn to_ethrex_execution_requests(
     requests: ExecutionRequestsGloas,
-) -> eip8025_ssz::ExecutionRequests {
-    eip8025_ssz::ExecutionRequests {
-        deposits: map_ssz_list(requests.deposits, |deposit| eip8025_ssz::DepositRequest {
-            pubkey: deposit.pubkey,
-            withdrawal_credentials: deposit.withdrawal_credentials,
-            amount: deposit.amount,
-            signature: deposit.signature,
-            index: deposit.index,
-        }),
-        withdrawals: map_ssz_list(requests.withdrawals, |withdrawal| {
-            eip8025_ssz::WithdrawalRequest {
+) -> Result<eip8025_ssz::ExecutionRequests, Error> {
+    Ok(eip8025_ssz::ExecutionRequests {
+        deposits: progressive_to_ssz_list(
+            "execution_requests.deposits",
+            requests.deposits,
+            MAX_DEPOSIT_REQUESTS_PER_PAYLOAD,
+            |deposit| eip8025_ssz::DepositRequest {
+                pubkey: deposit.pubkey,
+                withdrawal_credentials: deposit.withdrawal_credentials,
+                amount: deposit.amount,
+                signature: deposit.signature,
+                index: deposit.index,
+            },
+        )?,
+        withdrawals: progressive_to_ssz_list(
+            "execution_requests.withdrawals",
+            requests.withdrawals,
+            MAX_WITHDRAWAL_REQUESTS_PER_PAYLOAD,
+            |withdrawal| eip8025_ssz::WithdrawalRequest {
                 source_address: withdrawal.source_address.into(),
                 validator_pubkey: withdrawal.validator_pubkey,
                 amount: withdrawal.amount,
-            }
-        }),
-        consolidations: map_ssz_list(requests.consolidations, |consolidation| {
-            eip8025_ssz::ConsolidationRequest {
+            },
+        )?,
+        consolidations: progressive_to_ssz_list(
+            "execution_requests.consolidations",
+            requests.consolidations,
+            MAX_CONSOLIDATION_REQUESTS_PER_PAYLOAD,
+            |consolidation| eip8025_ssz::ConsolidationRequest {
                 source_address: consolidation.source_address.into(),
                 source_pubkey: consolidation.source_pubkey,
                 target_pubkey: consolidation.target_pubkey,
-            }
-        }),
-        builder_deposits: map_ssz_list(requests.builder_deposits, |builder_deposit| {
-            eip8025_ssz::BuilderDepositRequest {
+            },
+        )?,
+        builder_deposits: progressive_to_ssz_list(
+            "execution_requests.builder_deposits",
+            requests.builder_deposits,
+            MAX_BUILDER_DEPOSIT_REQUESTS_PER_PAYLOAD,
+            |builder_deposit| eip8025_ssz::BuilderDepositRequest {
                 pubkey: builder_deposit.pubkey,
                 withdrawal_credentials: builder_deposit.withdrawal_credentials,
                 amount: builder_deposit.amount,
                 signature: builder_deposit.signature,
-            }
-        }),
-        builder_exits: map_ssz_list(requests.builder_exits, |builder_exit| {
-            eip8025_ssz::BuilderExitRequest {
+            },
+        )?,
+        builder_exits: progressive_to_ssz_list(
+            "execution_requests.builder_exits",
+            requests.builder_exits,
+            MAX_BUILDER_EXIT_REQUESTS_PER_PAYLOAD,
+            |builder_exit| eip8025_ssz::BuilderExitRequest {
                 source_address: builder_exit.source_address.into(),
                 pubkey: builder_exit.pubkey,
-            }
-        }),
-    }
+            },
+        )?,
+    })
+}
+
+fn progressive_to_ssz_list<T, U, const N: usize>(
+    field: &'static str,
+    values: ProgressiveList<T>,
+    max: usize,
+    mut map: impl FnMut(T) -> U,
+) -> Result<SszList<U, N>, Error> {
+    let length = values.len();
+    let values = values.into_iter().map(&mut map).collect::<Vec<_>>();
+    SszList::try_from(values)
+        .map_err(|_| CommonError::ProgressiveListTooLong { field, length, max }.into())
 }
 
 /// Converts the execution witness into the ethrex container.
@@ -310,18 +374,28 @@ fn to_ethrex_legacy_new_payload_request(
             base_fee_per_gas: payload.base_fee_per_gas,
             block_hash: payload.block_hash,
             transactions: payload.transactions,
-            withdrawals: to_ethrex_withdrawals(payload.withdrawals),
+            withdrawals: map_ssz_list(payload.withdrawals, |withdrawal| eip8025_ssz::Withdrawal {
+                index: withdrawal.index,
+                validator_index: withdrawal.validator_index,
+                address: withdrawal.address.into(),
+                amount: withdrawal.amount,
+            }),
             blob_gas_used: payload.blob_gas_used,
             excess_blob_gas: payload.excess_blob_gas,
         },
         versioned_hashes: request.versioned_hashes,
         parent_beacon_block_root: request.parent_beacon_block_root,
         execution_requests: to_ethrex_execution_requests(ExecutionRequestsGloas {
-            deposits: request.execution_requests.deposits,
-            withdrawals: request.execution_requests.withdrawals,
-            consolidations: request.execution_requests.consolidations,
+            deposits: request.execution_requests.deposits.into_inner().into(),
+            withdrawals: request.execution_requests.withdrawals.into_inner().into(),
+            consolidations: request
+                .execution_requests
+                .consolidations
+                .into_inner()
+                .into(),
             ..Default::default()
-        }),
+        })
+        .expect("bounded Electra/Fulu requests fit their Gloas runtime limits"),
     }
 }
 

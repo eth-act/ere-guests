@@ -1,6 +1,10 @@
 //! Execution tests for `stateless-validator-reth` guest program on host
 
-use stateless_validator_test::declare_test_host_execution;
+use stateless_validator_test::{
+    declare_test_host_execution, declare_test_host_recursive_execution,
+};
+
+declare_test_host_recursive_execution!(Reth);
 
 declare_test_host_execution!(Reth, RpcBpo2);
 // NOTE:

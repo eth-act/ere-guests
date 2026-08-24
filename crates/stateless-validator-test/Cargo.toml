@@ -35,10 +35,14 @@ ere-dockerized.workspace = true
 ere-platform-core.workspace = true
 
 # local
+recursive-execution-proof.workspace = true
 stateless-validator-catalog.workspace = true
 stateless-validator-common = { workspace = true, features = ["host"] }
 stateless-validator-ethrex = { workspace = true, features = ["host"] }
 stateless-validator-reth = { workspace = true, features = ["host"] }
+
+# ssz
+libssz-merkle.workspace = true
 
 [dev-dependencies]
 paste.workspace = true
