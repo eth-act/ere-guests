@@ -9,22 +9,20 @@ license.workspace = true
 workspace = true
 
 [dependencies]
-anyhow = { workspace = true, optional = true }
-const-hex = { workspace = true, features = ["alloc"] }
 paste.workspace = true
-sha2.workspace = true
 thiserror.workspace = true
 
 # ssz
 libssz.workspace = true
 libssz-derive.workspace = true
-libssz-merkle = { workspace = true, features = ["sha2-backend"] }
+libssz-merkle.workspace = true
 libssz-types.workspace = true
 
 [features]
 # guest
 default = ["std"]
 std = []
-
-# host
 host = ["std"]
+
+[dev-dependencies]
+const-hex = { workspace = true, features = ["alloc"] }

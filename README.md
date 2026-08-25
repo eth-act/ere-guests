@@ -1,6 +1,6 @@
 # Ere Guests
 
-A collection of guest programs built with [Ere](https://github.com/eth-act/ere) for various zkVM platforms.
+A catalog, downloader, and execution harness for release-backed stateless validator guests used with [Ere](https://github.com/eth-act/ere).
 
 ## Table of Contents
 
@@ -9,46 +9,42 @@ A collection of guest programs built with [Ere](https://github.com/eth-act/ere) 
   - [Supported Rust Versions (MSRV)](#supported-rust-versions-msrv)
   - [Overview](#overview)
   - [Repository Structure](#repository-structure)
-    - [Library Crates](#library-crates)
-    - [Guest Programs](#guest-programs)
+    - [Workspace Crates](#workspace-crates)
+    - [Guest Artifacts](#guest-artifacts)
   - [Development](#development)
     - [Formatting](#formatting)
   - [License](#license)
 
 ## Supported Rust Versions (MSRV)
 
-The current MSRV (minimum supported rust version) is 1.88.
+The current MSRV (minimum supported Rust version) is 1.93.
 
 ## Overview
 
-This repository contains guest programs and libraries designed to run on zkVM platforms using the Ere framework. It provides both reusable library crates and compiled guest binaries for various zkVMs.
+This repository republishes checksum-verified guest ELFs and program verification keys from upstream releases. The active guest and zkVM combinations are defined in [`artifact-registry.json`](artifact-registry.json).
 
 ## Repository Structure
 
-### Library Crates
+### Workspace Crates
 
 Located in `crates/`, these provide reusable functionality for guest programs and host:
 
-- [`stateless-validator-catalog`](crates/stateless-validator-catalog) - Catalog of stateless validator kinds and their versions
-- [`stateless-validator-common`](crates/stateless-validator-common) - Canonical SSZ stateless input and output types shared by both validators
-- [`stateless-validator-ethrex`](crates/stateless-validator-ethrex) - Stateless validation using Ethrex
-- [`stateless-validator-reth`](crates/stateless-validator-reth) - Stateless validation using Reth
-- [`stateless-validator-debug`](crates/stateless-validator-debug) - CLI tool for running stateless validator guest fixtures natively
-- [`stateless-validator-downloader`](crates/stateless-validator-downloader) - Downloads released ELFs and VKs from GitHub releases and action artifacts
-- [`stateless-validator-test`](crates/stateless-validator-test) - Shared test harness that downloads EEST and RPC fixtures and runs guests on host and in dockerized zkVMs
+- [`stateless-validator-catalog`](crates/stateless-validator-catalog) - Catalog of active validator kinds and registry-derived versions
+- [`stateless-validator-common`](crates/stateless-validator-common) - Canonical `no_std` tests-zkevm v0.8.2 input and output schemas
+- [`stateless-validator-downloader`](crates/stateless-validator-downloader) - Downloads republished ELFs and VKs from releases and workflow artifacts
+- [`stateless-validator-test`](crates/stateless-validator-test) - Runs EEST and rolling devnet inputs against registry artifacts in dockerized zkVMs
 
-### Guest Programs
+### Guest Artifacts
 
-Located in `bin/`, these are executable guest programs for various zkVMs:
+Reth `v0.1.0-rc.2` is currently active on OpenVM, SP1, and ZisK. Ethrex keeps catalog ID `0` reserved, and Zesu keeps ID `2` reserved; they remain inactive until compatible, checksum-backed release artifacts pass the same test matrix.
 
-- [`stateless-validator-ethrex`](bin/stateless-validator-ethrex) - Stateless validator using Ethrex
-- [`stateless-validator-reth`](bin/stateless-validator-reth) - Stateless validator using Reth
+The daily devnet workflow probes the future `glamsterdam-devnet-8` batch catalog. It exits successfully without running guests until that dataset is published.
 
 ## Development
 
 ### Formatting
 
-Formatting of the workspace and all guest programs:
+Formatting the workspace:
 
 ```bash
 .github/scripts/cargo-fmt-all.sh

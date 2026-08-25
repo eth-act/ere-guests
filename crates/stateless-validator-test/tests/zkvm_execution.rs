@@ -1,7 +1,7 @@
-//! Execution tests for stateless validator guest program
+//! `tests-zkevm@v0.8.2` execution tests for release-backed guests.
 //!
-//! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built
-//! image as the executor.
+//! Set `STATELESS_VALIDATOR` and `ZKVM` to one pair from `artifact-registry.json`.
+//! Run with `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use pre-built Ere images.
 
 use ere_dockerized::zkVMKind;
 use stateless_validator_catalog::StatelessValidatorKind;
@@ -10,90 +10,57 @@ use stateless_validator_test::{
         ExecutionFailures, init_tracing,
         zkvm::{is_guest_compatible, run_zkvm_execution},
     },
-    fixture::{FixturePreset, preset_fixtures},
+    fixture::eest_fixtures,
 };
-use tracing::info;
 
-fn test_execution(
-    stateless_validator: StatelessValidatorKind,
-    zkvm_kind: zkVMKind,
-    preset: FixturePreset,
-    expected_failures: usize,
-) {
-    init_tracing();
+const RETH_EXPECTED_FAILURES: &[&str] = &[
+    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_opcode[fork_Amsterdam-blockchain_test_from_state_test-opcode_CREATE-non-empty-balance-correct-initcode]#block0",
+    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_opcode[fork_Amsterdam-blockchain_test_from_state_test-opcode_CREATE2-non-empty-balance-correct-initcode]#block0",
+    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_0-blockchain_test_from_state_test-non-empty-balance-correct-initcode]#block0",
+    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_0-blockchain_test_from_state_test-non-empty-balance-revert-initcode]#block0",
+    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_1-blockchain_test_from_state_test-non-empty-balance-correct-initcode]#block0",
+    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_1-blockchain_test_from_state_test-non-empty-balance-revert-initcode]#block0",
+    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_2-blockchain_test_from_state_test-non-empty-balance-correct-initcode]#block0",
+    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_2-blockchain_test_from_state_test-non-empty-balance-revert-initcode]#block0",
+    "tests/paris/eip7610_create_collision/test_revert_in_create.py::test_collision_with_create2_revert_in_initcode[fork_Amsterdam-blockchain_test_from_state_test]#block0",
+    "tests/paris/eip7610_create_collision/test_revert_in_create.py::test_create2_collision_storage[fork_Amsterdam-blockchain_test_from_state_test-empty-initcode]#block0",
+    "tests/paris/eip7610_create_collision/test_revert_in_create.py::test_create2_collision_storage[fork_Amsterdam-blockchain_test_from_state_test-initcode-with-deploy]#block0",
+    "tests/paris/eip7610_create_collision/test_revert_in_create.py::test_create2_collision_storage[fork_Amsterdam-blockchain_test_from_state_test-sstore-initcode]#block0",
+];
 
-    if !is_guest_compatible(stateless_validator, zkvm_kind) {
-        info!(
-            "Skipping {stateless_validator} on {zkvm_kind}, the published ELF is not compatible \
-             with zkVM version {} of Ere",
-            zkvm_kind.sdk_version()
-        );
-        return;
+fn expected_failures(stateless_validator: StatelessValidatorKind) -> &'static [&'static str] {
+    match stateless_validator {
+        StatelessValidatorKind::Reth => RETH_EXPECTED_FAILURES,
     }
+}
 
-    let failures = run_zkvm_execution(stateless_validator, zkvm_kind, preset_fixtures(preset));
+#[test]
+fn executes_registered_guest() {
+    init_tracing();
+    let stateless_validator = std::env::var("STATELESS_VALIDATOR")
+        .expect("STATELESS_VALIDATOR must name an artifact-registry.json guest")
+        .parse::<StatelessValidatorKind>()
+        .unwrap();
+    let zkvm = std::env::var("ZKVM")
+        .expect("ZKVM must name an artifact-registry.json zkVM")
+        .parse::<zkVMKind>()
+        .unwrap();
+    assert!(
+        is_guest_compatible(stateless_validator, zkvm),
+        "{stateless_validator}-{zkvm} is incompatible with Ere SDK {}",
+        zkvm.sdk_version()
+    );
+
+    let failures = run_zkvm_execution(stateless_validator, zkvm, eest_fixtures());
+    let failure_names = failures
+        .iter()
+        .map(|failure| failure.name.as_str())
+        .collect::<Vec<_>>();
     assert_eq!(
-        failures.len(),
-        expected_failures,
-        "expected {expected_failures} failures, got {}:\n{}",
+        failure_names,
+        expected_failures(stateless_validator),
+        "unexpected upstream failure set ({} failures):\n{}",
         failures.len(),
         ExecutionFailures(&failures),
     );
 }
-
-macro_rules! declare_test {
-    ($stateless_validator:ident, $zkvm_kind:ident, $preset:ident, failures = $expected_failures:expr) => {
-        paste::paste! {
-            #[test]
-            fn [<test_execution_ $stateless_validator:lower _ $zkvm_kind:lower _ $preset:snake>]() {
-                test_execution(
-                    StatelessValidatorKind::$stateless_validator,
-                    zkVMKind::$zkvm_kind,
-                    FixturePreset::$preset,
-                    $expected_failures,
-                );
-            }
-        }
-    };
-    ($stateless_validator:ident, $zkvm_kind:ident, $preset:ident) => {
-        declare_test!($stateless_validator, $zkvm_kind, $preset, failures = 0);
-    };
-}
-
-// Ethrex
-
-declare_test!(Ethrex, OpenVM, RpcBpo2);
-declare_test!(Ethrex, OpenVM, RpcGlamsterdamDevnet7);
-// Ethrex OOM.
-declare_test!(Ethrex, OpenVM, EestGlamsterdamDevnet7, failures = 4);
-declare_test!(Ethrex, SP1, RpcBpo2);
-declare_test!(Ethrex, SP1, RpcGlamsterdamDevnet7);
-declare_test!(Ethrex, SP1, EestGlamsterdamDevnet7);
-declare_test!(Ethrex, Zisk, RpcBpo2);
-declare_test!(Ethrex, Zisk, RpcGlamsterdamDevnet7);
-// Ethrex OOM.
-declare_test!(Ethrex, Zisk, EestGlamsterdamDevnet7, failures = 4);
-
-// Reth
-
-declare_test!(Reth, OpenVM, RpcBpo2);
-// Reth divergences (in-block created-code resolution from EIP-8025).
-declare_test!(Reth, OpenVM, RpcGlamsterdamDevnet7, failures = 1);
-// Reth divergences.
-declare_test!(Reth, OpenVM, EestGlamsterdamDevnet7, failures = 13);
-declare_test!(Reth, SP1, RpcBpo2);
-// Reth divergences (in-block created-code resolution from EIP-8025).
-declare_test!(Reth, SP1, RpcGlamsterdamDevnet7, failures = 1);
-// Reth divergences.
-declare_test!(Reth, SP1, EestGlamsterdamDevnet7, failures = 13);
-declare_test!(Reth, Zisk, RpcBpo2);
-// Reth divergences (in-block created-code resolution from EIP-8025).
-declare_test!(Reth, Zisk, RpcGlamsterdamDevnet7, failures = 1);
-// Reth divergences.
-declare_test!(Reth, Zisk, EestGlamsterdamDevnet7, failures = 13);
-
-// Zesu
-
-declare_test!(Zesu, Zisk, RpcBpo2);
-declare_test!(Zesu, Zisk, RpcGlamsterdamDevnet7);
-declare_test!(Zesu, Zisk, EestGlamsterdamDevnet7);

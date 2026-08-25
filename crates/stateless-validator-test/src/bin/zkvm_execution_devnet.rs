@@ -1,6 +1,5 @@
-//! Runs the latest blocks published in the devnet catalog through a stateless
-//! validator guest program, in a zkVM or, when no zkVM is selected, natively on
-//! the host, reporting the failures.
+//! Runs the latest blocks published in the devnet catalog through a
+//! release-backed stateless validator guest in a zkVM, reporting failures.
 //!
 //! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built
 //! image as the executor.
@@ -9,34 +8,28 @@ use std::{fs, path::PathBuf};
 
 use clap::Parser;
 use ere_dockerized::zkVMKind;
-use serde::Deserialize;
 use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
     execution::{
-        ExecutionFailures,
-        host::run_host_execution,
-        init_tracing,
+        ExecutionFailures, init_tracing,
         zkvm::{is_guest_compatible, run_zkvm_execution},
     },
-    fixture::{R2_FIXTURES_BASE_URL, StatelessValidatorFixture, archive_fixtures},
+    fixture::{DEVNET_NAME, latest_devnet_fixtures},
 };
 use tracing::info;
-
-/// Subdirectory under `<crate>/fixtures/` holding the unpacked devnet batches.
-const DEVNET_FIXTURES_DIR: &str = "rpc-glamsterdam-devnet-7";
 
 /// CLI options for the devnet zkVM execution runner.
 #[derive(Debug, Clone, PartialEq, Eq, Parser)]
 #[command(
     name = "zkvm_execution_devnet",
-    about = "Run the latest devnet blocks through a stateless validator guest in a zkVM or on host.",
+    about = "Run the latest devnet blocks through a release-backed stateless validator guest.",
     long_about = None,
     arg_required_else_help = true
 )]
 struct Cli {
-    /// zkVM to execute the guest on, omit to execute the guest natively on host.
+    /// zkVM to execute the guest on.
     #[arg(long)]
-    zkvm: Option<zkVMKind>,
+    zkvm: zkVMKind,
     /// Stateless validator guest to execute.
     #[arg(long)]
     stateless_validator: StatelessValidatorKind,
@@ -52,90 +45,25 @@ fn main() {
     let cli = Cli::parse();
     init_tracing();
 
-    if let Some(zkvm) = cli.zkvm
-        && !is_guest_compatible(cli.stateless_validator, zkvm)
-    {
+    if !is_guest_compatible(cli.stateless_validator, cli.zkvm) {
         info!(
-            "Skipping {} on {zkvm}, the published ELF is not compatible with zkVM version {} of Ere",
+            "Skipping {} on {}, the published ELF is not compatible with zkVM version {} of Ere",
             cli.stateless_validator,
-            zkvm.sdk_version()
+            cli.zkvm,
+            cli.zkvm.sdk_version()
         );
         return;
     }
 
     let fixtures = latest_devnet_fixtures(cli.blocks);
     info!(
-        "Running {} blocks from {} to {}",
+        "Running {} {DEVNET_NAME} blocks from {} to {}",
         fixtures.len(),
         fixtures.first().unwrap().name,
         fixtures.last().unwrap().name,
     );
-    let failures = match cli.zkvm {
-        Some(zkvm) => run_zkvm_execution(cli.stateless_validator, zkvm, fixtures),
-        None => run_host_execution(cli.stateless_validator, fixtures),
-    };
+    let failures = run_zkvm_execution(cli.stateless_validator, cli.zkvm, fixtures);
     if let Some(output) = cli.output {
         fs::write(output, ExecutionFailures(&failures).to_string()).unwrap();
     }
-}
-
-/// Returns the fixtures of the latest `count` block artifacts published in the
-/// devnet catalog, downloading and unpacking the batch archives covering them
-/// into the local cache on first use.
-fn latest_devnet_fixtures(count: usize) -> Vec<StatelessValidatorFixture> {
-    let mut fixtures = latest_devnet_batches(count)
-        .into_iter()
-        .flat_map(|batch| {
-            archive_fixtures(
-                &format!(
-                    "{DEVNET_FIXTURES_DIR}/{}-{}",
-                    batch.batch_start_block, batch.batch_end_block
-                ),
-                &format!("{R2_FIXTURES_BASE_URL}/{}", batch.path),
-                "blockchain_tests",
-            )
-        })
-        .collect::<Vec<_>>();
-    fixtures.drain(..fixtures.len().saturating_sub(count));
-    fixtures
-}
-
-/// Returns the latest batches of the devnet catalog covering at least `count`
-/// block artifacts, keeping the order of `batches.jsonl`.
-fn latest_devnet_batches(count: usize) -> Vec<DevnetBatch> {
-    let url = format!("{R2_FIXTURES_BASE_URL}/batches.jsonl");
-    println!("Downloading devnet batch index {url}");
-    let index = reqwest::blocking::get(&url)
-        .unwrap()
-        .error_for_status()
-        .unwrap()
-        .text()
-        .unwrap();
-
-    let mut batches = index
-        .lines()
-        .map(|line| serde_json::from_str::<DevnetBatch>(line).unwrap())
-        .collect::<Vec<_>>();
-    let take = (batches
-        .iter()
-        .rev()
-        .scan(0, |artifacts, batch| {
-            *artifacts += batch.artifact_count;
-            Some(*artifacts)
-        })
-        .take_while(|artifacts| *artifacts < count)
-        .count()
-        + 1)
-    .min(batches.len());
-    batches.split_off(batches.len() - take)
-}
-
-/// Wire shape of a batch entry in the devnet catalog's `batches.jsonl`.
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct DevnetBatch {
-    batch_start_block: u64,
-    batch_end_block: u64,
-    artifact_count: usize,
-    path: String,
 }

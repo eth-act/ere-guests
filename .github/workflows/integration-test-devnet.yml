@@ -1,31 +1,43 @@
-name: Integration test devnet
+name: Integration test devnet-8
 
 on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   CARGO_TERM_COLOR: always
+  DEVNET_CATALOG_URL: https://pub-df22334654034ebab51bc096137a59d8.r2.dev/devnets/glamsterdam-devnet-8/batches.jsonl
 
 jobs:
-  test_zkvm_execution_devnet:
+  devnet-preflight:
+    name: Check devnet-8 catalog and resolve matrix
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.preflight.outputs.available }}
+      matrix: ${{ steps.preflight.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Probe batch catalog and build registry matrix
+        id: preflight
+        env:
+          CATALOG_URL: ${{ env.DEVNET_CATALOG_URL }}
+        run: bash .github/scripts/devnet-preflight.sh "$CATALOG_URL"
+
+  test-zkvm-execution-devnet:
     name: ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}
+    needs: devnet-preflight
+    if: needs.devnet-preflight.outputs.available == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        stateless_validator:
-          - ethrex
-          - reth
-        zkvm:
-          - openvm
-          - sp1
-          - zisk
-        include:
-          - { zkvm: zisk, external: true, stateless_validator: zesu }
-          - { zkvm: zisk, stateless_validator: ethrex, ere_profile: ethrex }
-          - { zkvm: zisk, ere_rustflags: "-C target-feature=+unaligned-scalar-mem" }
+      matrix: ${{ fromJson(needs.devnet-preflight.outputs.matrix) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -44,8 +56,8 @@ jobs:
 
       - name: Configure sccache
         run: |
-          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> "$GITHUB_ENV"
+          echo "SCCACHE_GHA_ENABLED=true" >> "$GITHUB_ENV"
 
       - name: Cache cargo registry
         uses: actions/cache@v4
@@ -58,37 +70,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-registry-
 
-      - name: Cache bin target
-        if: matrix.external != true
-        uses: actions/cache@v4
-        with:
-          path: bin/stateless-validator-${{ matrix.stateless_validator }}/${{ matrix.zkvm }}/target
-          key: ${{ format('{0}-bin-{1}-{2}-{3}', runner.os, matrix.stateless_validator, matrix.zkvm, hashFiles(format('bin/stateless-validator-{0}/{1}/Cargo.lock', matrix.stateless_validator, matrix.zkvm))) }}
-          restore-keys: |
-            ${{ runner.os }}-bin-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}-
-
-      - name: Enable Ere profile
-        if: matrix.ere_profile != ''
+      - name: Run latest devnet-8 blocks
         env:
-          ERE_PROFILE: ${{ matrix.ere_profile }}
-        run: echo "ERE_PROFILE=$ERE_PROFILE" >> "$GITHUB_ENV"
-
-      - name: Enable Ere rustflags
-        if: matrix.ere_rustflags != ''
-        env:
-          ERE_RUSTFLAGS: ${{ matrix.ere_rustflags }}
-        run: echo "ERE_RUSTFLAGS=$ERE_RUSTFLAGS" >> "$GITHUB_ENV"
-
-      - name: Run zkVM execution of the latest devnet blocks
-        env:
-          RUST_LOG: info,ere_server=error
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
+          RUST_LOG: info,ere_server=error
         run: |
           cargo run --release --package stateless-validator-test --bin zkvm_execution_devnet -- \
             --zkvm ${{ matrix.zkvm }} \
             --stateless-validator ${{ matrix.stateless_validator }} \
             --output failures.txt
-          # No failures file means the guest was skipped as incompatible with the zkVM version.
           if [[ -f failures.txt ]]; then
             {
               echo "### ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}"
@@ -96,69 +86,9 @@ jobs:
               cat failures.txt
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "${{ matrix.stateless_validator }} on ${{ matrix.zkvm }} was skipped as SDK-incompatible." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Chown
-        if: matrix.external != true
-        run: |
-          sudo chown -R $(id -u):$(id -g) bin/stateless-validator-${{ matrix.stateless_validator }}/${{ matrix.zkvm }}/target || true
-
-      - name: Run sccache stat for check
-        shell: bash
-        run: ${SCCACHE_PATH} --show-stats
-
-  test_host_execution_devnet:
-    name: ${{ matrix.stateless_validator }} on host
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        stateless_validator:
-          - ethrex
-          - reth
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Setup sccache
-        uses: mozilla/sccache-action@v0.0.9
-        with:
-          disable_annotations: true
-
-      - name: Configure sccache
-        run: |
-          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
-
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-registry-
-
-      - name: Run host execution of the latest devnet blocks
-        env:
-          RUST_LOG: info
-          CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS: true
-        run: |
-          cargo run --release --package stateless-validator-test --bin zkvm_execution_devnet -- \
-            --stateless-validator ${{ matrix.stateless_validator }} \
-            --output failures.txt
-          {
-            echo "### ${{ matrix.stateless_validator }} on host"
-            echo '```'
-            cat failures.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Run sccache stat for check
-        shell: bash
+      - name: Show sccache statistics
         run: ${SCCACHE_PATH} --show-stats

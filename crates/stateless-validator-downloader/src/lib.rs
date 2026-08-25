@@ -1,4 +1,4 @@
-//! Downloads compiled guests from GitHub releases or action artifacts.
+//! Downloads release-backed guests from GitHub releases or action artifacts.
 
 use std::{collections::BTreeMap, io::ErrorKind};
 
@@ -14,9 +14,17 @@ use tempfile::tempdir;
 use tokio::{fs, process::Command};
 
 const REPO_API_URL: &str = "https://api.github.com/repos/eth-act/ere-guests";
-const ACTION_NAME: &str = "Compile and Release Compiled Guests";
+const ARTIFACT_REGISTRY_JSON: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../artifact-registry.json"
+));
+const ACTION_NAMES: &[&str] = &[
+    "Republish Release-Backed Guests",
+    // Retain access to artifacts produced before the registry-only workflow.
+    "Compile and Release Compiled Guests",
+];
 
-/// Compiled guest ELF.
+/// Release-backed guest ELF.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CompiledGuest {
     /// Raw ELF bytes.
@@ -36,7 +44,7 @@ enum DownloadSource {
     Rev { artifacts: BTreeMap<String, String> },
 }
 
-/// Downloads compiled guests from the `eth-act/ere-guests` repository.
+/// Downloads release-backed guests from the `eth-act/ere-guests` repository.
 #[derive(Clone, Debug)]
 pub struct Downloader {
     client: Client,
@@ -66,16 +74,15 @@ impl Downloader {
         })
     }
 
-    /// Downloads the compiled guest of `stateless_validator_kind` on `zkvm_kind`.
+    /// Downloads the registered guest of `stateless_validator_kind` on `zkvm_kind`.
     pub async fn download(
         &self,
         stateless_validator_kind: StatelessValidatorKind,
         zkvm_kind: zkVMKind,
     ) -> anyhow::Result<CompiledGuest> {
-        let artifact_name = format!(
-            "stateless-validator-{stateless_validator_kind}-{zkvm_kind}-{}",
-            zkvm_kind.sdk_version()
-        );
+        let zkvm_version = registered_zkvm_version(stateless_validator_kind, zkvm_kind)?;
+        let artifact_name =
+            format!("stateless-validator-{stateless_validator_kind}-{zkvm_kind}-{zkvm_version}",);
         match &self.source {
             DownloadSource::Tag { assets } => {
                 self.download_from_release(assets, &artifact_name).await
@@ -172,6 +179,44 @@ impl Downloader {
     }
 }
 
+fn registered_zkvm_version(
+    stateless_validator_kind: StatelessValidatorKind,
+    zkvm_kind: zkVMKind,
+) -> anyhow::Result<String> {
+    #[derive(Deserialize)]
+    struct ArtifactRegistry {
+        stateless_validators: Vec<StatelessValidator>,
+    }
+
+    #[derive(Deserialize)]
+    struct StatelessValidator {
+        name: String,
+        artifacts: Vec<Artifact>,
+    }
+
+    #[derive(Deserialize)]
+    struct Artifact {
+        zkvm: String,
+        zkvm_version: String,
+    }
+
+    let registry: ArtifactRegistry = serde_json::from_str(ARTIFACT_REGISTRY_JSON)?;
+    registry
+        .stateless_validators
+        .into_iter()
+        .find(|validator| validator.name == stateless_validator_kind.as_str())
+        .and_then(|validator| {
+            validator
+                .artifacts
+                .into_iter()
+                .find(|artifact| artifact.zkvm == zkvm_kind.as_str())
+        })
+        .map(|artifact| artifact.zkvm_version)
+        .with_context(|| {
+            format!("{stateless_validator_kind}-{zkvm_kind} not found in artifact-registry.json")
+        })
+}
+
 fn github_client(token: Option<&str>) -> anyhow::Result<Client> {
     let mut headers: HeaderMap = [
         ("Accept", "application/vnd.github+json"),
@@ -255,7 +300,7 @@ async fn get_action_id(client: &Client, full_sha: &str) -> anyhow::Result<u64> {
     workflow_runs
         .into_iter()
         .filter(|run| {
-            run.name == ACTION_NAME
+            ACTION_NAMES.contains(&run.name.as_str())
                 && run.status == "completed"
                 && run.conclusion.as_deref() == Some("success")
         })
@@ -307,7 +352,24 @@ mod tests {
     use ere_catalog::zkVMKind;
     use stateless_validator_catalog::StatelessValidatorKind;
 
-    use crate::Downloader;
+    use crate::{Downloader, registered_zkvm_version};
+
+    #[test]
+    fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
+        assert_eq!(
+            registered_zkvm_version(StatelessValidatorKind::Reth, zkVMKind::OpenVM)?,
+            "v2.1.0-preview"
+        );
+        assert_eq!(
+            registered_zkvm_version(StatelessValidatorKind::Reth, zkVMKind::SP1)?,
+            "v6.4.0"
+        );
+        assert_eq!(
+            registered_zkvm_version(StatelessValidatorKind::Reth, zkVMKind::Zisk)?,
+            "v1.1.0-alpha"
+        );
+        Ok(())
+    }
 
     #[tokio::test]
     async fn download_from_tag() -> anyhow::Result<()> {

@@ -43,12 +43,10 @@ include!(concat!(env!("OUT_DIR"), "/version_impl.rs"));
     parse_err_ty = ParseError
 )]
 pub enum StatelessValidatorKind {
-    /// Ethrex stateless validator.
-    Ethrex,
+    // TODO(ethrex-release): Restore `Ethrex = 0` after PR #7216 publishes compatible artifacts.
     /// Reth stateless validator.
-    Reth,
-    /// Zesu stateless validator.
-    Zesu,
+    Reth = 1,
+    // TODO(zesu-devnet-8): Restore `Zesu = 2` after a compatible release is published.
 }
 
 impl StatelessValidatorKind {
@@ -130,13 +128,17 @@ mod tests {
     #[test]
     fn parse_stateless_validator_kind() {
         // Valid
-        for (ss, kind) in [
-            (["ethrex", "Ethrex"], StatelessValidatorKind::Ethrex),
-            (["reth", "Reth"], StatelessValidatorKind::Reth),
-            (["zesu", "Zesu"], StatelessValidatorKind::Zesu),
-        ] {
-            ss.iter().for_each(|s| assert_eq!(s.parse(), Ok(kind)));
-            assert_eq!(kind.as_str(), ss[0]);
+        let spellings = ["reth", "Reth"];
+        spellings
+            .iter()
+            .for_each(|s| assert_eq!(s.parse(), Ok(StatelessValidatorKind::Reth)));
+        assert_eq!(StatelessValidatorKind::Reth.as_str(), spellings[0]);
+
+        for unsupported in ["ethrex", "zesu"] {
+            assert_eq!(
+                unsupported.parse::<StatelessValidatorKind>(),
+                Err(ParseError::from(unsupported))
+            );
         }
 
         // Invalid
@@ -146,8 +148,18 @@ mod tests {
         );
         assert_eq!(
             ParseError::from("xxx").to_string(),
-            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu]"
-                .to_string()
+            "Unsupported stateless validator kind `xxx`, expect one of [reth]".to_string()
         );
+    }
+
+    #[test]
+    fn preserve_reserved_numeric_ids() {
+        assert_eq!(StatelessValidatorKind::Reth.as_u8(), 1);
+        assert_eq!(
+            StatelessValidatorKind::from_u8(1),
+            Some(StatelessValidatorKind::Reth)
+        );
+        assert_eq!(StatelessValidatorKind::from_u8(0), None);
+        assert_eq!(StatelessValidatorKind::from_u8(2), None);
     }
 }

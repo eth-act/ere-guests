@@ -1,4 +1,4 @@
-//! Fixture loading and discovery for the stateless validator.
+//! Fixture loading and discovery for release-backed stateless validators.
 
 use std::{
     collections::BTreeMap,
@@ -10,90 +10,73 @@ use std::{
 use alloy_primitives::Bytes;
 use rayon::prelude::*;
 use serde::Deserialize;
+use sha2::{Digest, Sha256};
 use tar::Archive;
 use tracing::info;
 use walkdir::{DirEntry, WalkDir};
 
-/// Release hosting the EEST fixtures filled by `ethereum/execution-specs`.
-const EEST_FIXTURES_BASE_URL: &str =
-    "https://github.com/ethereum/execution-specs/releases/download";
-/// Release hosting the RPC-derived fixtures from `witness-generator-spec-cli`.
-const RPC_FIXTURES_BASE_URL: &str =
-    "https://github.com/han0110/ere-guests/releases/download/rpc-fixtures@v0.3.0";
-/// R2 bucket hosting the `glamsterdam-devnet-7` fixtures and their batch index.
-pub const R2_FIXTURES_BASE_URL: &str =
-    "https://pub-df22334654034ebab51bc096137a59d8.r2.dev/devnets/glamsterdam-devnet-7";
+const EEST_FIXTURES_URL: &str = "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v0.8.2/fixtures_zkevm.tar.gz";
+const EEST_FIXTURES_SHA256: &str =
+    "c58fbe493c1c37ab8371fd0ebb4ded668c08daf774f7f2fb798f6e7939810155";
 
-/// A preset fixture set identifying both its source archive and its format.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum FixturePreset {
-    /// EEST `blockchain_test` fixtures based on `tests-zkevm@v0.6.2`.
-    EestGlamsterdamDevnet7,
-    /// RPC-derived fixtures from the `mainnet`.
-    RpcBpo2,
-    /// RPC-derived fixtures from the `glamsterdam-devnet-7`.
-    RpcGlamsterdamDevnet7,
-}
+/// Name of the rolling execution-layer devnet fixture set.
+pub const DEVNET_NAME: &str = "glamsterdam-devnet-8";
+/// R2 bucket that will host the devnet-8 fixtures and batch index.
+pub const DEVNET_FIXTURES_BASE_URL: &str =
+    "https://pub-df22334654034ebab51bc096137a59d8.r2.dev/devnets/glamsterdam-devnet-8";
 
-/// Download and on-disk layout details for a [`FixturePreset`].
-struct FixtureSource {
-    /// URL of the release archive.
-    url: String,
-    /// Subdirectory under `<crate>/fixtures/`.
-    dir: &'static str,
-    /// Subdirectory inside the unpacked archive holding the fixtures.
-    archive_dir: &'static str,
-}
-
-impl FixturePreset {
-    fn source(self) -> FixtureSource {
-        match self {
-            Self::EestGlamsterdamDevnet7 => FixtureSource {
-                url: format!("{EEST_FIXTURES_BASE_URL}/tests-zkevm@v0.6.2/fixtures_zkevm.tar.gz"),
-                dir: "eest-glamsterdam-devnet-7",
-                archive_dir: "fixtures/blockchain_tests",
-            },
-            Self::RpcBpo2 => FixtureSource {
-                url: format!("{RPC_FIXTURES_BASE_URL}/rpc-bpo2.tar.zst"),
-                dir: "rpc-bpo2",
-                archive_dir: "rpc-bpo2",
-            },
-            Self::RpcGlamsterdamDevnet7 => FixtureSource {
-                url: format!("{R2_FIXTURES_BASE_URL}/exports/batches/56040-56049.tar.zst"),
-                dir: "rpc-glamsterdam-devnet-7/56040-56049",
-                archive_dir: "blockchain_tests",
-            },
-        }
-    }
-}
-
-/// A fixture normalized to canonical schema-prefixed SSZ input and output bytes.
+/// A fixture normalized to canonical schema-prefixed SSZ input and fixed-size output bytes.
 #[derive(Debug, Clone)]
 pub struct StatelessValidatorFixture {
     /// Human-readable identifier.
     pub name: String,
-    /// Whether the block is expected to validate successfully.
-    pub success: bool,
-    /// Canonical schema-prefixed SSZ input bytes consumed by the guests.
+    /// Canonical schema-prefixed SSZ input bytes consumed by the guest.
     pub stateless_input_bytes: Vec<u8>,
     /// Expected serialized guest output bytes.
     pub stateless_output_bytes: Vec<u8>,
 }
 
-/// Returns every fixture of `preset`, downloading and unpacking its archive into
-/// the local cache on first use. Fixtures are sorted by name for determinism.
-pub fn preset_fixtures(preset: FixturePreset) -> Vec<StatelessValidatorFixture> {
-    let source = preset.source();
-    archive_fixtures(source.dir, &source.url, source.archive_dir)
+/// Returns all `tests-zkevm@v0.8.2` fixtures, downloading them on first use.
+pub fn eest_fixtures() -> Vec<StatelessValidatorFixture> {
+    archive_fixtures(
+        "eest-tests-zkevm-v0.8.2",
+        EEST_FIXTURES_URL,
+        "fixtures/blockchain_tests",
+        Some(EEST_FIXTURES_SHA256),
+    )
 }
 
-/// Returns every fixture of the archive at `url`, unpacking its `archive_dir`
-/// subdirectory into `<crate>/fixtures/<dir>` on first use.
-pub fn archive_fixtures(dir: &str, url: &str, archive_dir: &str) -> Vec<StatelessValidatorFixture> {
-    load_fixtures_from_dir(ensure_fixtures(dir, url, archive_dir))
+/// Returns the latest `count` devnet-8 block fixtures from the rolling batch catalog.
+pub fn latest_devnet_fixtures(count: usize) -> Vec<StatelessValidatorFixture> {
+    assert!(count > 0, "devnet fixture count must be positive");
+    let mut fixtures = fetch_latest_devnet_batches(count)
+        .into_iter()
+        .flat_map(|batch| {
+            archive_fixtures(
+                &format!(
+                    "rpc-{DEVNET_NAME}/{}-{}",
+                    batch.batch_start_block, batch.batch_end_block
+                ),
+                &format!("{DEVNET_FIXTURES_BASE_URL}/{}", batch.path),
+                "blockchain_tests",
+                Some(batch.sha256.trim_start_matches("0x")),
+            )
+        })
+        .collect::<Vec<_>>();
+    fixtures.drain(..fixtures.len().saturating_sub(count));
+    fixtures
 }
 
-/// Returns whether `entry` is a `.json` file.
+/// Returns every fixture in `archive_dir`, caching its verified source archive locally.
+pub fn archive_fixtures(
+    dir: &str,
+    url: &str,
+    archive_dir: &str,
+    sha256: Option<&str>,
+) -> Vec<StatelessValidatorFixture> {
+    load_fixtures_from_dir(ensure_fixtures(dir, url, archive_dir, sha256))
+}
+
 fn is_json_file(entry: &DirEntry) -> bool {
     entry.file_type().is_file()
         && entry
@@ -103,7 +86,6 @@ fn is_json_file(entry: &DirEntry) -> bool {
             .is_some_and(|name| name.ends_with(".json"))
 }
 
-/// Returns every fixture under `dir`, sorted by name for determinism.
 fn load_fixtures_from_dir(dir: impl AsRef<Path>) -> Vec<StatelessValidatorFixture> {
     let mut fixtures = WalkDir::new(dir)
         .into_iter()
@@ -116,8 +98,7 @@ fn load_fixtures_from_dir(dir: impl AsRef<Path>) -> Vec<StatelessValidatorFixtur
     fixtures
 }
 
-/// Loads every fixture from a single JSON file. Every preset uses the EEST `blockchain_test`
-/// layout, including the RPC-derived ones.
+/// Loads every stateless fixture from one EEST `blockchain_test` JSON file.
 pub fn load_fixtures_from_file(path: impl AsRef<Path>) -> Vec<StatelessValidatorFixture> {
     let bytes = fs::read(path).unwrap();
     let tests: EestFixture = serde_json::from_slice(&bytes).unwrap();
@@ -133,7 +114,6 @@ pub fn load_fixtures_from_file(path: impl AsRef<Path>) -> Vec<StatelessValidator
                         .zip(block.stateless_output_bytes)?;
                     (!input.is_empty()).then(|| StatelessValidatorFixture {
                         name: format!("{test_id}#block{idx}"),
-                        success: block.expect_exception.is_none(),
                         stateless_input_bytes: input.to_vec(),
                         stateless_output_bytes: output.to_vec(),
                     })
@@ -142,25 +122,20 @@ pub fn load_fixtures_from_file(path: impl AsRef<Path>) -> Vec<StatelessValidator
         .collect()
 }
 
-/// Ensures `dir` under `<crate>/fixtures/` holds the `archive_dir` subdirectory
-/// of the archive at `url`, downloading and unpacking it when missing. Returns
-/// the directory.
-fn ensure_fixtures(dir: &str, url: &str, archive_dir: &str) -> PathBuf {
+fn ensure_fixtures(dir: &str, url: &str, archive_dir: &str, sha256: Option<&str>) -> PathBuf {
     static LOCK: Mutex<()> = Mutex::new(());
-    let _guard = LOCK.lock().unwrap_or_else(|err| err.into_inner());
+    let _guard = LOCK.lock().unwrap_or_else(|error| error.into_inner());
 
     let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("fixtures")
         .join(dir);
     if !dir.exists() {
-        download_and_unpack(url, archive_dir, &dir);
+        download_and_unpack(url, archive_dir, &dir, sha256);
     }
     dir
 }
 
-/// Downloads the archive at `url` and moves its `archive_dir` subdirectory to
-/// `dir`, discarding the rest of the archive.
-fn download_and_unpack(url: &str, archive_dir: &str, dir: &Path) {
+fn download_and_unpack(url: &str, archive_dir: &str, dir: &Path, sha256: Option<&str>) {
     info!("Downloading fixture archive {url}");
     let bytes = reqwest::blocking::get(url)
         .unwrap()
@@ -168,6 +143,13 @@ fn download_and_unpack(url: &str, archive_dir: &str, dir: &Path) {
         .unwrap()
         .bytes()
         .unwrap();
+    if let Some(sha256) = sha256 {
+        assert_eq!(
+            const_hex::encode(Sha256::digest(&bytes)),
+            sha256,
+            "fixture archive checksum mismatch for {url}"
+        );
+    }
 
     fs::create_dir_all(dir.parent().unwrap()).unwrap();
     let tempdir = tempfile::tempdir_in(dir.parent().unwrap()).unwrap();
@@ -180,26 +162,93 @@ fn download_and_unpack(url: &str, archive_dir: &str, dir: &Path) {
             .unpack(tempdir.path())
             .unwrap();
     } else {
-        unreachable!()
+        panic!("unsupported fixture archive extension: {url}");
     }
-
     fs::rename(tempdir.path().join(archive_dir), dir).unwrap();
+}
+
+fn fetch_latest_devnet_batches(count: usize) -> Vec<DevnetBatch> {
+    let url = format!("{DEVNET_FIXTURES_BASE_URL}/batches.jsonl");
+    info!("Downloading devnet batch index {url}");
+    let index = reqwest::blocking::get(&url)
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .text()
+        .unwrap();
+    latest_devnet_batches(&index, count).unwrap()
+}
+
+fn latest_devnet_batches(index: &str, count: usize) -> anyhow::Result<Vec<DevnetBatch>> {
+    anyhow::ensure!(count > 0, "devnet fixture count must be positive");
+    let mut batches = index
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(serde_json::from_str::<DevnetBatch>)
+        .collect::<Result<Vec<_>, _>>()?;
+    anyhow::ensure!(!batches.is_empty(), "devnet batch index is empty");
+
+    let take = (batches
+        .iter()
+        .rev()
+        .scan(0, |artifacts, batch| {
+            *artifacts += batch.artifact_count;
+            Some(*artifacts)
+        })
+        .take_while(|artifacts| *artifacts < count)
+        .count()
+        + 1)
+    .min(batches.len());
+    Ok(batches.split_off(batches.len() - take))
 }
 
 type EestFixture = BTreeMap<String, EestTest>;
 
-/// Minimal projection of an EEST `blockchain_test` body.
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct EestTest {
     blocks: Vec<EestBlock>,
 }
 
-/// Minimal projection of a single EEST block.
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct EestBlock {
     stateless_input_bytes: Option<Bytes>,
     stateless_output_bytes: Option<Bytes>,
-    expect_exception: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DevnetBatch {
+    batch_start_block: u64,
+    batch_end_block: u64,
+    artifact_count: usize,
+    sha256: String,
+    path: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::latest_devnet_batches;
+
+    const INDEX: &str = r#"
+{"batchStartBlock":1,"batchEndBlock":10,"artifactCount":10,"sha256":"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","path":"1-10.tar.zst"}
+{"batchStartBlock":11,"batchEndBlock":20,"artifactCount":10,"sha256":"0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","path":"11-20.tar.zst"}
+{"batchStartBlock":21,"batchEndBlock":30,"artifactCount":10,"sha256":"0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","path":"21-30.tar.zst"}
+"#;
+
+    #[test]
+    fn selects_latest_batches_covering_requested_count() {
+        let batches = latest_devnet_batches(INDEX, 15).unwrap();
+        assert_eq!(batches.len(), 2);
+        assert_eq!(batches[0].batch_start_block, 11);
+        assert_eq!(batches[1].batch_end_block, 30);
+    }
+
+    #[test]
+    fn rejects_empty_or_malformed_batch_index() {
+        assert!(latest_devnet_batches("", 1).is_err());
+        assert!(latest_devnet_batches("not-json", 1).is_err());
+        assert!(latest_devnet_batches(INDEX, 0).is_err());
+    }
 }

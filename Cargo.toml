@@ -1,11 +1,8 @@
 [workspace]
 members = [
     "crates/stateless-validator-catalog",
-    "crates/stateless-validator-debug",
     "crates/stateless-validator-common",
     "crates/stateless-validator-downloader",
-    "crates/stateless-validator-ethrex",
-    "crates/stateless-validator-reth",
     "crates/stateless-validator-test",
 ]
 resolver = "2"
@@ -23,11 +20,6 @@ rust_2018_idioms = { level = "deny", priority = -1 }
 unnameable_types = "warn"
 unreachable_pub = "warn"
 unused_must_use = "deny"
-unexpected_cfgs = { level = "warn", check-cfg = [
-    'cfg(zisk_hints)',
-    'cfg(zisk_hints_debug)',
-    'cfg(target_vendor, values("zisk"))',
-] }
 
 [workspace.lints.rustdoc]
 all = "warn"
@@ -40,8 +32,6 @@ result_large_err = "allow"
 anyhow = { version = "1.0", default-features = false }
 clap = { version = "4.6.0", features = ["derive"] }
 const-hex = { version = "1.19", default-features = false }
-hex-literal = { version = "1.1.0", default-features = false }
-once_cell = { version = "1.21", default-features = false }
 serde = { version = "1.0", default-features = false }
 sha2 = { version = "0.10.9", default-features = false }
 strum = { version = "0.28.0", default-features = false }
@@ -50,7 +40,6 @@ thiserror = { version = "2.0", default-features = false }
 # test/util
 dashmap = "6.2"
 flate2 = "1.1.5"
-paste = "1.0"
 rayon = "1.11.0"
 reqwest = "0.12"
 semver = "1.0.28"
@@ -62,50 +51,24 @@ tracing = "0.1.44"
 tracing-subscriber = "0.3.22"
 walkdir = "2.5.0"
 zstd = "0.13.3"
-
-# alloy
-alloy-consensus = { version = "2.2.0", default-features = false }
-alloy-eips = { version = "2.2.0", default-features = false }
-alloy-genesis = { version = "2.2.0", default-features = false }
-alloy-primitives = { version = "1.6.1", default-features = false }
-alloy-rpc-types-engine = { version = "2.2.0", default-features = false }
-
-# revm
-revm = { version = "42.0.1", default-features = false }
-
-# reth
-reth-chainspec = { git = "https://github.com/paradigmxyz/reth", rev = "f804dc1eaa06927b1bdf17f2b67572f6f6b2deee", default-features = false }
-reth-ethereum-primitives = { git = "https://github.com/paradigmxyz/reth", rev = "f804dc1eaa06927b1bdf17f2b67572f6f6b2deee", default-features = false }
-reth-evm-ethereum = { git = "https://github.com/paradigmxyz/reth", rev = "f804dc1eaa06927b1bdf17f2b67572f6f6b2deee", default-features = false }
-reth-payload-validator = { git = "https://github.com/paradigmxyz/reth", rev = "f804dc1eaa06927b1bdf17f2b67572f6f6b2deee", default-features = false }
-reth-primitives-traits = { version = "0.6.0", default-features = false }
-reth-stateless = { git = "https://github.com/han0110/stateless", rev = "b2520535b14ab8fec4ee3b14f28c4136f1e25400", default-features = false, package = "stateless" }
-reth-tries = { git = "https://github.com/han0110/stateless", rev = "b2520535b14ab8fec4ee3b14f28c4136f1e25400", default-features = false, package = "tries" }
-
-# ethrex
-ethrex-common = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v23.0.0", default-features = false }
-ethrex-crypto = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v23.0.0", default-features = false }
-ethrex-guest-program = { git = "https://github.com/lambdaclass/ethrex.git", tag = "v23.0.0", default-features = false }
+paste = "1.0"
 
 # ssz
-libssz = { version = "0.2.2", default-features = false, features = ["alloc"] }
-libssz-derive = { version = "0.2.2" }
-libssz-merkle = { version = "0.2.2", default-features = false, features = ["alloc"] }
-libssz-types = { version = "0.2.2", default-features = false, features = ["alloc"] }
+libssz = { version = "0.3.0", default-features = false, features = ["alloc"] }
+libssz-derive = "0.3.0"
+libssz-merkle = { version = "0.3.0", default-features = false, features = [
+    "alloc",
+    "sha2-backend",
+] }
+libssz-types = { version = "0.3.0", default-features = false, features = ["alloc"] }
 
-# zkvm-standard
-zkvm-interface = { git = "https://github.com/eth-act/zkvm-standards", rev = "282cd356c3a0498416bb0619f9c8a347ce9933fb" }
+# fixture JSON byte strings
+alloy-primitives = { version = "1.6.1", default-features = false }
 
 # ere
 ere-catalog = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
 ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
-ere-platform-core = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
-ere-util-build = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
 
 # local
 stateless-validator-catalog = { path = "crates/stateless-validator-catalog" }
 stateless-validator-common = { path = "crates/stateless-validator-common", default-features = false }
-stateless-validator-debug = { path = "crates/stateless-validator-debug", default-features = false }
-stateless-validator-ethrex = { path = "crates/stateless-validator-ethrex", default-features = false }
-stateless-validator-reth = { path = "crates/stateless-validator-reth", default-features = false }
-stateless-validator-test = { path = "crates/stateless-validator-test", default-features = false }

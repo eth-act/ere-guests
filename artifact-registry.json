@@ -1,16 +1,32 @@
 {
     "stateless_validators": [
         {
-            "name": "zesu",
-            "version": "glamsterdam-devnet-7.2-2026-07-29",
+            "name": "reth",
+            "version": "0.1.0-rc.2",
             "artifacts": [
                 {
+                    "zkvm": "openvm",
+                    "zkvm_version": "v2.1.0-preview",
+                    "elf_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.2/stateless-validator-reth-openvm-v2.1.0-preview.elf",
+                    "elf_sha256": "befa3b69743f51011d234726ccc5d9d540932d41c45499a8d3114eacee34ed3c",
+                    "vk_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.2/stateless-validator-reth-openvm-v2.1.0-preview.vk",
+                    "vk_sha256": "c354e0bc160c07884091765a2c891e76ae71cf7541244aaca12e600b0a254e6b"
+                },
+                {
+                    "zkvm": "sp1",
+                    "zkvm_version": "v6.4.0",
+                    "elf_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.2/stateless-validator-reth-sp1-v6.4.0.elf",
+                    "elf_sha256": "4bc19567b4b40d4cd7d58876365c63b6548c9fda310070895b8244882c74320b",
+                    "vk_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.2/stateless-validator-reth-sp1-v6.4.0.vk",
+                    "vk_sha256": "376e2d8aa82ce34a0e3d07ce046038e3596da49006d8b1bdd8a04c062230f914"
+                },
+                {
                     "zkvm": "zisk",
-                    "zkvm_version": "v1.0.0-alpha",
-                    "elf_url": "https://github.com/Consensys/zesu-zkvm/releases/download/glamsterdam-devnet-7.2-2026-07-29/stateless-validator-zesu-zisk-1.0.0-alpha.elf",
-                    "elf_sha256": "088a71b8ff69630de88b970a6a633911c2ecaaeb4be7cb9ca5b356f6e622f89d",
-                    "vk_url": "https://github.com/Consensys/zesu-zkvm/releases/download/glamsterdam-devnet-7.2-2026-07-29/stateless-validator-zesu-zisk-1.0.0-alpha.vk",
-                    "vk_sha256": "8566ed4034e5dbb540e6e7c0316decd93705d0f39444c9dbcb722b9ed0064d55"
+                    "zkvm_version": "v1.1.0-alpha",
+                    "elf_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.2/stateless-validator-reth-zisk-v1.1.0-alpha.elf",
+                    "elf_sha256": "9bccce8633be03a6fb5188387fb00e876f08ca40c5c77b48e94773520b0f5a41",
+                    "vk_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.2/stateless-validator-reth-zisk-v1.1.0-alpha.vk",
+                    "vk_sha256": "13a2d4814c468e8b4839e28d9b2b150f566bf70c8cd0d5b017cc16af616bc5ef"
                 }
             ]
         }
