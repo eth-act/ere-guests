@@ -11,33 +11,31 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  DEVNET_CATALOG_URL: https://pub-760ad8b3dd9547539f829c1ea30f18b5.r2.dev/devnets/glamsterdam-devnet-8/batches.jsonl
 
 jobs:
-  devnet-preflight:
-    name: Check devnet-8 catalog and resolve matrix
+  registry-matrix:
+    name: Resolve active guest matrix
     runs-on: ubuntu-latest
     outputs:
-      available: ${{ steps.preflight.outputs.available }}
-      matrix: ${{ steps.preflight.outputs.matrix }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Probe batch catalog and build registry matrix
-        id: preflight
-        env:
-          CATALOG_URL: ${{ env.DEVNET_CATALOG_URL }}
-        run: bash .github/scripts/devnet-preflight.sh "$CATALOG_URL"
+      - name: Build matrix from artifact registry
+        id: matrix
+        run: |
+          MATRIX=$(jq -ce '{ include: [.stateless_validators[] as $validator | $validator.artifacts[] | { stateless_validator: $validator.name, zkvm: .zkvm, zkvm_version: .zkvm_version }] } | select(.include | length > 0)' artifact-registry.json)
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+          echo "Matrix: ${MATRIX}"
 
   test-zkvm-execution-devnet:
     name: ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}
-    needs: devnet-preflight
-    if: needs.devnet-preflight.outputs.available == 'true'
+    needs: registry-matrix
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.devnet-preflight.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.registry-matrix.outputs.matrix) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
