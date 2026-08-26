@@ -18,12 +18,16 @@ use walkdir::{DirEntry, WalkDir};
 const EEST_FIXTURES_URL: &str = "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v0.8.2/fixtures_zkevm.tar.gz";
 const EEST_FIXTURES_SHA256: &str =
     "c58fbe493c1c37ab8371fd0ebb4ded668c08daf774f7f2fb798f6e7939810155";
+const DEVNET_PRESET_BATCH: &str = "93350-93359";
+const DEVNET_PRESET_ARTIFACT_COUNT: usize = 10;
+const DEVNET_PRESET_SHA256: &str =
+    "dfcfc4520b59404e2ad6baa621d1b0b8626cd726904ca84c536c235ee6098811";
 
 /// Name of the rolling execution-layer devnet fixture set.
 pub const DEVNET_NAME: &str = "glamsterdam-devnet-8";
-/// R2 bucket that will host the devnet-8 fixtures and batch index.
+/// R2 bucket that hosts the devnet-8 fixtures and batch index.
 pub const DEVNET_FIXTURES_BASE_URL: &str =
-    "https://pub-df22334654034ebab51bc096137a59d8.r2.dev/devnets/glamsterdam-devnet-8";
+    "https://pub-760ad8b3dd9547539f829c1ea30f18b5.r2.dev/devnets/glamsterdam-devnet-8";
 
 /// A fixture normalized to canonical schema-prefixed SSZ input and fixed-size output bytes.
 #[derive(Debug, Clone)]
@@ -44,6 +48,22 @@ pub fn eest_fixtures() -> Vec<StatelessValidatorFixture> {
         "fixtures/blockchain_tests",
         Some(EEST_FIXTURES_SHA256),
     )
+}
+
+/// Returns the pinned 10-block devnet-8 fixture set used by pull request tests.
+pub fn devnet_preset_fixtures() -> Vec<StatelessValidatorFixture> {
+    let fixtures = archive_fixtures(
+        &format!("rpc-{DEVNET_NAME}/{DEVNET_PRESET_BATCH}"),
+        &format!("{DEVNET_FIXTURES_BASE_URL}/exports/batches/{DEVNET_PRESET_BATCH}.tar.zst"),
+        "blockchain_tests",
+        Some(DEVNET_PRESET_SHA256),
+    );
+    assert_eq!(
+        fixtures.len(),
+        DEVNET_PRESET_ARTIFACT_COUNT,
+        "devnet preset {DEVNET_PRESET_BATCH} must contain {DEVNET_PRESET_ARTIFACT_COUNT} fixtures"
+    );
+    fixtures
 }
 
 /// Returns the latest `count` devnet-8 block fixtures from the rolling batch catalog.
@@ -235,14 +255,32 @@ mod tests {
 {"batchStartBlock":1,"batchEndBlock":10,"artifactCount":10,"sha256":"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","path":"1-10.tar.zst"}
 {"batchStartBlock":11,"batchEndBlock":20,"artifactCount":10,"sha256":"0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","path":"11-20.tar.zst"}
 {"batchStartBlock":21,"batchEndBlock":30,"artifactCount":10,"sha256":"0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","path":"21-30.tar.zst"}
+{"batchStartBlock":31,"batchEndBlock":40,"artifactCount":10,"sha256":"0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","path":"31-40.tar.zst"}
+{"batchStartBlock":41,"batchEndBlock":50,"artifactCount":10,"sha256":"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee","path":"41-50.tar.zst"}
+{"batchStartBlock":51,"batchEndBlock":60,"artifactCount":10,"sha256":"0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","path":"51-60.tar.zst"}
 "#;
 
     #[test]
     fn selects_latest_batches_covering_requested_count() {
         let batches = latest_devnet_batches(INDEX, 15).unwrap();
         assert_eq!(batches.len(), 2);
-        assert_eq!(batches[0].batch_start_block, 11);
-        assert_eq!(batches[1].batch_end_block, 30);
+        assert_eq!(batches[0].batch_start_block, 41);
+        assert_eq!(batches[1].batch_end_block, 60);
+    }
+
+    #[test]
+    fn selects_all_available_batches_when_request_exceeds_catalog() {
+        let batches = latest_devnet_batches(INDEX, 100).unwrap();
+        assert_eq!(batches.len(), 6);
+        assert_eq!(
+            batches
+                .iter()
+                .map(|batch| batch.artifact_count)
+                .sum::<usize>(),
+            60
+        );
+        assert_eq!(batches[0].batch_start_block, 1);
+        assert_eq!(batches[5].batch_end_block, 60);
     }
 
     #[test]

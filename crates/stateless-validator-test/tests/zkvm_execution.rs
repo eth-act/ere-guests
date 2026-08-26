@@ -10,7 +10,7 @@ use stateless_validator_test::{
         ExecutionFailures, init_tracing,
         zkvm::{is_guest_compatible, run_zkvm_execution},
     },
-    fixture::eest_fixtures,
+    fixture::{StatelessValidatorFixture, devnet_preset_fixtures, eest_fixtures},
 };
 
 const RETH_EXPECTED_FAILURES: &[&str] = &[
@@ -34,9 +34,7 @@ fn expected_failures(stateless_validator: StatelessValidatorKind) -> &'static [&
     }
 }
 
-#[test]
-fn executes_registered_guest() {
-    init_tracing();
+fn registered_pair() -> (StatelessValidatorKind, zkVMKind) {
     let stateless_validator = std::env::var("STATELESS_VALIDATOR")
         .expect("STATELESS_VALIDATOR must name an artifact-registry.json guest")
         .parse::<StatelessValidatorKind>()
@@ -50,17 +48,44 @@ fn executes_registered_guest() {
         "{stateless_validator}-{zkvm} is incompatible with Ere SDK {}",
         zkvm.sdk_version()
     );
+    (stateless_validator, zkvm)
+}
 
-    let failures = run_zkvm_execution(stateless_validator, zkvm, eest_fixtures());
+fn assert_execution(
+    stateless_validator: StatelessValidatorKind,
+    zkvm: zkVMKind,
+    fixtures: Vec<StatelessValidatorFixture>,
+    expected_failures: &[&str],
+) {
+    let failures = run_zkvm_execution(stateless_validator, zkvm, fixtures);
     let failure_names = failures
         .iter()
         .map(|failure| failure.name.as_str())
         .collect::<Vec<_>>();
     assert_eq!(
         failure_names,
-        expected_failures(stateless_validator),
+        expected_failures,
         "unexpected upstream failure set ({} failures):\n{}",
         failures.len(),
         ExecutionFailures(&failures),
     );
+}
+
+#[test]
+fn executes_registered_guest() {
+    init_tracing();
+    let (stateless_validator, zkvm) = registered_pair();
+    assert_execution(
+        stateless_validator,
+        zkvm,
+        eest_fixtures(),
+        expected_failures(stateless_validator),
+    );
+}
+
+#[test]
+fn executes_registered_guest_devnet_preset() {
+    init_tracing();
+    let (stateless_validator, zkvm) = registered_pair();
+    assert_execution(stateless_validator, zkvm, devnet_preset_fixtures(), &[]);
 }

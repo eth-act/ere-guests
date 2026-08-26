@@ -38,7 +38,7 @@ Located in `crates/`, these provide reusable functionality for guest programs an
 
 Reth `v0.1.0-rc.2` is currently active on OpenVM, SP1, and ZisK. Ethrex keeps catalog ID `0` reserved, and Zesu keeps ID `2` reserved; they remain inactive until compatible, checksum-backed release artifacts pass the same test matrix.
 
-The daily devnet workflow probes the future `glamsterdam-devnet-8` batch catalog. It exits successfully without running guests until that dataset is published.
+Pull requests run a pinned 10-block `glamsterdam-devnet-8` fixture set. The daily workflow runs the latest 100 available blocks from the rolling catalog.
 
 ## Development
 

@@ -75,7 +75,7 @@ jobs:
           ZKVM: ${{ matrix.zkvm }}
         run: |
           cargo test --release --package stateless-validator-test --test zkvm_execution -- \
-            executes_registered_guest --exact --test-threads=1
+            --test-threads=1
 
       - name: Show sccache statistics
         run: ${SCCACHE_PATH} --show-stats
