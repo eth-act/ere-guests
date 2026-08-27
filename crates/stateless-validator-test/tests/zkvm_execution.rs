@@ -13,6 +13,14 @@ use stateless_validator_test::{
     fixture::{StatelessValidatorFixture, devnet_preset_fixtures, eest_fixtures},
 };
 
+// These fixtures exceed the Ethrex guest memory available on OpenVM and ZisK. SP1 executes them.
+const ETHREX_EXPECTED_RESOURCE_FAILURES: &[&str] = &[
+    "tests/amsterdam/eip8037_state_creation_gas_cost_increase/test_state_gas_reservoir.py::test_block_2d_gas_valid_when_cumulative_exceeds_limit[fork_Amsterdam-blockchain_test]#block0",
+    "tests/ported_static/stQuadraticComplexityTest/test_return50000.py::test_return50000[fork_Amsterdam-blockchain_test_from_state_test--g1]#block0",
+    "tests/ported_static/stQuadraticComplexityTest/test_return50000_2.py::test_return50000_2[fork_Amsterdam-blockchain_test_from_state_test--g1]#block0",
+    "tests/ported_static/stStaticCall/test_static_return50000_2.py::test_static_return50000_2[fork_Amsterdam-blockchain_test_from_state_test]#block0",
+];
+
 const RETH_EXPECTED_FAILURES: &[&str] = &[
     "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_opcode[fork_Amsterdam-blockchain_test_from_state_test-opcode_CREATE-non-empty-balance-correct-initcode]#block0",
     "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_opcode[fork_Amsterdam-blockchain_test_from_state_test-opcode_CREATE2-non-empty-balance-correct-initcode]#block0",
@@ -28,9 +36,16 @@ const RETH_EXPECTED_FAILURES: &[&str] = &[
     "tests/paris/eip7610_create_collision/test_revert_in_create.py::test_create2_collision_storage[fork_Amsterdam-blockchain_test_from_state_test-sstore-initcode]#block0",
 ];
 
-fn expected_failures(stateless_validator: StatelessValidatorKind) -> &'static [&'static str] {
-    match stateless_validator {
-        StatelessValidatorKind::Reth => RETH_EXPECTED_FAILURES,
+fn expected_failures(
+    stateless_validator: StatelessValidatorKind,
+    zkvm: zkVMKind,
+) -> &'static [&'static str] {
+    match (stateless_validator, zkvm) {
+        (StatelessValidatorKind::Ethrex, zkVMKind::OpenVM | zkVMKind::Zisk) => {
+            ETHREX_EXPECTED_RESOURCE_FAILURES
+        }
+        (StatelessValidatorKind::Ethrex, zkVMKind::SP1) => &[],
+        (StatelessValidatorKind::Reth, _) => RETH_EXPECTED_FAILURES,
     }
 }
 
@@ -79,7 +94,7 @@ fn executes_registered_guest() {
         stateless_validator,
         zkvm,
         eest_fixtures(),
-        expected_failures(stateless_validator),
+        expected_failures(stateless_validator, zkvm),
     );
 }
 

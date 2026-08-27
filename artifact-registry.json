@@ -1,6 +1,36 @@
 {
     "stateless_validators": [
         {
+            "name": "ethrex",
+            "version": "26.0.0-rc.2",
+            "artifacts": [
+                {
+                    "zkvm": "openvm",
+                    "zkvm_version": "v2.1.0-preview",
+                    "elf_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0-rc.2/stateless-validator-ethrex-openvm-v2.1.0-preview.elf",
+                    "elf_sha256": "c8e7bd80b9ab2b0b0031251ab07c437e66465d695d27df15fe58891a4c1bac64",
+                    "vk_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0-rc.2/stateless-validator-ethrex-openvm-v2.1.0-preview.vk",
+                    "vk_sha256": "fbae2109fda9a737f0b67a362c51e4f921f242b9e8073257bc443a08820f8308"
+                },
+                {
+                    "zkvm": "sp1",
+                    "zkvm_version": "v6.4.0",
+                    "elf_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0-rc.2/stateless-validator-ethrex-sp1-v6.4.0.elf",
+                    "elf_sha256": "04df2107c3efeb44f32482a6ed3d3a4f55c00e2e7d25ceb9d7583da7cd99a990",
+                    "vk_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0-rc.2/stateless-validator-ethrex-sp1-v6.4.0.vk",
+                    "vk_sha256": "f226df9885768ceb1797ffc0673e653336837e99d89354cfbf57cf347ddbd5a0"
+                },
+                {
+                    "zkvm": "zisk",
+                    "zkvm_version": "v1.1.0-alpha",
+                    "elf_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0-rc.2/stateless-validator-ethrex-zisk-v1.1.0-alpha.elf",
+                    "elf_sha256": "8733164ae60fe566de6169efebf789e7cb93889d6b29f13a8909f01ffbf3f437",
+                    "vk_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0-rc.2/stateless-validator-ethrex-zisk-v1.1.0-alpha.vk",
+                    "vk_sha256": "435ffa40e40debb4b8f4d467af33d3309d0d947687b62f1246a98464cf220046"
+                }
+            ]
+        },
+        {
             "name": "reth",
             "version": "0.1.0-rc.2",
             "artifacts": [

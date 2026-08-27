@@ -36,7 +36,7 @@ Located in `crates/`, these provide reusable functionality for guest programs an
 
 ### Guest Artifacts
 
-Reth `v0.1.0-rc.2` is currently active on OpenVM, SP1, and ZisK. Ethrex keeps catalog ID `0` reserved, and Zesu keeps ID `2` reserved; they remain inactive until compatible, checksum-backed release artifacts pass the same test matrix.
+Ethrex `v26.0.0-rc.2` and Reth `v0.1.0-rc.2` are currently active on OpenVM, SP1, and ZisK. Zesu keeps catalog ID `2` reserved and remains inactive until compatible, checksum-backed release artifacts pass the same test matrix.
 
 Pull requests run a pinned 10-block `glamsterdam-devnet-8` fixture set. The daily workflow runs the latest 100 available blocks from the rolling catalog.
 

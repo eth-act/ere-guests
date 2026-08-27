@@ -356,18 +356,20 @@ mod tests {
 
     #[test]
     fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
-        assert_eq!(
-            registered_zkvm_version(StatelessValidatorKind::Reth, zkVMKind::OpenVM)?,
-            "v2.1.0-preview"
-        );
-        assert_eq!(
-            registered_zkvm_version(StatelessValidatorKind::Reth, zkVMKind::SP1)?,
-            "v6.4.0"
-        );
-        assert_eq!(
-            registered_zkvm_version(StatelessValidatorKind::Reth, zkVMKind::Zisk)?,
-            "v1.1.0-alpha"
-        );
+        for stateless_validator_kind in
+            [StatelessValidatorKind::Ethrex, StatelessValidatorKind::Reth]
+        {
+            for (zkvm_kind, expected) in [
+                (zkVMKind::OpenVM, "v2.1.0-preview"),
+                (zkVMKind::SP1, "v6.4.0"),
+                (zkVMKind::Zisk, "v1.1.0-alpha"),
+            ] {
+                assert_eq!(
+                    registered_zkvm_version(stateless_validator_kind, zkvm_kind)?,
+                    expected
+                );
+            }
+        }
         Ok(())
     }
 

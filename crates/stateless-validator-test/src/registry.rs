@@ -163,18 +163,24 @@ mod tests {
     #[test]
     fn parses_active_registry() {
         let registry = ArtifactRegistry::load().unwrap();
-        assert_eq!(registry.stateless_validators.len(), 1);
-        let reth = &registry.stateless_validators[0];
-        assert_eq!(reth.name, "reth");
-        assert_eq!(reth.version, StatelessValidatorKind::Reth.version());
-        assert_eq!(reth.artifacts.len(), 3);
+        assert_eq!(registry.stateless_validators.len(), 2);
 
-        for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
-            assert!(
-                registry
-                    .artifact(StatelessValidatorKind::Reth, zkvm)
-                    .is_some()
-            );
+        for (kind, expected_version) in [
+            (StatelessValidatorKind::Ethrex, "26.0.0-rc.2"),
+            (StatelessValidatorKind::Reth, "0.1.0-rc.2"),
+        ] {
+            let validator = registry
+                .stateless_validators
+                .iter()
+                .find(|validator| validator.name == kind.as_str())
+                .unwrap();
+            assert_eq!(kind.version(), expected_version);
+            assert_eq!(validator.version, expected_version);
+            assert_eq!(validator.artifacts.len(), 3);
+
+            for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+                assert!(registry.artifact(kind, zkvm).is_some());
+            }
         }
     }
 
