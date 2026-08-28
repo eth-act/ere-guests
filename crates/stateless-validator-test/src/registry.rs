@@ -174,7 +174,7 @@ mod tests {
                 .iter()
                 .find(|validator| validator.name == kind.as_str())
                 .unwrap();
-            assert_eq!(kind.version(), expected_version);
+            assert_eq!(kind.version(), Some(expected_version));
             assert_eq!(validator.version, expected_version);
             assert_eq!(validator.artifacts.len(), 3);
 
@@ -182,6 +182,8 @@ mod tests {
                 assert!(registry.artifact(kind, zkvm).is_some());
             }
         }
+
+        assert_eq!(StatelessValidatorKind::Zesu.version(), None);
     }
 
     #[test]

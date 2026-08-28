@@ -370,6 +370,7 @@ mod tests {
                 );
             }
         }
+        assert!(registered_zkvm_version(StatelessValidatorKind::Zesu, zkVMKind::Zisk).is_err());
         Ok(())
     }
 

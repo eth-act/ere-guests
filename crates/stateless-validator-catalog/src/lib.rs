@@ -44,10 +44,11 @@ include!(concat!(env!("OUT_DIR"), "/version_impl.rs"));
 )]
 pub enum StatelessValidatorKind {
     /// Ethrex stateless validator.
-    Ethrex = 0,
+    Ethrex,
     /// Reth stateless validator.
-    Reth = 1,
-    // TODO(zesu-devnet-8): Restore `Zesu = 2` after a compatible release is published.
+    Reth,
+    /// Zesu stateless validator.
+    Zesu,
 }
 
 impl StatelessValidatorKind {
@@ -131,17 +132,13 @@ mod tests {
         for (spellings, kind) in [
             (["ethrex", "Ethrex"], StatelessValidatorKind::Ethrex),
             (["reth", "Reth"], StatelessValidatorKind::Reth),
+            (["zesu", "Zesu"], StatelessValidatorKind::Zesu),
         ] {
             spellings
                 .iter()
                 .for_each(|s| assert_eq!(s.parse(), Ok(kind)));
             assert_eq!(kind.as_str(), spellings[0]);
         }
-
-        assert_eq!(
-            "zesu".parse::<StatelessValidatorKind>(),
-            Err(ParseError::from("zesu"))
-        );
 
         // Invalid
         assert_eq!(
@@ -150,7 +147,8 @@ mod tests {
         );
         assert_eq!(
             ParseError::from("xxx").to_string(),
-            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth]".to_string()
+            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu]"
+                .to_string()
         );
     }
 
@@ -158,6 +156,7 @@ mod tests {
     fn preserve_reserved_numeric_ids() {
         assert_eq!(StatelessValidatorKind::Ethrex.as_u8(), 0);
         assert_eq!(StatelessValidatorKind::Reth.as_u8(), 1);
+        assert_eq!(StatelessValidatorKind::Zesu.as_u8(), 2);
         assert_eq!(
             StatelessValidatorKind::from_u8(0),
             Some(StatelessValidatorKind::Ethrex)
@@ -166,6 +165,10 @@ mod tests {
             StatelessValidatorKind::from_u8(1),
             Some(StatelessValidatorKind::Reth)
         );
-        assert_eq!(StatelessValidatorKind::from_u8(2), None);
+        assert_eq!(
+            StatelessValidatorKind::from_u8(2),
+            Some(StatelessValidatorKind::Zesu)
+        );
+        assert_eq!(StatelessValidatorKind::Zesu.version(), None);
     }
 }

@@ -46,6 +46,7 @@ fn expected_failures(
         }
         (StatelessValidatorKind::Ethrex, zkVMKind::SP1) => &[],
         (StatelessValidatorKind::Reth, _) => RETH_EXPECTED_FAILURES,
+        (StatelessValidatorKind::Zesu, _) => panic!("Zesu has no active registry artifacts"),
     }
 }
 

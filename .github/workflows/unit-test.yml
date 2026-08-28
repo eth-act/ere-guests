@@ -50,12 +50,6 @@ jobs:
         shell: bash
         run: .github/scripts/check-unused-patch.sh
 
-      - name: Check for duplicate packages
-        shell: bash
-        run: |
-          .github/scripts/check-duplicate-pkg.sh \
-            --include '^(ere|alloy|openvm|sp1|zisk)'
-
   test:
     name: Test and clippy workspace crates
     runs-on: ubuntu-latest

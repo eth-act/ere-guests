@@ -21,17 +21,22 @@ fn main() {
                 validator.name
             );
             let variant = variant_name(&validator.name);
-            format!("            Self::{variant} => {:?},", validator.version)
+            format!(
+                "            Self::{variant} => Some({:?}),",
+                validator.version
+            )
         })
         .collect::<Vec<_>>()
         .join("\n");
 
     let version_impl = format!(
         r#"impl crate::StatelessValidatorKind {{
-    /// Returns the stateless validator version.
-    pub const fn version(&self) -> &'static str {{
+    /// Returns the active stateless validator version, or `None` when no artifacts are registered.
+    pub const fn version(&self) -> Option<&'static str> {{
+        #[allow(unreachable_patterns)]
         match self {{
 {arms}
+            _ => None,
         }}
     }}
 }}"#,
