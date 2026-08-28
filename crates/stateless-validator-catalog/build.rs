@@ -1,23 +1,42 @@
-//! Generates the `StatelessValidatorKind::version` impl.
+//! Generates the `StatelessValidatorKind::version` impl from the artifact registry.
 
-use std::{env, fs, path::Path};
+use std::{collections::BTreeSet, env, fs, path::Path};
 
-use ere_util_build::{cargo_lock_path, detect_dep_version, workspace};
 use serde::Deserialize;
 
 fn main() {
-    let ethrex_version = detect_dep_version("stateless-validator-ethrex", "ethrex-guest-program");
-    let reth_version = detect_dep_version("stateless-validator-reth", "reth-chainspec");
-    let zesu_version = registry_version("zesu");
+    let registry_path = workspace().join("artifact-registry.json");
+    println!("cargo:rerun-if-changed={}", registry_path.display());
+    let registry = serde_json::from_slice::<ArtifactRegistry>(&fs::read(&registry_path).unwrap())
+        .expect("artifact-registry.json should be valid");
+
+    let mut names = BTreeSet::new();
+    let arms = registry
+        .stateless_validators
+        .into_iter()
+        .map(|validator| {
+            assert!(
+                names.insert(validator.name.clone()),
+                "duplicate stateless validator `{}` in artifact-registry.json",
+                validator.name
+            );
+            let variant = variant_name(&validator.name);
+            format!(
+                "            Self::{variant} => Some({:?}),",
+                validator.version
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
 
     let version_impl = format!(
         r#"impl crate::StatelessValidatorKind {{
-    /// Returns the stateless validator version.
-    pub const fn version(&self) -> &'static str {{
+    /// Returns the active stateless validator version, or `None` when no artifacts are registered.
+    pub const fn version(&self) -> Option<&'static str> {{
+        #[allow(unreachable_patterns)]
         match self {{
-            Self::Ethrex => "{ethrex_version}",
-            Self::Reth => "{reth_version}",
-            Self::Zesu => "{zesu_version}",
+{arms}
+            _ => None,
         }}
     }}
 }}"#,
@@ -26,36 +45,37 @@ fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let dst = Path::new(&out_dir).join("version_impl.rs");
     fs::write(dst, version_impl).unwrap();
-
-    if let Some(cargo_lock) = cargo_lock_path() {
-        println!("cargo:rerun-if-changed={}", cargo_lock.display());
-    }
 }
 
-/// Resolves the version of the `name` stateless validator from `artifact-registry.json`.
-fn registry_version(name: &str) -> String {
-    #[derive(Deserialize)]
-    struct ArtifactRegistry {
-        stateless_validators: Vec<StatelessValidator>,
-    }
+#[derive(Deserialize)]
+struct ArtifactRegistry {
+    stateless_validators: Vec<StatelessValidator>,
+}
 
-    #[derive(Deserialize)]
-    struct StatelessValidator {
-        name: String,
-        version: String,
-    }
+#[derive(Deserialize)]
+struct StatelessValidator {
+    name: String,
+    version: String,
+}
 
-    let registry_path = workspace()
-        .expect("workspace should be found")
-        .join("artifact-registry.json");
-    println!("cargo:rerun-if-changed={}", registry_path.display());
+fn workspace() -> std::path::PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .and_then(Path::parent)
+        .expect("catalog crate should be under the workspace crates directory")
+        .to_path_buf()
+}
 
-    let registry =
-        serde_json::from_slice::<ArtifactRegistry>(&fs::read(&registry_path).unwrap()).unwrap();
-    registry
-        .stateless_validators
-        .into_iter()
-        .find(|validator| validator.name == name)
-        .unwrap_or_else(|| panic!("`{name}` not found in artifact-registry.json"))
-        .version
+fn variant_name(name: &str) -> String {
+    name.split(['-', '_'])
+        .map(|word| {
+            let mut chars = word.chars();
+            chars
+                .next()
+                .into_iter()
+                .flat_map(char::to_uppercase)
+                .chain(chars)
+                .collect::<String>()
+        })
+        .collect()
 }

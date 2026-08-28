@@ -129,14 +129,15 @@ mod tests {
 
     #[test]
     fn parse_stateless_validator_kind() {
-        // Valid
-        for (ss, kind) in [
+        for (spellings, kind) in [
             (["ethrex", "Ethrex"], StatelessValidatorKind::Ethrex),
             (["reth", "Reth"], StatelessValidatorKind::Reth),
             (["zesu", "Zesu"], StatelessValidatorKind::Zesu),
         ] {
-            ss.iter().for_each(|s| assert_eq!(s.parse(), Ok(kind)));
-            assert_eq!(kind.as_str(), ss[0]);
+            spellings
+                .iter()
+                .for_each(|s| assert_eq!(s.parse(), Ok(kind)));
+            assert_eq!(kind.as_str(), spellings[0]);
         }
 
         // Invalid
@@ -149,5 +150,25 @@ mod tests {
             "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu]"
                 .to_string()
         );
+    }
+
+    #[test]
+    fn preserve_reserved_numeric_ids() {
+        assert_eq!(StatelessValidatorKind::Ethrex.as_u8(), 0);
+        assert_eq!(StatelessValidatorKind::Reth.as_u8(), 1);
+        assert_eq!(StatelessValidatorKind::Zesu.as_u8(), 2);
+        assert_eq!(
+            StatelessValidatorKind::from_u8(0),
+            Some(StatelessValidatorKind::Ethrex)
+        );
+        assert_eq!(
+            StatelessValidatorKind::from_u8(1),
+            Some(StatelessValidatorKind::Reth)
+        );
+        assert_eq!(
+            StatelessValidatorKind::from_u8(2),
+            Some(StatelessValidatorKind::Zesu)
+        );
+        assert_eq!(StatelessValidatorKind::Zesu.version(), None);
     }
 }

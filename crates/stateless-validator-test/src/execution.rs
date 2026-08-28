@@ -6,7 +6,7 @@ use std::{
     time::Instant,
 };
 
-use anyhow::{anyhow, bail};
+use anyhow::bail;
 use rayon::prelude::*;
 use stateless_validator_common::{SszDecode, guest::StatelessValidationResult};
 use tracing::{debug, info};
@@ -14,16 +14,17 @@ use tracing_subscriber::EnvFilter;
 
 use crate::fixture::StatelessValidatorFixture;
 
-pub mod host;
 pub mod zkvm;
+
+const STATELESS_VALIDATION_RESULT_LEN: usize = 43;
 
 /// A fixture that failed to execute or match its expected output.
 #[derive(Debug, Clone)]
 pub struct ExecutionFailure {
     /// Name of the failing fixture.
-    name: String,
+    pub name: String,
     /// Reason the fixture failed.
-    err: String,
+    pub error: String,
 }
 
 /// A [`Display`] view over a slice of [`ExecutionFailure`].
@@ -35,7 +36,7 @@ impl Display for ExecutionFailures<'_> {
         writeln!(f, "{} execution failures:", self.0.len())?;
         for failure in self.0 {
             writeln!(f, "  - {}", failure.name)?;
-            writeln!(f, "    {}", failure.err)?;
+            writeln!(f, "    {}", failure.error)?;
         }
         Ok(())
     }
@@ -71,7 +72,7 @@ pub fn run_execution(
                 .and_then(|output| matches_output(output, fixture.stateless_output_bytes))
                 .map_err(|err| err.to_string())
             {
-                Some(ExecutionFailure { name, err })
+                Some(ExecutionFailure { name, error: err })
             } else {
                 debug!("PASS {name}: took {:?}", start.elapsed());
                 None
@@ -88,47 +89,92 @@ pub fn run_execution(
     failures
 }
 
-fn matches_output(got_bytes: Vec<u8>, expectecd_bytes: Vec<u8>) -> anyhow::Result<()> {
-    let Some(got_bytes) =
-        got_bytes
-            .split_at_checked(expectecd_bytes.len())
-            .and_then(|(got_bytes, trailing)| {
-                trailing.iter().all(|byte| *byte == 0).then_some(got_bytes)
-            })
+/// Validates guest output against the canonical result, allowing zkVM word padding.
+pub fn matches_output(got_bytes: Vec<u8>, expected_bytes: Vec<u8>) -> anyhow::Result<()> {
+    let expected = StatelessValidationResult::from_ssz_bytes(&expected_bytes)
+        .map_err(|error| anyhow::anyhow!("failed to decode fixture output: {error:?}"))?;
+
+    let Some(got_bytes) = got_bytes
+        .split_at_checked(STATELESS_VALIDATION_RESULT_LEN)
+        .and_then(|(result, trailing)| trailing.iter().all(|byte| *byte == 0).then_some(result))
     else {
         bail!(
             "Output bytes mismatch, expected {}, got {}",
-            const_hex::encode_prefixed(expectecd_bytes),
+            const_hex::encode_prefixed(expected_bytes),
             const_hex::encode_prefixed(got_bytes)
         )
     };
 
     let got = StatelessValidationResult::from_ssz_bytes(got_bytes)
-        .map_err(|err| anyhow!("Decode execute output bytes failure: {err:?}"))?;
-    let expected = StatelessValidationResult::from_ssz_bytes(&expectecd_bytes)
-        .map_err(|err| anyhow!("Decode fixture output bytes failure: {err:?}"))?;
+        .map_err(|error| anyhow::anyhow!("failed to decode guest output: {error:?}"))?;
+    if got == expected {
+        Ok(())
+    } else {
+        bail!("Output mismatch, expected {expected:?}, got {got:?}")
+    }
+}
 
-    match (
-        expected.new_payload_request_root == got.new_payload_request_root,
-        expected.successful_validation == got.successful_validation,
-        expected.chain_config == got.chain_config,
-    ) {
-        (true, true, true) => Ok(()),
-        (false, true, true) => bail!(
-            "Output new_payload_request_root mismatch, expected {}, got {}",
-            const_hex::encode_prefixed(expected.new_payload_request_root),
-            const_hex::encode_prefixed(got.new_payload_request_root)
-        ),
-        (true, false, true) => bail!(
-            "Output successful_validation mismatch, expected {}, got {}",
-            expected.successful_validation,
-            got.successful_validation
-        ),
-        (true, true, false) => bail!(
-            "Output chain_config mismatch, expected {:?}, got {:?}",
-            expected.chain_config,
-            got.chain_config
-        ),
-        _ => bail!("Output mismatch, expected {expected:?}, got {got:?}"),
+#[cfg(test)]
+mod tests {
+    use super::{STATELESS_VALIDATION_RESULT_LEN, matches_output};
+
+    fn valid_output() -> Vec<u8> {
+        let mut bytes = Vec::from([0xaa; STATELESS_VALIDATION_RESULT_LEN]);
+        bytes[32] = 1;
+        bytes[33..41].copy_from_slice(&0x0102_0304_0506_0708_u64.to_le_bytes());
+        bytes[41..43].copy_from_slice(&0x1501_u16.to_le_bytes());
+        bytes
+    }
+
+    #[test]
+    fn accepts_fixed_v08_output() {
+        let output = valid_output();
+        matches_output(output.clone(), output).unwrap();
+    }
+
+    #[test]
+    fn reports_malformed_fixture_and_guest_outputs_separately() {
+        let mut malformed = valid_output();
+        malformed[32] = 2;
+        let fixture_error = matches_output(valid_output(), malformed.clone()).unwrap_err();
+        assert!(
+            fixture_error
+                .to_string()
+                .contains("failed to decode fixture output")
+        );
+
+        let guest_error = matches_output(malformed, valid_output()).unwrap_err();
+        assert!(
+            guest_error
+                .to_string()
+                .contains("failed to decode guest output")
+        );
+
+        for len in [0, STATELESS_VALIDATION_RESULT_LEN - 1] {
+            assert!(matches_output(vec![0; len], valid_output()).is_err());
+        }
+
+        let mut long_fixture = valid_output();
+        long_fixture.push(0);
+        assert!(matches_output(valid_output(), long_fixture).is_err());
+    }
+
+    #[test]
+    fn accepts_only_zero_word_padding() {
+        let expected = valid_output();
+        let mut padded = expected.clone();
+        padded.extend([0; 5]);
+        matches_output(padded, expected.clone()).unwrap();
+
+        let mut nonzero_padding = expected.clone();
+        nonzero_padding.push(1);
+        assert!(matches_output(nonzero_padding, expected).is_err());
+    }
+
+    #[test]
+    fn compares_decode_error_sentinel_distinctly() {
+        let sentinel = vec![0; STATELESS_VALIDATION_RESULT_LEN];
+        matches_output(sentinel.clone(), sentinel.clone()).unwrap();
+        assert!(matches_output(sentinel, valid_output()).is_err());
     }
 }

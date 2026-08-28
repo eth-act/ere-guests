@@ -3,51 +3,70 @@
 //! The types mirror `StatelessValidationResult` in [`stateless.py`] and its SSZ schema in
 //! [`stateless_ssz.py`]. The serialized form is the plain SSZ encoding without a schema prefix.
 //!
-//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/stateless.py
-//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.6.2/src/ethereum/forks/amsterdam/stateless_ssz.py
+//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.8.2/src/ethereum/forks/amsterdam/stateless.py
+//! [`stateless_ssz.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.8.2/src/ethereum/forks/amsterdam/stateless_ssz.py
 
 use alloc::vec::Vec;
-use core::fmt::{self, Debug};
 
 use libssz_derive::{SszDecode, SszEncode};
 
-use crate::guest::input::ChainConfig;
-
 /// Canonical result returned by stateless validation.
-#[derive(Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct StatelessValidationResult {
     /// The SSZ hash tree root of the validated payload request.
     pub new_payload_request_root: [u8; 32],
     /// Whether the stateless validation succeeded.
     pub successful_validation: bool,
-    /// The chain configuration echoed from the decoded input.
-    pub chain_config: ChainConfig,
+    /// The chain identifier echoed from the decoded input.
+    pub chain_id: u64,
+    /// The exact schema identifier decoded and executed by the guest.
+    pub schema_id: u16,
 }
 
-impl StatelessValidationResult {
-    /// Constructs a new [`StatelessValidationResult`].
-    pub fn new(
-        new_payload_request_root: [u8; 32],
-        successful_validation: bool,
-        chain_config: ChainConfig,
-    ) -> Self {
-        Self {
-            new_payload_request_root,
-            successful_validation,
-            chain_config,
-        }
+#[cfg(test)]
+mod tests {
+    use libssz::{SszDecode as _, SszEncode as _};
+
+    use super::*;
+
+    #[test]
+    fn validation_result_has_fixed_v08_layout() {
+        let result = StatelessValidationResult {
+            new_payload_request_root: [0xaa; 32],
+            successful_validation: true,
+            chain_id: 0x0102_0304_0506_0708,
+            schema_id: 0x1501,
+        };
+        let encoded = result.to_ssz();
+
+        assert_eq!(encoded.len(), 43);
+        assert_eq!(&encoded[..32], &[0xaa; 32]);
+        assert_eq!(encoded[32], 1);
+        assert_eq!(&encoded[33..41], &0x0102_0304_0506_0708_u64.to_le_bytes());
+        assert_eq!(&encoded[41..], &0x1501_u16.to_le_bytes());
+        assert_eq!(
+            StatelessValidationResult::from_ssz_bytes(&encoded).unwrap(),
+            result
+        );
     }
-}
 
-impl Debug for StatelessValidationResult {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("StatelessValidationResult")
-            .field(
-                "new_payload_request_root",
-                &const_hex::encode_prefixed(self.new_payload_request_root),
-            )
-            .field("successful_validation", &self.successful_validation)
-            .field("chain_config", &self.chain_config)
-            .finish()
+    #[test]
+    fn default_validation_result_is_zero_sentinel() {
+        assert_eq!(StatelessValidationResult::default().to_ssz(), [0; 43]);
+        assert_eq!(
+            StatelessValidationResult::from_ssz_bytes(&[0; 43]).unwrap(),
+            StatelessValidationResult::default()
+        );
+    }
+
+    #[test]
+    fn rejects_malformed_validation_results() {
+        for bytes in [&[0; 42][..], &[0; 44][..]] {
+            assert!(StatelessValidationResult::from_ssz_bytes(bytes).is_err());
+        }
+
+        let mut invalid_boolean = StatelessValidationResult::default().to_ssz();
+        invalid_boolean[32] = 2;
+        assert!(StatelessValidationResult::from_ssz_bytes(&invalid_boolean).is_err());
     }
 }

@@ -50,12 +50,6 @@ jobs:
         shell: bash
         run: .github/scripts/check-unused-patch.sh
 
-      - name: Check for duplicate packages
-        shell: bash
-        run: |
-          .github/scripts/check-duplicate-pkg.sh \
-            --include '^(ere|ethrex|alloy|revm|reth|stateless|openvm|sp1|zisk)'
-
   test:
     name: Test and clippy workspace crates
     runs-on: ubuntu-latest
@@ -83,13 +77,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cargo test --lib --no-fail-fast
 
-      # Include the package once the issue is resolved:
-      # - `stateless-validator-ethrex` - ethrex is not no_std compatible
-      - name: Compile to target riscv64imac-unknown-none-elf
+      - name: Compile common schemas for riscv64imac-unknown-none-elf
         run: |
           cargo build \
             --no-default-features \
             --target riscv64imac-unknown-none-elf \
-            --package stateless-validator-common \
-            --package stateless-validator-reth
-            # --package stateless-validator-ethrex
+            --package stateless-validator-common

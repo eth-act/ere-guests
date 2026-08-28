@@ -4,3 +4,4 @@ pub use stateless_validator_catalog::StatelessValidatorKind;
 
 pub mod execution;
 pub mod fixture;
+pub mod registry;
