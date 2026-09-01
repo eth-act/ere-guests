@@ -66,8 +66,8 @@ libssz-types = { version = "0.3.0", default-features = false, features = ["alloc
 alloy-primitives = { version = "1.6.1", default-features = false }
 
 # ere
-ere-catalog = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
-ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.16.2" }
+ere-catalog = { git = "https://github.com/eth-act/ere", tag = "v0.17.0" }
+ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.17.0" }
 
 # local
 stateless-validator-catalog = { path = "crates/stateless-validator-catalog" }

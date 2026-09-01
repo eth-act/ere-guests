@@ -69,8 +69,16 @@ pub fn devnet_preset_fixtures() -> Vec<StatelessValidatorFixture> {
 /// Returns the latest `count` devnet-8 block fixtures from the rolling batch catalog.
 pub fn latest_devnet_fixtures(count: usize) -> Vec<StatelessValidatorFixture> {
     assert!(count > 0, "devnet fixture count must be positive");
-    let mut fixtures = fetch_latest_devnet_batches(count)
-        .into_iter()
+    let batches = latest_devnet_batches(&fetch_devnet_batches().unwrap(), count).unwrap();
+    let mut fixtures = devnet_fixtures(&batches);
+    fixtures.drain(..fixtures.len().saturating_sub(count));
+    fixtures
+}
+
+/// Returns the devnet-8 block fixtures from the selected batches.
+pub fn devnet_fixtures(batches: &[DevnetBatch]) -> Vec<StatelessValidatorFixture> {
+    batches
+        .iter()
         .flat_map(|batch| {
             archive_fixtures(
                 &format!(
@@ -82,9 +90,7 @@ pub fn latest_devnet_fixtures(count: usize) -> Vec<StatelessValidatorFixture> {
                 Some(batch.sha256.trim_start_matches("0x")),
             )
         })
-        .collect::<Vec<_>>();
-    fixtures.drain(..fixtures.len().saturating_sub(count));
-    fixtures
+        .collect()
 }
 
 /// Returns every fixture in `archive_dir`, caching its verified source archive locally.
@@ -187,27 +193,16 @@ fn download_and_unpack(url: &str, archive_dir: &str, dir: &Path, sha256: Option<
     fs::rename(tempdir.path().join(archive_dir), dir).unwrap();
 }
 
-fn fetch_latest_devnet_batches(count: usize) -> Vec<DevnetBatch> {
+/// Downloads the devnet batch index, which lists every published block batch.
+pub fn fetch_devnet_batches() -> anyhow::Result<String> {
     let url = format!("{DEVNET_FIXTURES_BASE_URL}/batches.jsonl");
     info!("Downloading devnet batch index {url}");
-    let index = reqwest::blocking::get(&url)
-        .unwrap()
-        .error_for_status()
-        .unwrap()
-        .text()
-        .unwrap();
-    latest_devnet_batches(&index, count).unwrap()
+    Ok(reqwest::blocking::get(&url)?.error_for_status()?.text()?)
 }
 
 fn latest_devnet_batches(index: &str, count: usize) -> anyhow::Result<Vec<DevnetBatch>> {
     anyhow::ensure!(count > 0, "devnet fixture count must be positive");
-    let mut batches = index
-        .lines()
-        .filter(|line| !line.trim().is_empty())
-        .map(serde_json::from_str::<DevnetBatch>)
-        .collect::<Result<Vec<_>, _>>()?;
-    anyhow::ensure!(!batches.is_empty(), "devnet batch index is empty");
-
+    let mut batches = devnet_batches(index)?;
     let take = (batches
         .iter()
         .rev()
@@ -220,6 +215,17 @@ fn latest_devnet_batches(index: &str, count: usize) -> anyhow::Result<Vec<Devnet
         + 1)
     .min(batches.len());
     Ok(batches.split_off(batches.len() - take))
+}
+
+/// Parses the batch index in the order it lists, from the oldest batch to the newest.
+pub fn devnet_batches(index: &str) -> anyhow::Result<Vec<DevnetBatch>> {
+    let batches = index
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(serde_json::from_str::<DevnetBatch>)
+        .collect::<Result<Vec<_>, _>>()?;
+    anyhow::ensure!(!batches.is_empty(), "devnet batch index is empty");
+    Ok(batches)
 }
 
 type EestFixture = BTreeMap<String, EestTest>;
@@ -237,14 +243,20 @@ struct EestBlock {
     stateless_output_bytes: Option<Bytes>,
 }
 
+/// One published archive of consecutive devnet blocks.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct DevnetBatch {
-    batch_start_block: u64,
-    batch_end_block: u64,
-    artifact_count: usize,
-    sha256: String,
-    path: String,
+pub struct DevnetBatch {
+    /// First block in the archive.
+    pub batch_start_block: u64,
+    /// Last block in the archive.
+    pub batch_end_block: u64,
+    /// Number of blocks in the archive.
+    pub artifact_count: usize,
+    /// SHA-256 of the archive.
+    pub sha256: String,
+    /// Path of the archive, relative to the fixture base URL.
+    pub path: String,
 }
 
 #[cfg(test)]
