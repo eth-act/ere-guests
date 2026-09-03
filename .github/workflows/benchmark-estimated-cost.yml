@@ -1,0 +1,166 @@
+name: Cost estimation benchmark
+
+on:
+  pull_request:
+    paths:
+      - artifact-registry.json
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  DEVNET_FIXTURES_BASE_URL: https://pub-760ad8b3dd9547539f829c1ea30f18b5.r2.dev/devnets/glamsterdam-devnet-8
+
+jobs:
+  registry-matrix:
+    name: Resolve changed guest matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      batch_end_block: ${{ steps.batch.outputs.batch_end_block }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Checkout base code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Build matrix from changed registry ELFs
+        id: matrix
+        run: |
+          MATRIX=$(jq -c --slurpfile base base/artifact-registry.json -f .github/scripts/registry-elf-diff.jq artifact-registry.json)
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+          echo "Matrix: ${MATRIX}"
+
+      - name: Pin the newest devnet batch
+        id: batch
+        run: |
+          BATCH_END_BLOCK=$(curl -fsSL "${DEVNET_FIXTURES_BASE_URL}/batches.jsonl" | jq -rs '.[-1].batchEndBlock')
+          echo "batch_end_block=${BATCH_END_BLOCK}" >> "$GITHUB_OUTPUT"
+          echo "Batch end block: ${BATCH_END_BLOCK}"
+
+  cost:
+    name: ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }} (${{ matrix.side }})
+    needs: registry-matrix
+    if: needs.registry-matrix.outputs.matrix != '{"include":[]}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.registry-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        if: matrix.zkvm == 'zisk'
+        run: bash .github/scripts/free-up-disk-space.sh
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup sccache
+        uses: mozilla/sccache-action@v0.0.9
+
+      - name: Configure sccache
+        run: |
+          echo "RUSTC_WRAPPER=sccache" >> "$GITHUB_ENV"
+          echo "SCCACHE_GHA_ENABLED=true" >> "$GITHUB_ENV"
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Estimate guest cost
+        env:
+          ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
+          RUST_LOG: info,ere_server=error
+          STATELESS_VALIDATOR: ${{ matrix.stateless_validator }}
+          ZKVM: ${{ matrix.zkvm }}
+          ZKVM_VERSION: ${{ matrix.zkvm_version }}
+          ELF_URL: ${{ matrix.elf_url }}
+          ELF_SHA256: ${{ matrix.elf_sha256 }}
+          BATCH_END_BLOCK: ${{ needs.registry-matrix.outputs.batch_end_block }}
+          SIDE: ${{ matrix.side }}
+        run: |
+          cargo run --release --package stateless-validator-test --bin zkvm_cost_estimation -- \
+            --stateless-validator "${STATELESS_VALIDATOR}" \
+            --zkvm "${ZKVM}" \
+            --zkvm-version "${ZKVM_VERSION}" \
+            --elf-url "${ELF_URL}" \
+            --elf-sha256 "${ELF_SHA256}" \
+            --batch-end-block "${BATCH_END_BLOCK}" \
+            --blocks 100 \
+            --output "${STATELESS_VALIDATOR}-${ZKVM}-${SIDE}.json"
+
+      - name: Upload the cost report
+        uses: actions/upload-artifact@v4
+        with:
+          name: guest-cost-${{ matrix.stateless_validator }}-${{ matrix.zkvm }}-${{ matrix.side }}
+          path: ${{ matrix.stateless_validator }}-${{ matrix.zkvm }}-${{ matrix.side }}.json
+          if-no-files-found: ignore
+
+      - name: Show sccache statistics
+        run: ${SCCACHE_PATH} --show-stats
+
+  report:
+    name: Report the cost difference
+    needs: [registry-matrix, cost]
+    if: ${{ !cancelled() && needs.cost.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download the cost reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: guest-cost-*
+          path: reports
+          merge-multiple: true
+
+      - name: Render the report
+        env:
+          MATRIX: ${{ needs.registry-matrix.outputs.matrix }}
+          COST_RESULT: ${{ needs.cost.result }}
+        run: |
+          {
+            echo "<!-- guest-cost -->"
+            .github/scripts/guest-cost-report.py --reports reports --matrix "${MATRIX}"
+            if [ "${COST_RESULT}" != success ]; then
+              echo "Some measurements failed, see the workflow run."
+            fi
+          } > comment.md
+          cat comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post or update the comment
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          COMMENT_ID=$(gh api "repos/${REPOSITORY}/issues/${NUMBER}/comments" --paginate \
+            --jq '.[] | select(.body | startswith("<!-- guest-cost -->")) | .id' | head -1)
+          if [ -n "${COMMENT_ID}" ]; then
+            gh api -X PATCH "repos/${REPOSITORY}/issues/comments/${COMMENT_ID}" -F body=@comment.md
+          else
+            gh api -X POST "repos/${REPOSITORY}/issues/${NUMBER}/comments" -F body=@comment.md
+          fi

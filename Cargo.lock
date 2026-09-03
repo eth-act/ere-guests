@@ -523,6 +523,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34"
 
 [[package]]
+name = "elf"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4445909572dbd556c457c849c4ca58623d84b27c8fff1e74b0b4227d8b90d17b"
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -539,8 +545,8 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-catalog"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 dependencies = [
  "ere-util-build",
  "serde",
@@ -549,21 +555,21 @@ dependencies = [
 
 [[package]]
 name = "ere-codec"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 
 [[package]]
 name = "ere-compiler-core"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "ere-dockerized"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 dependencies = [
  "anyhow",
  "ere-catalog",
@@ -579,16 +585,16 @@ dependencies = [
 
 [[package]]
 name = "ere-prover-core"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 dependencies = [
  "anyhow",
  "auto_impl",
  "bincode",
  "clap",
+ "elf",
  "ere-codec",
  "ere-verifier-core",
- "indexmap",
  "serde",
  "strum 0.27.2",
  "thiserror",
@@ -596,8 +602,8 @@ dependencies = [
 
 [[package]]
 name = "ere-server-api"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 dependencies = [
  "prost",
  "serde",
@@ -606,10 +612,9 @@ dependencies = [
 
 [[package]]
 name = "ere-server-client"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 dependencies = [
- "bincode",
  "ere-prover-core",
  "ere-server-api",
  "thiserror",
@@ -618,24 +623,24 @@ dependencies = [
 
 [[package]]
 name = "ere-util-build"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 dependencies = [
  "cargo_metadata",
 ]
 
 [[package]]
 name = "ere-util-tokio"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 dependencies = [
  "tokio",
 ]
 
 [[package]]
 name = "ere-verifier-core"
-version = "0.16.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.16.2#8961a4e7ac5c9ca2dc6a2fc848452f23a186b1aa"
+version = "0.17.0"
+source = "git+https://github.com/eth-act/ere?tag=v0.17.0#5023513851c69ab9c4871e3899608e450e6960b6"
 dependencies = [
  "auto_impl",
  "ere-codec",

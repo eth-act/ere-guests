@@ -52,7 +52,7 @@ pub fn is_guest_compatible(
 
 /// Returns whether `version` and `other` are equal up to their patch level, comparing them
 /// verbatim when either is not a `v`-prefixed semantic version.
-fn matches_up_to_patch(version: &str, other: &str) -> bool {
+pub fn matches_up_to_patch(version: &str, other: &str) -> bool {
     let parse = |version: &str| Version::parse(version.strip_prefix('v')?).ok();
     match (parse(version), parse(other)) {
         (Some(version), Some(other)) => {
@@ -87,7 +87,8 @@ fn verify_artifact_checksum(bytes: &[u8], sha256: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn download_artifact(url: &str, sha256: &str) -> Vec<u8> {
+/// Downloads the artifact and verifies its SHA-256 checksum.
+pub fn download_artifact(url: &str, sha256: &str) -> Vec<u8> {
     let bytes = reqwest::blocking::get(url)
         .unwrap()
         .error_for_status()
