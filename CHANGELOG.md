@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.17.0](https://github.com/eth-act/ere-guests/compare/v0.16.0...v0.17.0) (2026-09-03)
+
+
+### Features
+
+* add benchmark-estimated-cost.yml workflow to report cost estimation diff on PRs if elf changes ([#83](https://github.com/eth-act/ere-guests/issues/83)) ([dd6ac1a](https://github.com/eth-act/ere-guests/commit/dd6ac1a43fc14a34e0dc764937ba64f4b0237885))
+* update devnet fixture handling and add preset for pull request tests ([7edb195](https://github.com/eth-act/ere-guests/commit/7edb1959ac4a466ec2c8cf62c2f0158d55f45849))
+
+
+### Bug Fixes
+
+* correct git diff and add command for Cargo.lock update ([#82](https://github.com/eth-act/ere-guests/issues/82)) ([d5a6451](https://github.com/eth-act/ere-guests/commit/d5a6451221acd42993f4a2c8c40b041e06571dd9))
+
 ## [0.16.0](https://github.com/eth-act/ere-guests/compare/v0.15.0...v0.16.0) (2026-08-21)
 
 
