@@ -356,27 +356,30 @@ mod tests {
 
     #[test]
     fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
-        for stateless_validator_kind in
-            [StatelessValidatorKind::Ethrex, StatelessValidatorKind::Reth]
-        {
-            for (zkvm_kind, expected) in [
-                (zkVMKind::OpenVM, "v2.1.0-preview"),
-                (zkVMKind::SP1, "v6.4.0"),
-                (zkVMKind::Zisk, "v1.1.0-alpha"),
-            ] {
+        for (zkvm_kind, expected) in [
+            (zkVMKind::OpenVM, "v2.1.0-preview"),
+            (zkVMKind::SP1, "v6.4.0"),
+            (zkVMKind::Zisk, "v1.1.0-alpha"),
+        ] {
+            assert_eq!(
+                registered_zkvm_version(StatelessValidatorKind::Ethrex, zkvm_kind)?,
+                expected
+            );
+            for kind in [StatelessValidatorKind::Reth, StatelessValidatorKind::Zesu] {
                 assert_eq!(
-                    registered_zkvm_version(stateless_validator_kind, zkvm_kind)?,
-                    expected
+                    registered_zkvm_version(kind, zkvm_kind)
+                        .unwrap_err()
+                        .to_string(),
+                    format!("{kind}-{zkvm_kind} not found in artifact-registry.json")
                 );
             }
         }
-        assert!(registered_zkvm_version(StatelessValidatorKind::Zesu, zkVMKind::Zisk).is_err());
         Ok(())
     }
 
     #[tokio::test]
     async fn download_from_tag() -> anyhow::Result<()> {
-        let stateless_validator_kind = StatelessValidatorKind::Reth;
+        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
         let zkvm_kind = zkVMKind::OpenVM;
         let guest = Downloader::from_tag("v0.15.0")
             .await?
@@ -397,7 +400,7 @@ mod tests {
             return Ok(());
         };
 
-        let stateless_validator_kind = StatelessValidatorKind::Reth;
+        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
         let zkvm_kind = zkVMKind::OpenVM;
         let guest = Downloader::from_commit("817fae8", &github_token)
             .await?

@@ -169,6 +169,7 @@ mod tests {
             StatelessValidatorKind::from_u8(2),
             Some(StatelessValidatorKind::Zesu)
         );
+        assert_eq!(StatelessValidatorKind::Reth.version(), None);
         assert_eq!(StatelessValidatorKind::Zesu.version(), None);
     }
 }

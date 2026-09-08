@@ -1,4 +1,4 @@
-//! `tests-zkevm@v0.8.2` execution tests for release-backed guests.
+//! `tests-zkevm@v0.8.4` execution tests for release-backed guests.
 //!
 //! Set `STATELESS_VALIDATOR` and `ZKVM` to one pair from `artifact-registry.json`.
 //! Run with `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use pre-built Ere images.
@@ -15,25 +15,9 @@ use stateless_validator_test::{
 
 // These fixtures exceed the Ethrex guest memory available on OpenVM and ZisK. SP1 executes them.
 const ETHREX_EXPECTED_RESOURCE_FAILURES: &[&str] = &[
-    "tests/amsterdam/eip8037_state_creation_gas_cost_increase/test_state_gas_reservoir.py::test_block_2d_gas_valid_when_cumulative_exceeds_limit[fork_Amsterdam-blockchain_test]#block0",
     "tests/ported_static/stQuadraticComplexityTest/test_return50000.py::test_return50000[fork_Amsterdam-blockchain_test_from_state_test--g1]#block0",
     "tests/ported_static/stQuadraticComplexityTest/test_return50000_2.py::test_return50000_2[fork_Amsterdam-blockchain_test_from_state_test--g1]#block0",
     "tests/ported_static/stStaticCall/test_static_return50000_2.py::test_static_return50000_2[fork_Amsterdam-blockchain_test_from_state_test]#block0",
-];
-
-const RETH_EXPECTED_FAILURES: &[&str] = &[
-    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_opcode[fork_Amsterdam-blockchain_test_from_state_test-opcode_CREATE-non-empty-balance-correct-initcode]#block0",
-    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_opcode[fork_Amsterdam-blockchain_test_from_state_test-opcode_CREATE2-non-empty-balance-correct-initcode]#block0",
-    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_0-blockchain_test_from_state_test-non-empty-balance-correct-initcode]#block0",
-    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_0-blockchain_test_from_state_test-non-empty-balance-revert-initcode]#block0",
-    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_1-blockchain_test_from_state_test-non-empty-balance-correct-initcode]#block0",
-    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_1-blockchain_test_from_state_test-non-empty-balance-revert-initcode]#block0",
-    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_2-blockchain_test_from_state_test-non-empty-balance-correct-initcode]#block0",
-    "tests/paris/eip7610_create_collision/test_initcollision.py::test_init_collision_create_tx[fork_Amsterdam-tx_type_2-blockchain_test_from_state_test-non-empty-balance-revert-initcode]#block0",
-    "tests/paris/eip7610_create_collision/test_revert_in_create.py::test_collision_with_create2_revert_in_initcode[fork_Amsterdam-blockchain_test_from_state_test]#block0",
-    "tests/paris/eip7610_create_collision/test_revert_in_create.py::test_create2_collision_storage[fork_Amsterdam-blockchain_test_from_state_test-empty-initcode]#block0",
-    "tests/paris/eip7610_create_collision/test_revert_in_create.py::test_create2_collision_storage[fork_Amsterdam-blockchain_test_from_state_test-initcode-with-deploy]#block0",
-    "tests/paris/eip7610_create_collision/test_revert_in_create.py::test_create2_collision_storage[fork_Amsterdam-blockchain_test_from_state_test-sstore-initcode]#block0",
 ];
 
 fn expected_failures(
@@ -45,8 +29,9 @@ fn expected_failures(
             ETHREX_EXPECTED_RESOURCE_FAILURES
         }
         (StatelessValidatorKind::Ethrex, zkVMKind::SP1) => &[],
-        (StatelessValidatorKind::Reth, _) => RETH_EXPECTED_FAILURES,
-        (StatelessValidatorKind::Zesu, _) => panic!("Zesu has no active registry artifacts"),
+        (StatelessValidatorKind::Reth | StatelessValidatorKind::Zesu, _) => {
+            panic!("{stateless_validator} has no active registry artifacts")
+        }
     }
 }
 
