@@ -166,7 +166,7 @@ mod tests {
         assert_eq!(registry.stateless_validators.len(), 2);
 
         for (kind, expected_version) in [
-            (StatelessValidatorKind::Ethrex, "26.0.0-rc.4"),
+            (StatelessValidatorKind::Ethrex, "26.0.0"),
             (StatelessValidatorKind::Reth, "0.1.0-rc.3"),
         ] {
             let validator = registry
