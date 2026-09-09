@@ -29,6 +29,36 @@
                     "vk_sha256": "7f8d16136f2783e9eaef89365cbc34333d06a73f3b77313a72f94a2054e0347e"
                 }
             ]
+        },
+        {
+            "name": "reth",
+            "version": "0.1.0-rc.3",
+            "artifacts": [
+                {
+                    "zkvm": "openvm",
+                    "zkvm_version": "v2.1.0-preview",
+                    "elf_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.3/stateless-validator-reth-openvm-v2.1.0-preview.elf",
+                    "elf_sha256": "af890c636db55d2c7c111198fb2143c04abce4b9793d234feacf3452efa35a95",
+                    "vk_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.3/stateless-validator-reth-openvm-v2.1.0-preview.vk",
+                    "vk_sha256": "c118d0744d722cef89896b7bd085bd957686b190f55deaed80147b9abe3dba59"
+                },
+                {
+                    "zkvm": "sp1",
+                    "zkvm_version": "v6.4.0",
+                    "elf_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.3/stateless-validator-reth-sp1-v6.4.0.elf",
+                    "elf_sha256": "b854432c9bb0822931c6d250661ea0c182bb2cb9633050d302e3d6e16890fab8",
+                    "vk_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.3/stateless-validator-reth-sp1-v6.4.0.vk",
+                    "vk_sha256": "420933f79a82fcb40880a97f0efb7780e6f939cbf6a0bbec716de24b8033df28"
+                },
+                {
+                    "zkvm": "zisk",
+                    "zkvm_version": "v1.1.0-alpha",
+                    "elf_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.3/stateless-validator-reth-zisk-v1.1.0-alpha.elf",
+                    "elf_sha256": "89e4d8d4a6a624659e1281efda6f83e4259fd09e21024702d00e7149de4aa922",
+                    "vk_url": "https://github.com/paradigmxyz/stateless/releases/download/reth-guest-v0.1.0-rc.3/stateless-validator-reth-zisk-v1.1.0-alpha.vk",
+                    "vk_sha256": "6806dfc26dfdab7aaa6931d832b78f052e08a151d36353bb8662dc54e6766756"
+                }
+            ]
         }
     ]
 }

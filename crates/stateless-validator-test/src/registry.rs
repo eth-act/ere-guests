@@ -163,28 +163,27 @@ mod tests {
     #[test]
     fn parses_active_registry() {
         let registry = ArtifactRegistry::load().unwrap();
-        assert_eq!(registry.stateless_validators.len(), 1);
+        assert_eq!(registry.stateless_validators.len(), 2);
 
-        let validator = &registry.stateless_validators[0];
-        assert_eq!(validator.name, StatelessValidatorKind::Ethrex.as_str());
-        assert_eq!(
-            StatelessValidatorKind::Ethrex.version(),
-            Some("26.0.0-rc.4")
-        );
-        assert_eq!(validator.version, "26.0.0-rc.4");
-        assert_eq!(validator.artifacts.len(), 3);
+        for (kind, expected_version) in [
+            (StatelessValidatorKind::Ethrex, "26.0.0-rc.4"),
+            (StatelessValidatorKind::Reth, "0.1.0-rc.3"),
+        ] {
+            let validator = registry
+                .stateless_validators
+                .iter()
+                .find(|validator| validator.name == kind.as_str())
+                .unwrap();
+            assert_eq!(kind.version(), Some(expected_version));
+            assert_eq!(validator.version, expected_version);
+            assert_eq!(validator.artifacts.len(), 3);
+
+            for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+                assert!(registry.artifact(kind, zkvm).is_some());
+            }
+        }
 
         for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
-            assert!(
-                registry
-                    .artifact(StatelessValidatorKind::Ethrex, zkvm)
-                    .is_some()
-            );
-            assert!(
-                registry
-                    .artifact(StatelessValidatorKind::Reth, zkvm)
-                    .is_none()
-            );
             assert!(
                 registry
                     .artifact(StatelessValidatorKind::Zesu, zkvm)
@@ -192,7 +191,6 @@ mod tests {
             );
         }
 
-        assert_eq!(StatelessValidatorKind::Reth.version(), None);
         assert_eq!(StatelessValidatorKind::Zesu.version(), None);
     }
 

@@ -29,7 +29,8 @@ fn expected_failures(
             ETHREX_EXPECTED_RESOURCE_FAILURES
         }
         (StatelessValidatorKind::Ethrex, zkVMKind::SP1) => &[],
-        (StatelessValidatorKind::Reth | StatelessValidatorKind::Zesu, _) => {
+        (StatelessValidatorKind::Reth, _) => &[],
+        (StatelessValidatorKind::Zesu, _) => {
             panic!("{stateless_validator} has no active registry artifacts")
         }
     }

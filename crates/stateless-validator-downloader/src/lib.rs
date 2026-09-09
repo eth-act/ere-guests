@@ -361,18 +361,15 @@ mod tests {
             (zkVMKind::SP1, "v6.4.0"),
             (zkVMKind::Zisk, "v1.1.0-alpha"),
         ] {
-            assert_eq!(
-                registered_zkvm_version(StatelessValidatorKind::Ethrex, zkvm_kind)?,
-                expected
-            );
-            for kind in [StatelessValidatorKind::Reth, StatelessValidatorKind::Zesu] {
-                assert_eq!(
-                    registered_zkvm_version(kind, zkvm_kind)
-                        .unwrap_err()
-                        .to_string(),
-                    format!("{kind}-{zkvm_kind} not found in artifact-registry.json")
-                );
+            for kind in [StatelessValidatorKind::Ethrex, StatelessValidatorKind::Reth] {
+                assert_eq!(registered_zkvm_version(kind, zkvm_kind)?, expected);
             }
+            assert_eq!(
+                registered_zkvm_version(StatelessValidatorKind::Zesu, zkvm_kind)
+                    .unwrap_err()
+                    .to_string(),
+                format!("zesu-{zkvm_kind} not found in artifact-registry.json")
+            );
         }
         Ok(())
     }
