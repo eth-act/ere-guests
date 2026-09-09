@@ -53,8 +53,13 @@ pub struct Downloader {
 
 impl Downloader {
     /// Creates a downloader from a GitHub release tag (e.g., `"v0.5.0"`).
+    /// Uses the first nonempty token from `GH_TOKEN` or `GITHUB_TOKEN` for authentication.
     pub async fn from_tag(tag: &str) -> anyhow::Result<Self> {
-        let client = github_client(None)?;
+        let token = ["GH_TOKEN", "GITHUB_TOKEN"]
+            .into_iter()
+            .filter_map(|name| std::env::var(name).ok())
+            .find(|token| !token.is_empty());
+        let client = github_client(token.as_deref())?;
         let assets = get_release_assets(&client, tag).await?;
         Ok(Self {
             client,
@@ -356,27 +361,33 @@ mod tests {
 
     #[test]
     fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
-        for stateless_validator_kind in
-            [StatelessValidatorKind::Ethrex, StatelessValidatorKind::Reth]
-        {
-            for (zkvm_kind, expected) in [
-                (zkVMKind::OpenVM, "v2.1.0-preview"),
-                (zkVMKind::SP1, "v6.4.0"),
-                (zkVMKind::Zisk, "v1.1.0-alpha"),
-            ] {
-                assert_eq!(
-                    registered_zkvm_version(stateless_validator_kind, zkvm_kind)?,
-                    expected
-                );
+        for (zkvm_kind, expected) in [
+            (zkVMKind::OpenVM, "v2.1.0-preview"),
+            (zkVMKind::SP1, "v6.4.0"),
+            (zkVMKind::Zisk, "v1.1.0-alpha"),
+        ] {
+            for kind in [StatelessValidatorKind::Ethrex, StatelessValidatorKind::Reth] {
+                assert_eq!(registered_zkvm_version(kind, zkvm_kind)?, expected);
             }
         }
-        assert!(registered_zkvm_version(StatelessValidatorKind::Zesu, zkVMKind::Zisk).is_err());
+        assert_eq!(
+            registered_zkvm_version(StatelessValidatorKind::Zesu, zkVMKind::Zisk)?,
+            "v1.1.0-alpha"
+        );
+        for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1] {
+            assert_eq!(
+                registered_zkvm_version(StatelessValidatorKind::Zesu, zkvm_kind)
+                    .unwrap_err()
+                    .to_string(),
+                format!("zesu-{zkvm_kind} not found in artifact-registry.json")
+            );
+        }
         Ok(())
     }
 
     #[tokio::test]
     async fn download_from_tag() -> anyhow::Result<()> {
-        let stateless_validator_kind = StatelessValidatorKind::Reth;
+        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
         let zkvm_kind = zkVMKind::OpenVM;
         let guest = Downloader::from_tag("v0.15.0")
             .await?
@@ -397,7 +408,7 @@ mod tests {
             return Ok(());
         };
 
-        let stateless_validator_kind = StatelessValidatorKind::Reth;
+        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
         let zkvm_kind = zkVMKind::OpenVM;
         let guest = Downloader::from_commit("817fae8", &github_token)
             .await?

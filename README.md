@@ -31,13 +31,13 @@ This repository republishes checksum-verified guest ELFs and program verificatio
 Located in `crates/`, these provide reusable functionality for guest programs and host:
 
 - [`stateless-validator-catalog`](crates/stateless-validator-catalog) - Catalog of active validator kinds and registry-derived versions
-- [`stateless-validator-common`](crates/stateless-validator-common) - Canonical `no_std` tests-zkevm v0.8.2 input and output schemas
+- [`stateless-validator-common`](crates/stateless-validator-common) - Canonical `no_std` tests-zkevm v0.8.4 input and output schemas
 - [`stateless-validator-downloader`](crates/stateless-validator-downloader) - Downloads republished ELFs and VKs from releases and workflow artifacts
 - [`stateless-validator-test`](crates/stateless-validator-test) - Runs EEST and rolling devnet inputs against registry artifacts in dockerized zkVMs
 
 ### Guest Artifacts
 
-Ethrex `v26.0.0-rc.2` and Reth `v0.1.0-rc.2` are currently active on OpenVM, SP1, and ZisK. Zesu keeps catalog ID `2` reserved and remains inactive until compatible, checksum-backed release artifacts pass the same test matrix.
+Ethrex `v26.0.0` and Reth `v0.1.0-rc.3` are active on OpenVM, SP1, and ZisK with tests-zkevm `v0.8.4`. Zesu [`tests-glamsterdam-devnet@v8.1.4`](https://github.com/Consensys-Incorporated/zesu-zkvm/releases/tag/tests-glamsterdam-devnet%40v8.1.4) is active on ZisK `v1.1.0-alpha` with the same fixtures. Its catalog ID remains `2`.
 
 Pull requests run a pinned 10-block `glamsterdam-devnet-8` fixture set. The daily workflow runs the latest 100 available blocks from the rolling catalog.
 
@@ -50,7 +50,7 @@ To measure one ELF locally, pick a `batchEndBlock` from the [batch index](https:
 ```bash
 ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere \
   cargo run --release --package stateless-validator-test --bin zkvm_cost_estimation -- \
-    --stateless-validator reth --zkvm zisk --zkvm-version v1.1.0-alpha \
+    --stateless-validator ethrex --zkvm zisk --zkvm-version v1.1.0-alpha \
     --elf-url <url> --elf-sha256 <sha256> \
     --batch-end-block <block> --blocks 100 --output cost.json
 ```
