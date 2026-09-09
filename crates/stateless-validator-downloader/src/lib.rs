@@ -364,6 +364,12 @@ mod tests {
             for kind in [StatelessValidatorKind::Ethrex, StatelessValidatorKind::Reth] {
                 assert_eq!(registered_zkvm_version(kind, zkvm_kind)?, expected);
             }
+        }
+        assert_eq!(
+            registered_zkvm_version(StatelessValidatorKind::Zesu, zkVMKind::Zisk)?,
+            "v1.1.0-alpha"
+        );
+        for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1] {
             assert_eq!(
                 registered_zkvm_version(StatelessValidatorKind::Zesu, zkvm_kind)
                     .unwrap_err()

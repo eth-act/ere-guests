@@ -37,7 +37,7 @@ Located in `crates/`, these provide reusable functionality for guest programs an
 
 ### Guest Artifacts
 
-Ethrex `v26.0.0` and Reth `v0.1.0-rc.3` are active on OpenVM, SP1, and ZisK with tests-zkevm `v0.8.4`. Zesu keeps catalog ID `2` reserved and remains inactive. Its activation requires checksum-verified artifacts that pass the same test matrix.
+Ethrex `v26.0.0` and Reth `v0.1.0-rc.3` are active on OpenVM, SP1, and ZisK with tests-zkevm `v0.8.4`. Zesu [`tests-glamsterdam-devnet@v8.1.4`](https://github.com/Consensys-Incorporated/zesu-zkvm/releases/tag/tests-glamsterdam-devnet%40v8.1.4) is active on ZisK `v1.1.0-alpha` with the same fixtures. Its catalog ID remains `2`.
 
 Pull requests run a pinned 10-block `glamsterdam-devnet-8` fixture set. The daily workflow runs the latest 100 available blocks from the rolling catalog.
 

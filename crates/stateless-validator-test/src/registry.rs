@@ -163,11 +163,17 @@ mod tests {
     #[test]
     fn parses_active_registry() {
         let registry = ArtifactRegistry::load().unwrap();
-        assert_eq!(registry.stateless_validators.len(), 2);
+        assert_eq!(registry.stateless_validators.len(), 3);
 
-        for (kind, expected_version) in [
-            (StatelessValidatorKind::Ethrex, "26.0.0"),
-            (StatelessValidatorKind::Reth, "0.1.0-rc.3"),
+        let all_zkvms: &[zkVMKind] = &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk];
+        for (kind, expected_version, expected_zkvms) in [
+            (StatelessValidatorKind::Ethrex, "26.0.0", all_zkvms),
+            (StatelessValidatorKind::Reth, "0.1.0-rc.3", all_zkvms),
+            (
+                StatelessValidatorKind::Zesu,
+                "tests-glamsterdam-devnet@v8.1.4",
+                &[zkVMKind::Zisk],
+            ),
         ] {
             let validator = registry
                 .stateless_validators
@@ -176,22 +182,20 @@ mod tests {
                 .unwrap();
             assert_eq!(kind.version(), Some(expected_version));
             assert_eq!(validator.version, expected_version);
-            assert_eq!(validator.artifacts.len(), 3);
+            assert_eq!(validator.artifacts.len(), expected_zkvms.len());
 
-            for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+            for &zkvm in expected_zkvms {
                 assert!(registry.artifact(kind, zkvm).is_some());
             }
         }
 
-        for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+        for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1] {
             assert!(
                 registry
                     .artifact(StatelessValidatorKind::Zesu, zkvm)
                     .is_none()
             );
         }
-
-        assert_eq!(StatelessValidatorKind::Zesu.version(), None);
     }
 
     #[test]

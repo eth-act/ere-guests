@@ -59,6 +59,20 @@
                     "vk_sha256": "6806dfc26dfdab7aaa6931d832b78f052e08a151d36353bb8662dc54e6766756"
                 }
             ]
+        },
+        {
+            "name": "zesu",
+            "version": "tests-glamsterdam-devnet@v8.1.4",
+            "artifacts": [
+                {
+                    "zkvm": "zisk",
+                    "zkvm_version": "v1.1.0-alpha",
+                    "elf_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests-glamsterdam-devnet%40v8.1.4/stateless-validator-zesu-zisk-1.1.0-alpha.elf",
+                    "elf_sha256": "1753427feee8ef8c18d8e5d829a15b5a17794d00adc5f7095f382e2f906ad3ed",
+                    "vk_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests-glamsterdam-devnet%40v8.1.4/stateless-validator-zesu-zisk-1.1.0-alpha.vk",
+                    "vk_sha256": "ad94ad82ad310fda4ab8e8e91e7b4826edaa20e9c4e76f479ed7ca3482e3755c"
+                }
+            ]
         }
     ]
 }
