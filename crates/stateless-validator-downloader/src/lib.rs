@@ -53,8 +53,13 @@ pub struct Downloader {
 
 impl Downloader {
     /// Creates a downloader from a GitHub release tag (e.g., `"v0.5.0"`).
+    /// Uses the first nonempty token from `GH_TOKEN` or `GITHUB_TOKEN` for authentication.
     pub async fn from_tag(tag: &str) -> anyhow::Result<Self> {
-        let client = github_client(None)?;
+        let token = ["GH_TOKEN", "GITHUB_TOKEN"]
+            .into_iter()
+            .filter_map(|name| std::env::var(name).ok())
+            .find(|token| !token.is_empty());
+        let client = github_client(token.as_deref())?;
         let assets = get_release_assets(&client, tag).await?;
         Ok(Self {
             client,
