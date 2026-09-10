@@ -18,11 +18,9 @@ const ARTIFACT_REGISTRY_JSON: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../../artifact-registry.json"
 ));
-const ACTION_NAMES: &[&str] = &[
-    "Republish Release-Backed Guests",
-    // Retain access to artifacts produced before the registry-only workflow.
-    "Compile and Release Compiled Guests",
-];
+const ACTION_NAME: &str = "Release Please";
+/// Action artifact that bundles every registered ELF and VK under `artifacts/`.
+const RELEASE_ASSETS_ARTIFACT: &str = "release-assets";
 
 /// Release-backed guest ELF.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -133,8 +131,8 @@ impl Downloader {
         artifact_name: &str,
     ) -> anyhow::Result<CompiledGuest> {
         let artifact_url = artifacts
-            .get(artifact_name)
-            .with_context(|| format!("Guest not found: {artifact_name}"))?;
+            .get(RELEASE_ASSETS_ARTIFACT)
+            .with_context(|| format!("Artifact not found: {RELEASE_ASSETS_ARTIFACT}"))?;
 
         let tempdir = tempdir().context("Failed to create temp dir")?;
         let zip_path = tempdir.path().join("artifact.zip");
@@ -152,11 +150,10 @@ impl Downloader {
             .context("Failed to run unzip")?;
         ensure!(output.status.success(), "Unzip exited with non-zero status");
 
-        let elf_path = tempdir.path().join(format!("{artifact_name}.elf"));
-        let program_vk_path = tempdir.path().join(format!("{artifact_name}.vk"));
-        let profiling_elf_path = tempdir
-            .path()
-            .join(format!("{artifact_name}-profiling.elf"));
+        let artifacts_dir = tempdir.path().join("artifacts");
+        let elf_path = artifacts_dir.join(format!("{artifact_name}.elf"));
+        let program_vk_path = artifacts_dir.join(format!("{artifact_name}.vk"));
+        let profiling_elf_path = artifacts_dir.join(format!("{artifact_name}-profiling.elf"));
         let elf = fs::read(&elf_path)
             .await
             .with_context(|| format!("Failed to read ELF: {}", elf_path.display()))?;
@@ -305,7 +302,7 @@ async fn get_action_id(client: &Client, full_sha: &str) -> anyhow::Result<u64> {
     workflow_runs
         .into_iter()
         .filter(|run| {
-            ACTION_NAMES.contains(&run.name.as_str())
+            run.name == ACTION_NAME
                 && run.status == "completed"
                 && run.conclusion.as_deref() == Some("success")
         })
