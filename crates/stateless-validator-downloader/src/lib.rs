@@ -18,11 +18,9 @@ const ARTIFACT_REGISTRY_JSON: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../../artifact-registry.json"
 ));
-const ACTION_NAMES: &[&str] = &[
-    "Republish Release-Backed Guests",
-    // Retain access to artifacts produced before the registry-only workflow.
-    "Compile and Release Compiled Guests",
-];
+const ACTION_NAME: &str = "Release Please";
+/// Action artifact that bundles every registered ELF and VK under `artifacts/`.
+const RELEASE_ASSETS_ARTIFACT: &str = "release-assets";
 
 /// Release-backed guest ELF.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -55,11 +53,7 @@ impl Downloader {
     /// Creates a downloader from a GitHub release tag (e.g., `"v0.5.0"`).
     /// Uses the first nonempty token from `GH_TOKEN` or `GITHUB_TOKEN` for authentication.
     pub async fn from_tag(tag: &str) -> anyhow::Result<Self> {
-        let token = ["GH_TOKEN", "GITHUB_TOKEN"]
-            .into_iter()
-            .filter_map(|name| std::env::var(name).ok())
-            .find(|token| !token.is_empty());
-        let client = github_client(token.as_deref())?;
+        let client = github_client()?;
         let assets = get_release_assets(&client, tag).await?;
         Ok(Self {
             client,
@@ -67,9 +61,9 @@ impl Downloader {
         })
     }
 
-    /// Creates a downloader from a commit SHA. Requires `github_token`.
-    pub async fn from_commit(sha: &str, github_token: &str) -> anyhow::Result<Self> {
-        let client = github_client(Some(github_token))?;
+    /// Creates a downloader from a commit SHA. Requires a nonempty `GH_TOKEN` or `GITHUB_TOKEN`.
+    pub async fn from_commit(sha: &str) -> anyhow::Result<Self> {
+        let client = github_client()?;
         let full_sha = get_full_sha(&client, sha).await?;
         let action_id = get_action_id(&client, &full_sha).await?;
         let artifacts = get_artifacts(&client, action_id).await?;
@@ -133,8 +127,8 @@ impl Downloader {
         artifact_name: &str,
     ) -> anyhow::Result<CompiledGuest> {
         let artifact_url = artifacts
-            .get(artifact_name)
-            .with_context(|| format!("Guest not found: {artifact_name}"))?;
+            .get(RELEASE_ASSETS_ARTIFACT)
+            .with_context(|| format!("Artifact not found: {RELEASE_ASSETS_ARTIFACT}"))?;
 
         let tempdir = tempdir().context("Failed to create temp dir")?;
         let zip_path = tempdir.path().join("artifact.zip");
@@ -152,11 +146,10 @@ impl Downloader {
             .context("Failed to run unzip")?;
         ensure!(output.status.success(), "Unzip exited with non-zero status");
 
-        let elf_path = tempdir.path().join(format!("{artifact_name}.elf"));
-        let program_vk_path = tempdir.path().join(format!("{artifact_name}.vk"));
-        let profiling_elf_path = tempdir
-            .path()
-            .join(format!("{artifact_name}-profiling.elf"));
+        let artifacts_dir = tempdir.path().join("artifacts");
+        let elf_path = artifacts_dir.join(format!("{artifact_name}.elf"));
+        let program_vk_path = artifacts_dir.join(format!("{artifact_name}.vk"));
+        let profiling_elf_path = artifacts_dir.join(format!("{artifact_name}-profiling.elf"));
         let elf = fs::read(&elf_path)
             .await
             .with_context(|| format!("Failed to read ELF: {}", elf_path.display()))?;
@@ -222,7 +215,7 @@ fn registered_zkvm_version(
         })
 }
 
-fn github_client(token: Option<&str>) -> anyhow::Result<Client> {
+fn github_client() -> anyhow::Result<Client> {
     let mut headers: HeaderMap = [
         ("Accept", "application/vnd.github+json"),
         ("X-GitHub-Api-Version", "2022-11-28"),
@@ -231,7 +224,7 @@ fn github_client(token: Option<&str>) -> anyhow::Result<Client> {
     .map(|(k, v)| (k.parse().unwrap(), HeaderValue::from_static(v)))
     .collect();
 
-    if let Some(token) = token {
+    if let Some(token) = github_token() {
         let mut value = HeaderValue::from_str(&format!("Bearer {token}"))?;
         value.set_sensitive(true);
         headers.insert(reqwest::header::AUTHORIZATION, value);
@@ -241,6 +234,13 @@ fn github_client(token: Option<&str>) -> anyhow::Result<Client> {
         .user_agent("eth-act/ere-guests")
         .default_headers(headers)
         .build()?)
+}
+
+fn github_token() -> Option<String> {
+    ["GH_TOKEN", "GITHUB_TOKEN"]
+        .into_iter()
+        .filter_map(|name| std::env::var(name).ok())
+        .find(|token| !token.is_empty())
 }
 
 async fn get_release_assets(
@@ -305,7 +305,7 @@ async fn get_action_id(client: &Client, full_sha: &str) -> anyhow::Result<u64> {
     workflow_runs
         .into_iter()
         .filter(|run| {
-            ACTION_NAMES.contains(&run.name.as_str())
+            run.name == ACTION_NAME
                 && run.status == "completed"
                 && run.conclusion.as_deref() == Some("success")
         })
@@ -357,7 +357,7 @@ mod tests {
     use ere_catalog::zkVMKind;
     use stateless_validator_catalog::StatelessValidatorKind;
 
-    use crate::{Downloader, registered_zkvm_version};
+    use crate::{Downloader, github_token, registered_zkvm_version};
 
     #[test]
     fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
@@ -404,13 +404,13 @@ mod tests {
 
     #[tokio::test]
     async fn download_from_commit() -> anyhow::Result<()> {
-        let Ok(github_token) = std::env::var("GITHUB_TOKEN") else {
+        if github_token().is_none() {
             return Ok(());
-        };
+        }
 
         let stateless_validator_kind = StatelessValidatorKind::Ethrex;
         let zkvm_kind = zkVMKind::OpenVM;
-        let guest = Downloader::from_commit("817fae8", &github_token)
+        let guest = Downloader::from_commit("ec6e4af")
             .await?
             .download(stateless_validator_kind, zkvm_kind)
             .await?;
