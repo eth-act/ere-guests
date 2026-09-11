@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/eth-act/ere-guests/compare/v0.17.0...v0.17.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* **ci:** move the artifacts republishment into `release-please.yml` ([#85](https://github.com/eth-act/ere-guests/issues/85)) ([170d4c1](https://github.com/eth-act/ere-guests/commit/170d4c1c6f37a2d33e85d0637aa60751fa4ae270))
+
 ## [0.17.0](https://github.com/eth-act/ere-guests/compare/v0.16.0...v0.17.0) (2026-09-09)
 
 
