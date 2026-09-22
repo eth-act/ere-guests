@@ -2,31 +2,31 @@
     "stateless_validators": [
         {
             "name": "ethrex",
-            "version": "26.0.0",
+            "version": "27.0.0",
             "artifacts": [
                 {
                     "zkvm": "openvm",
                     "zkvm_version": "v2.1.0-preview",
-                    "elf_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0/stateless-validator-ethrex-openvm-v2.1.0-preview.elf",
-                    "elf_sha256": "5c577aa7d05fce56a8bea4a48cd69e20a7c5625ba8ceb89707b7f7d8e1a4ace2",
-                    "vk_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0/stateless-validator-ethrex-openvm-v2.1.0-preview.vk",
-                    "vk_sha256": "5de0d2feff592e5957c2dfcb613b649751e623a8b28e68187250eaf000eed8d7"
+                    "elf_url": "https://github.com/lambdaclass/ethrex/releases/download/v27.0.0/stateless-validator-ethrex-openvm-v2.1.0-preview.elf",
+                    "elf_sha256": "064e25bb4c9ad5bbf92826f46def7737e1f5b805d8cc7ed88cc6040b9df78bc0",
+                    "vk_url": "https://github.com/lambdaclass/ethrex/releases/download/v27.0.0/stateless-validator-ethrex-openvm-v2.1.0-preview.vk",
+                    "vk_sha256": "5b30ed33da50146414df9cf4725ff6077410b1368d6a4f0bc493796e28baf4e4"
                 },
                 {
                     "zkvm": "sp1",
                     "zkvm_version": "v6.4.0",
-                    "elf_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0/stateless-validator-ethrex-sp1-v6.4.0.elf",
-                    "elf_sha256": "3f1268f8deb2853e18812e97e8c2ffea202df6c6283aec06b4c6e08276084481",
-                    "vk_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0/stateless-validator-ethrex-sp1-v6.4.0.vk",
-                    "vk_sha256": "5e614b666d4f9a60a68d826833b94e2c5afa029b2dc501a45f3656059811a4d7"
+                    "elf_url": "https://github.com/lambdaclass/ethrex/releases/download/v27.0.0/stateless-validator-ethrex-sp1-v6.4.0.elf",
+                    "elf_sha256": "75c15fe814bdea43517d43f696b37f41f3e5bfde1f9fb6efd294a23ec1a431ab",
+                    "vk_url": "https://github.com/lambdaclass/ethrex/releases/download/v27.0.0/stateless-validator-ethrex-sp1-v6.4.0.vk",
+                    "vk_sha256": "6b9239f879fedf432ca5502d966ed8d828f93717458606fa1dfc3c320af081f5"
                 },
                 {
                     "zkvm": "zisk",
                     "zkvm_version": "v1.1.0-alpha",
-                    "elf_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0/stateless-validator-ethrex-zisk-v1.1.0-alpha.elf",
-                    "elf_sha256": "a24829643c251f80820829897dfa559e5ddaf5020c988f486e0a1dac6782fa28",
-                    "vk_url": "https://github.com/lambdaclass/ethrex/releases/download/v26.0.0/stateless-validator-ethrex-zisk-v1.1.0-alpha.vk",
-                    "vk_sha256": "7f8d16136f2783e9eaef89365cbc34333d06a73f3b77313a72f94a2054e0347e"
+                    "elf_url": "https://github.com/lambdaclass/ethrex/releases/download/v27.0.0/stateless-validator-ethrex-zisk-v1.1.0-alpha.elf",
+                    "elf_sha256": "760f6404df3849cb3f40a9e3cefac93a03d30f27ab7be8a1d715e2f8dbbcbad8",
+                    "vk_url": "https://github.com/lambdaclass/ethrex/releases/download/v27.0.0/stateless-validator-ethrex-zisk-v1.1.0-alpha.vk",
+                    "vk_sha256": "f08af79b9331a52d9722b3b0dc011222a40b5bee2cf3249851713da5f0da32fa"
                 }
             ]
         },

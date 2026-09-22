@@ -167,7 +167,7 @@ mod tests {
 
         let all_zkvms: &[zkVMKind] = &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk];
         for (kind, expected_version, expected_zkvms) in [
-            (StatelessValidatorKind::Ethrex, "26.0.0", all_zkvms),
+            (StatelessValidatorKind::Ethrex, "27.0.0", all_zkvms),
             (StatelessValidatorKind::Reth, "0.1.0-rc.3", all_zkvms),
             (
                 StatelessValidatorKind::Zesu,
