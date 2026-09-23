@@ -371,7 +371,10 @@ mod tests {
             }
         }
         for kind in [StatelessValidatorKind::Zesu, StatelessValidatorKind::Nimbus] {
-            assert_eq!(registered_zkvm_version(kind, zkVMKind::Zisk)?, "v1.1.0-alpha");
+            assert_eq!(
+                registered_zkvm_version(kind, zkVMKind::Zisk)?,
+                "v1.1.0-alpha"
+            );
             for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1] {
                 assert_eq!(
                     registered_zkvm_version(kind, zkvm_kind)
