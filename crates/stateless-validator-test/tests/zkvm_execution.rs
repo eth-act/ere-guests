@@ -30,8 +30,8 @@ fn expected_failures(
         }
         (StatelessValidatorKind::Ethrex, zkVMKind::SP1) => &[],
         (StatelessValidatorKind::Reth, _) => &[],
-        (StatelessValidatorKind::Zesu, zkVMKind::Zisk) => &[],
-        (StatelessValidatorKind::Zesu, _) => {
+        (StatelessValidatorKind::Zesu | StatelessValidatorKind::Nimbus, zkVMKind::Zisk) => &[],
+        (StatelessValidatorKind::Zesu | StatelessValidatorKind::Nimbus, _) => {
             panic!("{stateless_validator}-{zkvm} has no active registry artifacts")
         }
     }

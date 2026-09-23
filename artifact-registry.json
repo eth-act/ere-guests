@@ -73,6 +73,20 @@
                     "vk_sha256": "ad94ad82ad310fda4ab8e8e91e7b4826edaa20e9c4e76f479ed7ca3482e3755c"
                 }
             ]
+        },
+        {
+            "name": "nimbus",
+            "version": "v0.1.0-alpha",
+            "artifacts": [
+                {
+                    "zkvm": "zisk",
+                    "zkvm_version": "v1.1.0-alpha",
+                    "elf_url": "https://github.com/status-im/nimbus-zkvm-guests/releases/download/v0.1.0-alpha/stateless-validator-nimbus-zisk-v1.1.0-alpha.elf",
+                    "elf_sha256": "15a19f483d18541783fa6d76c534e54564bb44bcecf22eb423e51f2d96ea510c",
+                    "vk_url": "https://github.com/status-im/nimbus-zkvm-guests/releases/download/v0.1.0-alpha/stateless-validator-nimbus-zisk-v1.1.0-alpha.vk",
+                    "vk_sha256": "eee3f48ea2fc4c399d0fe64070fc053fb9ae9627ae069e8ac0218c6577e6f694"
+                }
+            ]
         }
     ]
 }

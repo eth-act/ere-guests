@@ -49,6 +49,8 @@ pub enum StatelessValidatorKind {
     Reth,
     /// Zesu stateless validator.
     Zesu,
+    /// Nimbus stateless validator.
+    Nimbus,
 }
 
 impl StatelessValidatorKind {
@@ -133,6 +135,7 @@ mod tests {
             (["ethrex", "Ethrex"], StatelessValidatorKind::Ethrex),
             (["reth", "Reth"], StatelessValidatorKind::Reth),
             (["zesu", "Zesu"], StatelessValidatorKind::Zesu),
+            (["nimbus", "Nimbus"], StatelessValidatorKind::Nimbus),
         ] {
             spellings
                 .iter()
@@ -147,7 +150,7 @@ mod tests {
         );
         assert_eq!(
             ParseError::from("xxx").to_string(),
-            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu]"
+            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu, nimbus]"
                 .to_string()
         );
     }
@@ -157,6 +160,7 @@ mod tests {
         assert_eq!(StatelessValidatorKind::Ethrex.as_u8(), 0);
         assert_eq!(StatelessValidatorKind::Reth.as_u8(), 1);
         assert_eq!(StatelessValidatorKind::Zesu.as_u8(), 2);
+        assert_eq!(StatelessValidatorKind::Nimbus.as_u8(), 3);
         assert_eq!(
             StatelessValidatorKind::from_u8(0),
             Some(StatelessValidatorKind::Ethrex)
@@ -169,10 +173,18 @@ mod tests {
             StatelessValidatorKind::from_u8(2),
             Some(StatelessValidatorKind::Zesu)
         );
+        assert_eq!(
+            StatelessValidatorKind::from_u8(3),
+            Some(StatelessValidatorKind::Nimbus)
+        );
         assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.3"));
         assert_eq!(
             StatelessValidatorKind::Zesu.version(),
             Some("tests-glamsterdam-devnet@v8.1.4")
+        );
+        assert_eq!(
+            StatelessValidatorKind::Nimbus.version(),
+            Some("v0.1.0-alpha")
         );
     }
 }

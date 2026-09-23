@@ -370,17 +370,16 @@ mod tests {
                 assert_eq!(registered_zkvm_version(kind, zkvm_kind)?, expected);
             }
         }
-        assert_eq!(
-            registered_zkvm_version(StatelessValidatorKind::Zesu, zkVMKind::Zisk)?,
-            "v1.1.0-alpha"
-        );
-        for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1] {
-            assert_eq!(
-                registered_zkvm_version(StatelessValidatorKind::Zesu, zkvm_kind)
-                    .unwrap_err()
-                    .to_string(),
-                format!("zesu-{zkvm_kind} not found in artifact-registry.json")
-            );
+        for kind in [StatelessValidatorKind::Zesu, StatelessValidatorKind::Nimbus] {
+            assert_eq!(registered_zkvm_version(kind, zkVMKind::Zisk)?, "v1.1.0-alpha");
+            for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1] {
+                assert_eq!(
+                    registered_zkvm_version(kind, zkvm_kind)
+                        .unwrap_err()
+                        .to_string(),
+                    format!("{kind}-{zkvm_kind} not found in artifact-registry.json")
+                );
+            }
         }
         Ok(())
     }
