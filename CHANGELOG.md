@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.17.1](https://github.com/eth-act/ere-guests/compare/v0.17.0...v0.17.1) (2026-09-24)
+
+
+### Features
+
+* add nimbus stateless validator guest (zisk) ([#88](https://github.com/eth-act/ere-guests/issues/88)) ([ca54752](https://github.com/eth-act/ere-guests/commit/ca5475245f05be6f6f4120de7f6cdd2769e150f7))
+
+
+### Bug Fixes
+
+* **ci:** move the artifacts republishment into `release-please.yml` ([#85](https://github.com/eth-act/ere-guests/issues/85)) ([170d4c1](https://github.com/eth-act/ere-guests/commit/170d4c1c6f37a2d33e85d0637aa60751fa4ae270))
+
+
+### Miscellaneous Chores
+
+* release-as 0.17.1 ([#89](https://github.com/eth-act/ere-guests/issues/89)) ([e3378f2](https://github.com/eth-act/ere-guests/commit/e3378f212a022f503976fdb228e0a406018d4d32))
+
 ## [0.17.0](https://github.com/eth-act/ere-guests/compare/v0.16.0...v0.17.0) (2026-09-09)
 
 
