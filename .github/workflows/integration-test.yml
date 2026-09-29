@@ -79,3 +79,43 @@ jobs:
 
       - name: Show sccache statistics
         run: ${SCCACHE_PATH} --show-stats
+
+  # Checks the common crate's SSZ schema against the spec: each EEST input must decode, or be
+  # rejected, as its fixture expects, with the same root, chain ID and schema ID. It runs no
+  # guest, but downloads the EEST fixture archive, so it lives here instead of the unit tests.
+  test-schema-conformance:
+    name: Common schema conformance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup sccache
+        uses: mozilla/sccache-action@v0.0.9
+
+      - name: Configure sccache
+        run: |
+          echo "RUSTC_WRAPPER=sccache" >> "$GITHUB_ENV"
+          echo "SCCACHE_GHA_ENABLED=true" >> "$GITHUB_ENV"
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Test common schema against EEST fixtures
+        env:
+          RUST_LOG: info
+        run: cargo test --release --package stateless-validator-test --test schema_conformance
+
+      - name: Show sccache statistics
+        run: ${SCCACHE_PATH} --show-stats

@@ -138,7 +138,7 @@ pub fn load_fixtures_from_file(path: impl AsRef<Path>) -> Vec<StatelessValidator
                     let (input, output) = block
                         .stateless_input_bytes
                         .zip(block.stateless_output_bytes)?;
-                    (!input.is_empty()).then(|| StatelessValidatorFixture {
+                    Some(StatelessValidatorFixture {
                         name: format!("{test_id}#block{idx}"),
                         stateless_input_bytes: input.to_vec(),
                         stateless_output_bytes: output.to_vec(),
