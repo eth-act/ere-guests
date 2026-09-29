@@ -31,19 +31,21 @@ This repository republishes checksum-verified guest ELFs and program verificatio
 Located in `crates/`, these provide reusable functionality for guest programs and host:
 
 - [`stateless-validator-catalog`](crates/stateless-validator-catalog) - Catalog of active validator kinds and registry-derived versions
-- [`stateless-validator-common`](crates/stateless-validator-common) - Canonical `no_std` tests-zkevm v0.8.4 input and output schemas
+- [`stateless-validator-common`](crates/stateless-validator-common) - Canonical `no_std` tests-zkevm v21.0.1 input and output schemas
 - [`stateless-validator-downloader`](crates/stateless-validator-downloader) - Downloads republished ELFs and VKs from releases and workflow artifacts
 - [`stateless-validator-test`](crates/stateless-validator-test) - Runs EEST and rolling devnet inputs against registry artifacts in dockerized zkVMs
 
 ### Guest Artifacts
 
-Ethrex `v27.0.0` and Reth `v0.1.0-rc.3` are active on OpenVM, SP1, and ZisK with tests-zkevm `v0.8.4`. Zesu [`tests-glamsterdam-devnet@v8.1.4`](https://github.com/Consensys-Incorporated/zesu-zkvm/releases/tag/tests-glamsterdam-devnet%40v8.1.4) is active on ZisK `v1.1.0-alpha` with the same fixtures. Its catalog ID remains `2`. Nimbus [`v0.1.0-alpha`](https://github.com/status-im/nimbus-zkvm-guests/releases/tag/v0.1.0-alpha) is active on ZisK `v1.1.0-alpha` with the same fixtures. Its catalog ID is `3`.
+Ethrex `v27.0.0` and Reth `v0.1.0-rc.3` are registered on OpenVM, SP1, and ZisK. Zesu [`tests-glamsterdam-devnet@v8.1.4`](https://github.com/Consensys-Incorporated/zesu-zkvm/releases/tag/tests-glamsterdam-devnet%40v8.1.4) is registered on ZisK `v1.1.0-alpha`. Its catalog ID remains `2`. Nimbus [`v0.1.0-alpha`](https://github.com/status-im/nimbus-zkvm-guests/releases/tag/v0.1.0-alpha) is registered on ZisK `v1.1.0-alpha`. Its catalog ID is `3`. These releases target tests-zkevm `v0.8.4`, so they fail the `v21.0.1` fixtures until each guest publishes a v21 release.
 
-Pull requests run a pinned 10-block `glamsterdam-devnet-8` fixture set. The daily workflow runs the latest 100 available blocks from the rolling catalog.
+Devnet runs are paused until Sepolia blocks exist in the engine format. The `glamsterdam-devnet-8` blocks use the tests-zkevm `v0.8.4` input layout, which v21 guests reject. Until then, the pinned 10-block pull request test is ignored, and the devnet workflow, which runs the latest 100 blocks from the rolling catalog, runs only on manual dispatch.
 
 ### Estimated Guest Cost
 
-A pull request that changes an `elf_sha256` in [`artifact-registry.json`](artifact-registry.json) triggers the `Cost estimation benchmark` workflow. The workflow measures the old ELF and the new ELF over the same 100 `glamsterdam-devnet-8` blocks. It writes the difference to the job summary and, for a branch of this repository, to a pull request comment. The report is advisory and never fails the pull request. Cost units differ per zkVM.
+The benchmark is paused, like the devnet runs, until Sepolia blocks exist in the engine format.
+
+When active, a pull request that changes an `elf_sha256` in [`artifact-registry.json`](artifact-registry.json) triggers the `Cost estimation benchmark` workflow. The workflow measures the old ELF and the new ELF over the same 100 `glamsterdam-devnet-8` blocks. It writes the difference to the job summary and, for a branch of this repository, to a pull request comment. The report is advisory and never fails the pull request. Cost units differ per zkVM.
 
 To measure one ELF locally, pick a `batchEndBlock` from the [batch index](https://pub-760ad8b3dd9547539f829c1ea30f18b5.r2.dev/devnets/glamsterdam-devnet-8/batches.jsonl) and run:
 

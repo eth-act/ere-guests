@@ -1,8 +1,9 @@
 name: Integration test devnet-8
 
 on:
-  schedule:
-    - cron: "0 0 * * *"
+  # TODO(tests-zkevm@v21): restore `schedule: [{ cron: "0 0 * * *" }]` once Sepolia blocks exist
+  # in the engine format. The daily run is paused because devnet-8 blocks use the
+  # tests-zkevm@v0.8.4 input layout, which v21 guests reject.
   workflow_dispatch:
 
 concurrency:

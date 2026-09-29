@@ -15,9 +15,9 @@ use tar::Archive;
 use tracing::info;
 use walkdir::{DirEntry, WalkDir};
 
-const EEST_FIXTURES_URL: &str = "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v0.8.4/fixtures_zkevm.tar.gz";
+const EEST_FIXTURES_URL: &str = "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v21.0.1/fixtures_zkevm.tar.gz";
 const EEST_FIXTURES_SHA256: &str =
-    "7a8c3537e85c8947354f6ffdebb0cab8dfb98b6b3031348808f85fb1fff58da3";
+    "42fa627e2e262b109ce29d255fb9c11baa297246f759c6edaf0e58f58d4aa205";
 const DEVNET_PRESET_BATCH: &str = "93350-93359";
 const DEVNET_PRESET_ARTIFACT_COUNT: usize = 10;
 const DEVNET_PRESET_SHA256: &str =
@@ -40,12 +40,12 @@ pub struct StatelessValidatorFixture {
     pub stateless_output_bytes: Vec<u8>,
 }
 
-/// Returns all `tests-zkevm@v0.8.4` fixtures, downloading them on first use.
+/// Returns all `tests-zkevm@v21.0.1` engine fixtures, downloading them on first use.
 pub fn eest_fixtures() -> Vec<StatelessValidatorFixture> {
     archive_fixtures(
-        "eest-tests-zkevm-v0.8.4",
+        "eest-tests-zkevm-v21.0.1",
         EEST_FIXTURES_URL,
-        "fixtures/blockchain_tests",
+        "fixtures/blockchain_tests_engine",
         Some(EEST_FIXTURES_SHA256),
     )
 }
@@ -124,22 +124,22 @@ fn load_fixtures_from_dir(dir: impl AsRef<Path>) -> Vec<StatelessValidatorFixtur
     fixtures
 }
 
-/// Loads every stateless fixture from one EEST `blockchain_test` JSON file.
+/// Loads every stateless fixture from one EEST `blockchain_test_engine` JSON file.
 pub fn load_fixtures_from_file(path: impl AsRef<Path>) -> Vec<StatelessValidatorFixture> {
     let bytes = fs::read(path).unwrap();
     let tests: EestFixture = serde_json::from_slice(&bytes).unwrap();
     tests
         .into_iter()
         .flat_map(|(test_id, test)| {
-            test.blocks
+            test.engine_new_payloads
                 .into_iter()
                 .enumerate()
-                .filter_map(move |(idx, block)| {
-                    let (input, output) = block
+                .filter_map(move |(idx, payload)| {
+                    let (input, output) = payload
                         .stateless_input_bytes
-                        .zip(block.stateless_output_bytes)?;
+                        .zip(payload.stateless_output_bytes)?;
                     Some(StatelessValidatorFixture {
-                        name: format!("{test_id}#block{idx}"),
+                        name: format!("{test_id}#payload{idx}"),
                         stateless_input_bytes: input.to_vec(),
                         stateless_output_bytes: output.to_vec(),
                     })
@@ -233,12 +233,12 @@ type EestFixture = BTreeMap<String, EestTest>;
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct EestTest {
-    blocks: Vec<EestBlock>,
+    engine_new_payloads: Vec<EestNewPayload>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct EestBlock {
+struct EestNewPayload {
     stateless_input_bytes: Option<Bytes>,
     stateless_output_bytes: Option<Bytes>,
 }

@@ -3,13 +3,16 @@
 //! The types mirror `StatelessValidationResult` and its SSZ schema in [`stateless.py`].
 //! The serialized form is the plain SSZ encoding without a schema prefix.
 //!
-//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v0.8.4/src/ethereum/forks/amsterdam/stateless.py
+//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v21.0.1/src/ethereum/forks/amsterdam/stateless.py
 
 use alloc::vec::Vec;
 
 use libssz_derive::{SszDecode, SszEncode};
 
 /// Canonical result returned by stateless validation.
+///
+/// A zero `schema_id` means the guest could not decode the input or produce a validation result.
+/// The other fields then hold their zero defaults, so the whole result equals [`Default`].
 #[derive(Debug, Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
 pub struct StatelessValidationResult {
     /// The SSZ hash tree root of the validated payload request.

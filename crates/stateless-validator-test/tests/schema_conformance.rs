@@ -1,4 +1,4 @@
-//! `tests-zkevm@v0.8.4` schema conformance of `stateless-validator-common`.
+//! `tests-zkevm@v21.0.1` schema conformance of `stateless-validator-common`.
 //!
 //! Decodes every fixture input on the host and checks it against the expected guest output. This
 //! needs no Docker or zkVM, so it checks the common crate against the spec without any guest.

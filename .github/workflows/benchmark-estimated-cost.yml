@@ -19,6 +19,10 @@ env:
 jobs:
   registry-matrix:
     name: Resolve changed guest matrix
+    # TODO(tests-zkevm@v21): remove this `if` once Sepolia blocks exist in the engine format. It
+    # pauses this job and every job that depends on it, because the benchmark measures devnet-8
+    # blocks, which use the tests-zkevm@v0.8.4 input layout that v21 guests reject.
+    if: false
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
