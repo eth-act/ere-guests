@@ -163,43 +163,35 @@ mod tests {
     #[test]
     fn parses_active_registry() {
         let registry = ArtifactRegistry::load().unwrap();
-        assert_eq!(registry.stateless_validators.len(), 4);
 
-        let all_zkvms: &[zkVMKind] = &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk];
-        for (kind, expected_version, expected_zkvms) in [
-            (StatelessValidatorKind::Ethrex, "27.0.0", all_zkvms),
-            (StatelessValidatorKind::Reth, "0.1.0-rc.3", all_zkvms),
-            (
-                StatelessValidatorKind::Zesu,
-                "tests-glamsterdam-devnet@v8.1.4",
-                &[zkVMKind::Zisk],
-            ),
-            (
-                StatelessValidatorKind::Nimbus,
-                "v0.1.0-alpha",
-                &[zkVMKind::Zisk],
-            ),
-        ] {
-            let validator = registry
-                .stateless_validators
+        // TODO(tests-zkevm@v21): re-add Ethrex, Reth and Zesu as they publish v21 releases.
+        let registered: &[(StatelessValidatorKind, &str, &[zkVMKind])] = &[(
+            StatelessValidatorKind::Nimbus,
+            "v0.2.0-alpha",
+            &[zkVMKind::Zisk],
+        )];
+        assert_eq!(registry.stateless_validators.len(), registered.len());
+
+        for kind in StatelessValidatorKind::iter() {
+            let entry = registered
                 .iter()
-                .find(|validator| validator.name == kind.as_str())
-                .unwrap();
-            assert_eq!(kind.version(), Some(expected_version));
-            assert_eq!(validator.version, expected_version);
-            assert_eq!(validator.artifacts.len(), expected_zkvms.len());
+                .find(|(registered_kind, ..)| *registered_kind == kind);
+            assert_eq!(kind.version(), entry.map(|&(_, version, _)| version));
 
-            for &zkvm in expected_zkvms {
-                assert!(registry.artifact(kind, zkvm).is_some());
+            if let Some(&(_, expected_version, expected_zkvms)) = entry {
+                let validator = registry
+                    .stateless_validators
+                    .iter()
+                    .find(|validator| validator.name == kind.as_str())
+                    .unwrap();
+                assert_eq!(validator.version, expected_version);
+                assert_eq!(validator.artifacts.len(), expected_zkvms.len());
             }
-        }
 
-        for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1] {
-            assert!(
-                registry
-                    .artifact(StatelessValidatorKind::Zesu, zkvm)
-                    .is_none()
-            );
+            for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+                let expected = entry.is_some_and(|(_, _, zkvms)| zkvms.contains(&zkvm));
+                assert_eq!(registry.artifact(kind, zkvm).is_some(), expected);
+            }
         }
     }
 

@@ -361,27 +361,29 @@ mod tests {
 
     #[test]
     fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
-        for (zkvm_kind, expected) in [
-            (zkVMKind::OpenVM, "v2.1.0-preview"),
-            (zkVMKind::SP1, "v6.4.0"),
-            (zkVMKind::Zisk, "v1.1.0-alpha"),
-        ] {
-            for kind in [StatelessValidatorKind::Ethrex, StatelessValidatorKind::Reth] {
-                assert_eq!(registered_zkvm_version(kind, zkvm_kind)?, expected);
-            }
-        }
-        for kind in [StatelessValidatorKind::Zesu, StatelessValidatorKind::Nimbus] {
-            assert_eq!(
-                registered_zkvm_version(kind, zkVMKind::Zisk)?,
-                "v1.1.0-alpha"
-            );
-            for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1] {
-                assert_eq!(
-                    registered_zkvm_version(kind, zkvm_kind)
-                        .unwrap_err()
-                        .to_string(),
-                    format!("{kind}-{zkvm_kind} not found in artifact-registry.json")
-                );
+        // TODO(tests-zkevm@v21): re-add Ethrex, Reth and Zesu as they publish v21 releases.
+        let registered = [(
+            StatelessValidatorKind::Nimbus,
+            zkVMKind::Zisk,
+            "v1.1.0-alpha",
+        )];
+        for kind in StatelessValidatorKind::iter() {
+            for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+                match registered
+                    .iter()
+                    .find(|&&(registered_kind, registered_zkvm, _)| {
+                        (registered_kind, registered_zkvm) == (kind, zkvm_kind)
+                    }) {
+                    Some(&(_, _, expected)) => {
+                        assert_eq!(registered_zkvm_version(kind, zkvm_kind)?, expected)
+                    }
+                    None => assert_eq!(
+                        registered_zkvm_version(kind, zkvm_kind)
+                            .unwrap_err()
+                            .to_string(),
+                        format!("{kind}-{zkvm_kind} not found in artifact-registry.json")
+                    ),
+                }
             }
         }
         Ok(())
@@ -389,18 +391,15 @@ mod tests {
 
     #[tokio::test]
     async fn download_from_tag() -> anyhow::Result<()> {
-        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
-        let zkvm_kind = zkVMKind::OpenVM;
-        let guest = Downloader::from_tag("v0.15.0")
+        let stateless_validator_kind = StatelessValidatorKind::Nimbus;
+        let zkvm_kind = zkVMKind::Zisk;
+        let guest = Downloader::from_tag("v0.17.1")
             .await?
             .download(stateless_validator_kind, zkvm_kind)
             .await?;
         assert!(!guest.elf.is_empty());
         assert!(!guest.program_vk.is_empty());
-        match zkvm_kind {
-            zkVMKind::OpenVM | zkVMKind::SP1 => assert!(guest.profiling_elf.is_none()),
-            zkVMKind::Zisk => assert!(guest.profiling_elf.is_some_and(|elf| !elf.is_empty())),
-        };
+        assert!(guest.profiling_elf.is_none());
         Ok(())
     }
 
@@ -410,18 +409,15 @@ mod tests {
             return Ok(());
         }
 
-        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
-        let zkvm_kind = zkVMKind::OpenVM;
-        let guest = Downloader::from_commit("ec6e4af")
+        let stateless_validator_kind = StatelessValidatorKind::Nimbus;
+        let zkvm_kind = zkVMKind::Zisk;
+        let guest = Downloader::from_commit("ca54752")
             .await?
             .download(stateless_validator_kind, zkvm_kind)
             .await?;
         assert!(!guest.elf.is_empty());
         assert!(!guest.program_vk.is_empty());
-        match zkvm_kind {
-            zkVMKind::OpenVM | zkVMKind::SP1 => assert!(guest.profiling_elf.is_none()),
-            zkVMKind::Zisk => assert!(guest.profiling_elf.is_some_and(|elf| !elf.is_empty())),
-        };
+        assert!(guest.profiling_elf.is_none());
         Ok(())
     }
 }

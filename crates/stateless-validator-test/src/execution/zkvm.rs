@@ -204,7 +204,7 @@ mod tests {
 
         assert!(
             registry
-                .artifact(StatelessValidatorKind::Ethrex, zkVMKind::OpenVM)
+                .artifact(StatelessValidatorKind::Nimbus, zkVMKind::Zisk)
                 .is_some()
         );
     }

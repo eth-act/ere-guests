@@ -37,7 +37,7 @@ Located in `crates/`, these provide reusable functionality for guest programs an
 
 ### Guest Artifacts
 
-Ethrex `v27.0.0` and Reth `v0.1.0-rc.3` are registered on OpenVM, SP1, and ZisK. Zesu [`tests-glamsterdam-devnet@v8.1.4`](https://github.com/Consensys-Incorporated/zesu-zkvm/releases/tag/tests-glamsterdam-devnet%40v8.1.4) is registered on ZisK `v1.1.0-alpha`. Its catalog ID remains `2`. Nimbus [`v0.1.0-alpha`](https://github.com/status-im/nimbus-zkvm-guests/releases/tag/v0.1.0-alpha) is registered on ZisK `v1.1.0-alpha`. Its catalog ID is `3`. These releases target tests-zkevm `v0.8.4`, so they fail the `v21.0.1` fixtures until each guest publishes a v21 release.
+Nimbus [`v0.2.0-alpha`](https://github.com/status-im/nimbus-zkvm-guests/releases/tag/v0.2.0-alpha) is registered on ZisK `v1.1.0-alpha`. Its catalog ID is `3`. It is the only guest with a tests-zkevm `v21.0.1` release. Ethrex, Reth, and Zesu keep their catalog IDs `0`, `1`, and `2`, but have no registered artifacts until each publishes a v21 release.
 
 Devnet runs are paused until Sepolia blocks exist in the engine format. The `glamsterdam-devnet-8` blocks use the tests-zkevm `v0.8.4` input layout, which v21 guests reject. Until then, the pinned 10-block pull request test is ignored, and the devnet workflow, which runs the latest 100 blocks from the rolling catalog, runs only on manual dispatch.
 
