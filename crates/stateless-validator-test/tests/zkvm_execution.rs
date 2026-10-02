@@ -13,14 +13,11 @@ use stateless_validator_test::{
     fixture::{StatelessValidatorFixture, devnet_preset_fixtures, eest_fixtures},
 };
 
-// TODO(tests-zkevm@v21): re-derive these IDs by running a v21 Ethrex release. They still name the
-// v0.8.4 `blockchain_test_from_state_test` fixtures, and v21 loads only the engine format.
-//
 // These fixtures exceed the Ethrex guest memory available on OpenVM and ZisK. SP1 executes them.
 const ETHREX_EXPECTED_RESOURCE_FAILURES: &[&str] = &[
-    "tests/ported_static/stQuadraticComplexityTest/test_return50000.py::test_return50000[fork_Amsterdam-blockchain_test_from_state_test--g1]#block0",
-    "tests/ported_static/stQuadraticComplexityTest/test_return50000_2.py::test_return50000_2[fork_Amsterdam-blockchain_test_from_state_test--g1]#block0",
-    "tests/ported_static/stStaticCall/test_static_return50000_2.py::test_static_return50000_2[fork_Amsterdam-blockchain_test_from_state_test]#block0",
+    "tests/ported_static/stQuadraticComplexityTest/test_return50000.py::test_return50000[fork_Amsterdam-blockchain_test_engine_from_state_test--g1]#payload0",
+    "tests/ported_static/stQuadraticComplexityTest/test_return50000_2.py::test_return50000_2[fork_Amsterdam-blockchain_test_engine_from_state_test--g1]#payload0",
+    "tests/ported_static/stStaticCall/test_static_return50000_2.py::test_static_return50000_2[fork_Amsterdam-blockchain_test_engine_from_state_test]#payload0",
 ];
 
 fn expected_failures(

@@ -37,7 +37,7 @@ Located in `crates/`, these provide reusable functionality for guest programs an
 
 ### Guest Artifacts
 
-Nimbus [`v0.2.0-alpha`](https://github.com/status-im/nimbus-zkvm-guests/releases/tag/v0.2.0-alpha) is registered on ZisK `v1.1.0-alpha`. Its catalog ID is `3`. It is the only guest with a tests-zkevm `v21.0.1` release. Ethrex, Reth, and Zesu keep their catalog IDs `0`, `1`, and `2`, but have no registered artifacts until each publishes a v21 release.
+Ethrex [`29.0.0-rc.2`](https://github.com/lambdaclass/ethrex/releases/tag/v29.0.0-rc.2) is registered on OpenVM `v2.1.0-preview`, SP1 `v6.6.0`, and ZisK `v1.2.0-alpha`. Its catalog ID is `0`. Nimbus [`v0.2.1-alpha`](https://github.com/status-im/nimbus-zkvm-guests/releases/tag/v0.2.1-alpha) is registered on ZisK `v1.2.0-alpha`. Its catalog ID is `3`. Both target tests-zkevm `v21.0.1` and Ere `v0.18.1`. Reth and Zesu keep their catalog IDs `1` and `2`, but have no registered artifacts until each publishes a v21 release.
 
 Devnet runs are paused until Sepolia blocks exist in the engine format. The `glamsterdam-devnet-8` blocks use the tests-zkevm `v0.8.4` input layout, which v21 guests reject. Until then, the pinned 10-block pull request test is ignored, and the devnet workflow, which runs the latest 100 blocks from the rolling catalog, runs only on manual dispatch.
 
@@ -52,7 +52,7 @@ To measure one ELF locally, pick a `batchEndBlock` from the [batch index](https:
 ```bash
 ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere \
   cargo run --release --package stateless-validator-test --bin zkvm_cost_estimation -- \
-    --stateless-validator ethrex --zkvm zisk --zkvm-version v1.1.0-alpha \
+    --stateless-validator ethrex --zkvm zisk --zkvm-version v1.2.0-alpha \
     --elf-url <url> --elf-sha256 <sha256> \
     --batch-end-block <block> --blocks 100 --output cost.json
 ```

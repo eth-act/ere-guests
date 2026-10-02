@@ -361,12 +361,25 @@ mod tests {
 
     #[test]
     fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
-        // TODO(tests-zkevm@v21): re-add Ethrex, Reth and Zesu as they publish v21 releases.
-        let registered = [(
-            StatelessValidatorKind::Nimbus,
-            zkVMKind::Zisk,
-            "v1.1.0-alpha",
-        )];
+        // TODO(tests-zkevm@v21): re-add Reth and Zesu as they publish v21 releases.
+        let registered = [
+            (
+                StatelessValidatorKind::Ethrex,
+                zkVMKind::OpenVM,
+                "v2.1.0-preview",
+            ),
+            (StatelessValidatorKind::Ethrex, zkVMKind::SP1, "v6.6.0"),
+            (
+                StatelessValidatorKind::Ethrex,
+                zkVMKind::Zisk,
+                "v1.2.0-alpha",
+            ),
+            (
+                StatelessValidatorKind::Nimbus,
+                zkVMKind::Zisk,
+                "v1.2.0-alpha",
+            ),
+        ];
         for kind in StatelessValidatorKind::iter() {
             for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
                 match registered
@@ -391,8 +404,8 @@ mod tests {
 
     #[tokio::test]
     async fn download_from_tag() -> anyhow::Result<()> {
-        let stateless_validator_kind = StatelessValidatorKind::Nimbus;
-        let zkvm_kind = zkVMKind::Zisk;
+        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
+        let zkvm_kind = zkVMKind::OpenVM;
         let guest = Downloader::from_tag("v0.17.1")
             .await?
             .download(stateless_validator_kind, zkvm_kind)
@@ -409,8 +422,8 @@ mod tests {
             return Ok(());
         }
 
-        let stateless_validator_kind = StatelessValidatorKind::Nimbus;
-        let zkvm_kind = zkVMKind::Zisk;
+        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
+        let zkvm_kind = zkVMKind::OpenVM;
         let guest = Downloader::from_commit("ca54752")
             .await?
             .download(stateless_validator_kind, zkvm_kind)

@@ -164,12 +164,19 @@ mod tests {
     fn parses_active_registry() {
         let registry = ArtifactRegistry::load().unwrap();
 
-        // TODO(tests-zkevm@v21): re-add Ethrex, Reth and Zesu as they publish v21 releases.
-        let registered: &[(StatelessValidatorKind, &str, &[zkVMKind])] = &[(
-            StatelessValidatorKind::Nimbus,
-            "v0.2.0-alpha",
-            &[zkVMKind::Zisk],
-        )];
+        // TODO(tests-zkevm@v21): re-add Reth and Zesu as they publish v21 releases.
+        let registered: &[(StatelessValidatorKind, &str, &[zkVMKind])] = &[
+            (
+                StatelessValidatorKind::Ethrex,
+                "29.0.0-rc.2",
+                &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
+            ),
+            (
+                StatelessValidatorKind::Nimbus,
+                "v0.2.1-alpha",
+                &[zkVMKind::Zisk],
+            ),
+        ];
         assert_eq!(registry.stateless_validators.len(), registered.len());
 
         for kind in StatelessValidatorKind::iter() {
