@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.0](https://github.com/eth-act/ere-guests/compare/v0.17.1...v0.18.0) (2026-10-02)
+
+
+### Features
+
+* upgrade tests-zkevm to v21.0.1 ([#90](https://github.com/eth-act/ere-guests/issues/90)) ([e4ead7b](https://github.com/eth-act/ere-guests/commit/e4ead7ba59fccd6d4eee3ff2bbb809dde2a19c6f))
+
 ## [0.17.1](https://github.com/eth-act/ere-guests/compare/v0.17.0...v0.17.1) (2026-09-24)
 
 
