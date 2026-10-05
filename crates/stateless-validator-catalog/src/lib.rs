@@ -177,10 +177,7 @@ mod tests {
             StatelessValidatorKind::from_u8(3),
             Some(StatelessValidatorKind::Nimbus)
         );
-        assert_eq!(
-            StatelessValidatorKind::Ethrex.version(),
-            Some("29.0.0-rc.2")
-        );
+        assert_eq!(StatelessValidatorKind::Ethrex.version(), Some("29.0.0"));
         assert_eq!(StatelessValidatorKind::Reth.version(), None);
         assert_eq!(StatelessValidatorKind::Zesu.version(), None);
         assert_eq!(
