@@ -164,11 +164,16 @@ mod tests {
     fn parses_active_registry() {
         let registry = ArtifactRegistry::load().unwrap();
 
-        // TODO(tests-zkevm@v21): re-add Reth and Zesu as they publish v21 releases.
+        // TODO(tests-zkevm@v21): re-add Zesu once it publishes a v21 release.
         let registered: &[(StatelessValidatorKind, &str, &[zkVMKind])] = &[
             (
                 StatelessValidatorKind::Ethrex,
                 "29.0.0",
+                &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
+            ),
+            (
+                StatelessValidatorKind::Reth,
+                "0.1.0-rc.4",
                 &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (

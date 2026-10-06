@@ -20,6 +20,15 @@ const ETHREX_EXPECTED_RESOURCE_FAILURES: &[&str] = &[
     "tests/ported_static/stStaticCall/test_static_return50000_2.py::test_static_return50000_2[fork_Amsterdam-blockchain_test_engine_from_state_test]#payload0",
 ];
 
+// Reth computes a different block access list hash for these fixtures. alloy-evm runs the
+// post-execution system calls before it credits withdrawals, and revm's BAL builder records a
+// change when a value returns to its start-of-index value. See paradigmxyz/stateless#48.
+const RETH_EXPECTED_BAL_FAILURES: &[&str] = &[
+    "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_post_execution_calls_net_storage_at_last_index[fork_Amsterdam-blockchain_test_engine]#payload0",
+    "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_withdrawals_and_dequeues_net_balance_at_last_index[fork_Amsterdam-blockchain_test_engine-forward_all]#payload0",
+    "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_withdrawals_and_dequeues_net_balance_at_last_index[fork_Amsterdam-blockchain_test_engine-forward_half]#payload0",
+];
+
 fn expected_failures(
     stateless_validator: StatelessValidatorKind,
     zkvm: zkVMKind,
@@ -29,7 +38,7 @@ fn expected_failures(
             ETHREX_EXPECTED_RESOURCE_FAILURES
         }
         (StatelessValidatorKind::Ethrex, zkVMKind::SP1) => &[],
-        (StatelessValidatorKind::Reth, _) => &[],
+        (StatelessValidatorKind::Reth, _) => RETH_EXPECTED_BAL_FAILURES,
         (StatelessValidatorKind::Zesu | StatelessValidatorKind::Nimbus, zkVMKind::Zisk) => &[],
         (StatelessValidatorKind::Zesu | StatelessValidatorKind::Nimbus, _) => {
             panic!("{stateless_validator}-{zkvm} has no active registry artifacts")

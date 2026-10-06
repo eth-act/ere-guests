@@ -361,7 +361,7 @@ mod tests {
 
     #[test]
     fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
-        // TODO(tests-zkevm@v21): re-add Reth and Zesu as they publish v21 releases.
+        // TODO(tests-zkevm@v21): re-add Zesu once it publishes a v21 release.
         let registered = [
             (
                 StatelessValidatorKind::Ethrex,
@@ -374,6 +374,13 @@ mod tests {
                 zkVMKind::Zisk,
                 "v1.2.0-alpha",
             ),
+            (
+                StatelessValidatorKind::Reth,
+                zkVMKind::OpenVM,
+                "v2.1.0-preview",
+            ),
+            (StatelessValidatorKind::Reth, zkVMKind::SP1, "v6.6.0"),
+            (StatelessValidatorKind::Reth, zkVMKind::Zisk, "v1.2.0-alpha"),
             (
                 StatelessValidatorKind::Nimbus,
                 zkVMKind::Zisk,
