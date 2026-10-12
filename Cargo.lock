@@ -2030,8 +2030,8 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "sha2",
  "stateless-validator-catalog",
- "tempfile",
  "tokio",
 ]
 

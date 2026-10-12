@@ -32,7 +32,7 @@ Located in `crates/`, these provide reusable functionality for guest programs an
 
 - [`stateless-validator-catalog`](crates/stateless-validator-catalog) - Catalog of active validator kinds and registry-derived versions
 - [`stateless-validator-common`](crates/stateless-validator-common) - Canonical `no_std` tests-zkevm v21.0.1 input and output schemas
-- [`stateless-validator-downloader`](crates/stateless-validator-downloader) - Downloads republished ELFs and VKs from releases and workflow artifacts
+- [`stateless-validator-downloader`](crates/stateless-validator-downloader) - Downloads the registered ELFs and VKs and checks their sha256
 - [`stateless-validator-test`](crates/stateless-validator-test) - Runs EEST and rolling devnet inputs against registry artifacts in dockerized zkVMs
 
 ### Guest Artifacts

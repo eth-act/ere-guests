@@ -73,8 +73,6 @@ jobs:
         run: cargo test --doc --no-fail-fast
 
       - name: Test lib
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cargo test --lib --no-fail-fast
 
       - name: Compile common schemas for riscv64imac-unknown-none-elf
