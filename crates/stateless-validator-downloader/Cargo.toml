@@ -10,14 +10,16 @@ workspace = true
 
 [dependencies]
 anyhow.workspace = true
-reqwest = { workspace = true, features = ["json"] }
+reqwest.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
-tempfile.workspace = true
-tokio = { workspace = true, features = ["fs", "process", "rt-multi-thread", "macros"] }
+sha2.workspace = true
 
 # ere
 ere-catalog.workspace = true
 
 # local
 stateless-validator-catalog.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt"] }

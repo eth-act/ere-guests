@@ -1,186 +1,63 @@
-//! Downloads release-backed guests from GitHub releases or action artifacts.
-
-use std::{collections::BTreeMap, io::ErrorKind};
+//! Downloads the guests registered in `artifact-registry.json` and checks their sha256.
 
 use anyhow::{Context, ensure};
 use ere_catalog::zkVMKind;
-use reqwest::{
-    Client, ClientBuilder, IntoUrl, RequestBuilder,
-    header::{ACCEPT, HeaderMap, HeaderValue},
-};
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use stateless_validator_catalog::StatelessValidatorKind;
-use tempfile::tempdir;
-use tokio::{fs, process::Command};
 
-const REPO_API_URL: &str = "https://api.github.com/repos/eth-act/ere-guests";
 const ARTIFACT_REGISTRY_JSON: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../../artifact-registry.json"
 ));
-const ACTION_NAME: &str = "Release Please";
-/// Action artifact that bundles every registered ELF and VK under `artifacts/`.
-const RELEASE_ASSETS_ARTIFACT: &str = "release-assets";
 
-/// Release-backed guest ELF.
+/// Registered guest ELF and Program VK.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CompiledGuest {
     /// Raw ELF bytes.
     pub elf: Vec<u8>,
     /// Raw Program VK bytes.
     pub program_vk: Vec<u8>,
-    /// Raw ELF bytes of a ZisK guest compiled with feature `cycle-scope` enabled. `Some` only when
-    /// a `-profiling.elf` artifact is released for the guest.
-    pub profiling_elf: Option<Vec<u8>>,
 }
 
-#[derive(Clone, Debug)]
-enum DownloadSource {
-    /// GitHub release assets.
-    Tag { assets: BTreeMap<String, String> },
-    /// GitHub action artifacts (zipped).
-    Rev { artifacts: BTreeMap<String, String> },
+/// Guest of one zkVM in `artifact-registry.json`.
+#[derive(Debug, Deserialize)]
+struct Artifact {
+    zkvm: String,
+    zkvm_version: String,
+    elf_url: String,
+    elf_sha256: String,
+    vk_url: String,
+    vk_sha256: String,
 }
 
-/// Downloads release-backed guests from the `eth-act/ere-guests` repository.
-#[derive(Clone, Debug)]
-pub struct Downloader {
-    client: Client,
-    source: DownloadSource,
-}
-
-impl Downloader {
-    /// Creates a downloader from a GitHub release tag (e.g., `"v0.5.0"`).
-    /// Uses the first nonempty token from `GH_TOKEN` or `GITHUB_TOKEN` for authentication.
-    pub async fn from_tag(tag: &str) -> anyhow::Result<Self> {
-        let client = github_client()?;
-        let assets = get_release_assets(&client, tag).await?;
-        Ok(Self {
-            client,
-            source: DownloadSource::Tag { assets },
-        })
-    }
-
-    /// Creates a downloader from a commit SHA. Requires a nonempty `GH_TOKEN` or `GITHUB_TOKEN`.
-    pub async fn from_commit(sha: &str) -> anyhow::Result<Self> {
-        let client = github_client()?;
-        let full_sha = get_full_sha(&client, sha).await?;
-        let action_id = get_action_id(&client, &full_sha).await?;
-        let artifacts = get_artifacts(&client, action_id).await?;
-        Ok(Self {
-            client,
-            source: DownloadSource::Rev { artifacts },
-        })
-    }
-
-    /// Downloads the registered guest of `stateless_validator_kind` on `zkvm_kind`.
-    pub async fn download(
-        &self,
-        stateless_validator_kind: StatelessValidatorKind,
-        zkvm_kind: zkVMKind,
-    ) -> anyhow::Result<CompiledGuest> {
-        let zkvm_version = registered_zkvm_version(stateless_validator_kind, zkvm_kind)?;
-        let artifact_name =
-            format!("stateless-validator-{stateless_validator_kind}-{zkvm_kind}-{zkvm_version}",);
-        match &self.source {
-            DownloadSource::Tag { assets } => {
-                self.download_from_release(assets, &artifact_name).await
-            }
-            DownloadSource::Rev { artifacts } => {
-                self.download_from_action(artifacts, &artifact_name).await
-            }
-        }
-    }
-
-    async fn download_from_release(
-        &self,
-        assets: &BTreeMap<String, String>,
-        artifact_name: &str,
-    ) -> anyhow::Result<CompiledGuest> {
-        let elf_url = assets
-            .get(&format!("{artifact_name}.elf"))
-            .with_context(|| format!("ELF not found: {artifact_name}.elf"))?;
-        let program_vk_url = assets
-            .get(&format!("{artifact_name}.vk"))
-            .with_context(|| format!("Program VK not found: {artifact_name}.vk"))?;
-
-        let elf = get_bytes(&self.client, elf_url).await?;
-        let program_vk = get_bytes(&self.client, program_vk_url).await?;
-
-        let profiling_elf = if let Some(url) = assets.get(&format!("{artifact_name}-profiling.elf"))
-        {
-            Some(get_bytes(&self.client, url).await?)
-        } else {
-            None
-        };
-
-        Ok(CompiledGuest {
-            elf,
-            program_vk,
-            profiling_elf,
-        })
-    }
-
-    async fn download_from_action(
-        &self,
-        artifacts: &BTreeMap<String, String>,
-        artifact_name: &str,
-    ) -> anyhow::Result<CompiledGuest> {
-        let artifact_url = artifacts
-            .get(RELEASE_ASSETS_ARTIFACT)
-            .with_context(|| format!("Artifact not found: {RELEASE_ASSETS_ARTIFACT}"))?;
-
-        let tempdir = tempdir().context("Failed to create temp dir")?;
-        let zip_path = tempdir.path().join("artifact.zip");
-
-        fs::write(&zip_path, get_bytes(&self.client, artifact_url).await?)
-            .await
-            .context("Failed to write artifact zip")?;
-
-        let output = Command::new("unzip")
-            .arg("-o")
-            .arg(&zip_path)
-            .current_dir(tempdir.path())
-            .output()
-            .await
-            .context("Failed to run unzip")?;
-        ensure!(output.status.success(), "Unzip exited with non-zero status");
-
-        let artifacts_dir = tempdir.path().join("artifacts");
-        let elf_path = artifacts_dir.join(format!("{artifact_name}.elf"));
-        let program_vk_path = artifacts_dir.join(format!("{artifact_name}.vk"));
-        let profiling_elf_path = artifacts_dir.join(format!("{artifact_name}-profiling.elf"));
-        let elf = fs::read(&elf_path)
-            .await
-            .with_context(|| format!("Failed to read ELF: {}", elf_path.display()))?;
-        let program_vk = fs::read(&program_vk_path)
-            .await
-            .with_context(|| format!("Failed to read Program VK: {}", program_vk_path.display()))?;
-        let profiling_elf = match fs::read(&profiling_elf_path).await {
-            Ok(bytes) => Some(bytes),
-            Err(err) if err.kind() == ErrorKind::NotFound => None,
-            Err(err) => {
-                return Err(err).with_context(|| {
-                    format!(
-                        "Failed to read profiling ELF: {}",
-                        profiling_elf_path.display()
-                    )
-                });
-            }
-        };
-
-        Ok(CompiledGuest {
-            elf,
-            program_vk,
-            profiling_elf,
-        })
-    }
-}
-
-fn registered_zkvm_version(
+/// Downloads the guest of `stateless_validator_kind` on `zkvm_kind` that this crate's
+/// `artifact-registry.json` registers. Fails unless the ELF and Program VK match the registered
+/// sha256.
+pub async fn download(
     stateless_validator_kind: StatelessValidatorKind,
     zkvm_kind: zkVMKind,
-) -> anyhow::Result<String> {
+) -> anyhow::Result<CompiledGuest> {
+    let artifact = registered_artifact(stateless_validator_kind, zkvm_kind)?;
+    let artifact_name = format!(
+        "stateless-validator-{stateless_validator_kind}-{zkvm_kind}-{}",
+        artifact.zkvm_version
+    );
+    let client = Client::builder().user_agent("eth-act/ere-guests").build()?;
+    let elf = get_verified_bytes(&client, &artifact.elf_url, &artifact.elf_sha256)
+        .await
+        .with_context(|| format!("Failed to download ELF: {artifact_name}.elf"))?;
+    let program_vk = get_verified_bytes(&client, &artifact.vk_url, &artifact.vk_sha256)
+        .await
+        .with_context(|| format!("Failed to download Program VK: {artifact_name}.vk"))?;
+    Ok(CompiledGuest { elf, program_vk })
+}
+
+fn registered_artifact(
+    stateless_validator_kind: StatelessValidatorKind,
+    zkvm_kind: zkVMKind,
+) -> anyhow::Result<Artifact> {
     #[derive(Deserialize)]
     struct ArtifactRegistry {
         stateless_validators: Vec<StatelessValidator>,
@@ -190,12 +67,6 @@ fn registered_zkvm_version(
     struct StatelessValidator {
         name: String,
         artifacts: Vec<Artifact>,
-    }
-
-    #[derive(Deserialize)]
-    struct Artifact {
-        zkvm: String,
-        zkvm_version: String,
     }
 
     let registry: ArtifactRegistry = serde_json::from_str(ARTIFACT_REGISTRY_JSON)?;
@@ -209,147 +80,31 @@ fn registered_zkvm_version(
                 .into_iter()
                 .find(|artifact| artifact.zkvm == zkvm_kind.as_str())
         })
-        .map(|artifact| artifact.zkvm_version)
         .with_context(|| {
             format!("{stateless_validator_kind}-{zkvm_kind} not found in artifact-registry.json")
         })
 }
 
-fn github_client() -> anyhow::Result<Client> {
-    let mut headers: HeaderMap = [
-        ("Accept", "application/vnd.github+json"),
-        ("X-GitHub-Api-Version", "2022-11-28"),
-    ]
-    .into_iter()
-    .map(|(k, v)| (k.parse().unwrap(), HeaderValue::from_static(v)))
-    .collect();
-
-    if let Some(token) = github_token() {
-        let mut value = HeaderValue::from_str(&format!("Bearer {token}"))?;
-        value.set_sensitive(true);
-        headers.insert(reqwest::header::AUTHORIZATION, value);
-    }
-
-    Ok(ClientBuilder::new()
-        .user_agent("eth-act/ere-guests")
-        .default_headers(headers)
-        .build()?)
+/// Downloads `url` and fails unless its sha256 is `sha256`.
+async fn get_verified_bytes(client: &Client, url: &str, sha256: &str) -> anyhow::Result<Vec<u8>> {
+    let bytes = client
+        .get(url)
+        .send()
+        .await?
+        .error_for_status()?
+        .bytes()
+        .await?;
+    verify_sha256(&bytes, sha256)?;
+    Ok(bytes.to_vec())
 }
 
-fn github_token() -> Option<String> {
-    ["GH_TOKEN", "GITHUB_TOKEN"]
-        .into_iter()
-        .filter_map(|name| std::env::var(name).ok())
-        .find(|token| !token.is_empty())
-}
-
-async fn get_release_assets(
-    client: &Client,
-    tag: &str,
-) -> anyhow::Result<BTreeMap<String, String>> {
-    #[derive(Deserialize)]
-    struct Release {
-        assets: Vec<Asset>,
-    }
-
-    #[derive(Deserialize)]
-    struct Asset {
-        name: String,
-        browser_download_url: String,
-    }
-
-    let url = format!("{REPO_API_URL}/releases/tags/{tag}");
-    let Release { assets } = get_json(client, url)
-        .await
-        .with_context(|| format!("Release not found: {tag}"))?;
-
-    Ok(assets
-        .into_iter()
-        .map(|a| (a.name, a.browser_download_url))
-        .collect())
-}
-
-async fn get_full_sha(client: &Client, sha: &str) -> anyhow::Result<String> {
-    if sha.len() == 40 {
-        return Ok(sha.to_string());
-    };
-
-    let url = format!("{REPO_API_URL}/commits/{sha}");
-    let accept = HeaderValue::from_static("application/vnd.github.sha");
-    let req = client.get(url).header(ACCEPT, accept);
-    let res = send(req)
-        .await
-        .with_context(|| format!("Commit not found: {sha}"))?;
-    Ok(res.text().await?)
-}
-
-async fn get_action_id(client: &Client, full_sha: &str) -> anyhow::Result<u64> {
-    #[derive(Deserialize)]
-    struct WorkflowRunsResponse {
-        workflow_runs: Vec<WorkflowRun>,
-    }
-
-    #[derive(Deserialize)]
-    struct WorkflowRun {
-        id: u64,
-        name: String,
-        status: String,
-        conclusion: Option<String>,
-    }
-
-    let url = format!("{REPO_API_URL}/actions/runs?head_sha={full_sha}");
-    let WorkflowRunsResponse { workflow_runs } = get_json(client, url)
-        .await
-        .with_context(|| format!("Commit not found: {full_sha}"))?;
-
-    workflow_runs
-        .into_iter()
-        .filter(|run| {
-            run.name == ACTION_NAME
-                && run.status == "completed"
-                && run.conclusion.as_deref() == Some("success")
-        })
-        .map(|run| run.id)
-        .max()
-        .with_context(|| format!("No successful release workflow run for commit {full_sha}"))
-}
-
-async fn get_artifacts(
-    client: &Client,
-    action_id: u64,
-) -> anyhow::Result<BTreeMap<String, String>> {
-    #[derive(Deserialize)]
-    struct Artifact {
-        name: String,
-        archive_download_url: String,
-    }
-
-    #[derive(Deserialize)]
-    struct ArtifactsResponse {
-        artifacts: Vec<Artifact>,
-    }
-
-    let url = format!("{REPO_API_URL}/actions/runs/{action_id}/artifacts");
-    let ArtifactsResponse { artifacts } = get_json(client, url)
-        .await
-        .with_context(|| format!("Artifacts not found: {action_id}"))?;
-
-    Ok(artifacts
-        .into_iter()
-        .map(|artifact| (artifact.name, artifact.archive_download_url))
-        .collect())
-}
-
-async fn get_json<T: DeserializeOwned>(client: &Client, url: impl IntoUrl) -> anyhow::Result<T> {
-    Ok(send(client.get(url)).await?.json().await?)
-}
-
-async fn get_bytes(client: &Client, url: impl IntoUrl) -> anyhow::Result<Vec<u8>> {
-    Ok(send(client.get(url)).await?.bytes().await?.to_vec())
-}
-
-async fn send(builder: RequestBuilder) -> anyhow::Result<reqwest::Response> {
-    Ok(builder.send().await?.error_for_status()?)
+fn verify_sha256(bytes: &[u8], expected: &str) -> anyhow::Result<()> {
+    let actual = format!("{:x}", Sha256::digest(bytes));
+    ensure!(
+        actual == expected,
+        "sha256 is {actual}, but artifact-registry.json registers {expected}"
+    );
+    Ok(())
 }
 
 #[cfg(test)]
@@ -357,7 +112,7 @@ mod tests {
     use ere_catalog::zkVMKind;
     use stateless_validator_catalog::StatelessValidatorKind;
 
-    use crate::{Downloader, github_token, registered_zkvm_version};
+    use crate::{download, registered_artifact, verify_sha256};
 
     #[test]
     fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
@@ -395,10 +150,10 @@ mod tests {
                         (registered_kind, registered_zkvm) == (kind, zkvm_kind)
                     }) {
                     Some(&(_, _, expected)) => {
-                        assert_eq!(registered_zkvm_version(kind, zkvm_kind)?, expected)
+                        assert_eq!(registered_artifact(kind, zkvm_kind)?.zkvm_version, expected)
                     }
                     None => assert_eq!(
-                        registered_zkvm_version(kind, zkvm_kind)
+                        registered_artifact(kind, zkvm_kind)
                             .unwrap_err()
                             .to_string(),
                         format!("{kind}-{zkvm_kind} not found in artifact-registry.json")
@@ -409,35 +164,21 @@ mod tests {
         Ok(())
     }
 
-    #[tokio::test]
-    async fn download_from_tag() -> anyhow::Result<()> {
-        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
-        let zkvm_kind = zkVMKind::OpenVM;
-        let guest = Downloader::from_tag("v0.17.1")
-            .await?
-            .download(stateless_validator_kind, zkvm_kind)
-            .await?;
-        assert!(!guest.elf.is_empty());
-        assert!(!guest.program_vk.is_empty());
-        assert!(guest.profiling_elf.is_none());
-        Ok(())
+    #[test]
+    fn rejects_sha256_mismatch() {
+        let empty_sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+        assert!(verify_sha256(b"", empty_sha256).is_ok());
+        assert_eq!(
+            verify_sha256(b"elf", empty_sha256).unwrap_err().to_string(),
+            "sha256 is 780d84b20d7ae7e6292919399348bdbf96025270136198083fc8a4da398b5ca9, but \
+             artifact-registry.json registers \
+             e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        );
     }
 
     #[tokio::test]
-    async fn download_from_commit() -> anyhow::Result<()> {
-        if github_token().is_none() {
-            return Ok(());
-        }
-
-        let stateless_validator_kind = StatelessValidatorKind::Ethrex;
-        let zkvm_kind = zkVMKind::OpenVM;
-        let guest = Downloader::from_commit("ca54752")
-            .await?
-            .download(stateless_validator_kind, zkvm_kind)
-            .await?;
-        assert!(!guest.elf.is_empty());
-        assert!(!guest.program_vk.is_empty());
-        assert!(guest.profiling_elf.is_none());
+    async fn downloads_registered_guest() -> anyhow::Result<()> {
+        download(StatelessValidatorKind::Ethrex, zkVMKind::OpenVM).await?;
         Ok(())
     }
 }
