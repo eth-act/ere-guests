@@ -14,7 +14,7 @@ use serde::Serialize;
 use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
     execution::{
-        init_tracing, matches_output,
+        init_tracing, matches_output, zilkworm_input,
         zkvm::{download_artifact, init_zkvm, matches_up_to_patch},
     },
     fixture::{DEVNET_NAME, DevnetBatch, devnet_batches, devnet_fixtures, fetch_devnet_batches},
@@ -123,12 +123,26 @@ fn main() -> anyhow::Result<()> {
         .into_par_iter()
         .map(|fixture| {
             let start = Instant::now();
-            let outcome = zkvm
-                .execute_estimated_cost(&Input::new().with_stdin(fixture.stateless_input_bytes))
-                .and_then(|(public_values, estimation)| {
-                    matches_output(public_values.to_vec(), fixture.stateless_output_bytes)?;
+            // TODO(zilkworm): drop this branch with `zilkworm_input`.
+            let outcome = if cli.stateless_validator == StatelessValidatorKind::Zilkworm {
+                zilkworm_input(
+                    &fixture.stateless_input_bytes,
+                    &fixture.stateless_output_bytes,
+                )
+                .and_then(|input| {
+                    let (stdin, expected) = input.context("input rejected by the host")?;
+                    let (public_values, estimation) =
+                        zkvm.execute_estimated_cost(&Input::new().with_stdin(stdin))?;
+                    anyhow::ensure!(public_values.to_vec() == expected, "Public values mismatch");
                     Ok(estimation)
-                });
+                })
+            } else {
+                zkvm.execute_estimated_cost(&Input::new().with_stdin(fixture.stateless_input_bytes))
+                    .and_then(|(public_values, estimation)| {
+                        matches_output(public_values.to_vec(), fixture.stateless_output_bytes)?;
+                        Ok(estimation)
+                    })
+            };
             let outcome = match outcome {
                 Ok(estimation) => {
                     debug!("PASS {}: took {:?}", fixture.name, start.elapsed());

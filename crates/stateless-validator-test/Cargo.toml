@@ -36,3 +36,5 @@ ere-dockerized.workspace = true
 # local
 stateless-validator-catalog.workspace = true
 stateless-validator-common = { workspace = true, features = ["host"] }
+# TODO(zilkworm): host adapter (statelessInputBytes -> MFBD) until the guest consumes the canonical input.
+stateless-validator-zilkworm.workspace = true

@@ -72,3 +72,9 @@ ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.18.1" }
 # local
 stateless-validator-catalog = { path = "crates/stateless-validator-catalog" }
 stateless-validator-common = { path = "crates/stateless-validator-common", default-features = false }
+# TODO(zilkworm): host adapter (statelessInputBytes -> MFBD) until the guest consumes the canonical input.
+stateless-validator-zilkworm = { git = "https://github.com/erigontech/zilkworm", tag = "v0.1.0-alpha.4", package = "z6m_stateless_validator" }
+
+# TODO(zilkworm): the adapter depends on stateless-validator-common by git URL; resolve it here.
+[patch."https://github.com/eth-act/ere-guests"]
+stateless-validator-common = { path = "crates/stateless-validator-common" }

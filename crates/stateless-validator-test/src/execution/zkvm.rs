@@ -142,7 +142,7 @@ pub fn run_zkvm_execution(
         const_hex::encode_prefixed(&guest.vk),
         "regenerated program VK differs from the published one"
     );
-    run_execution(fixtures, &|input| {
+    run_execution(stateless_validator_kind, fixtures, &|input| {
         Ok(zkvm.execute(&Input::new().with_stdin(input))?.0.to_vec())
     })
 }

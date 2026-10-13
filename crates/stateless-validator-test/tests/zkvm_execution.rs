@@ -29,6 +29,12 @@ const RETH_EXPECTED_BAL_FAILURES: &[&str] = &[
     "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_withdrawals_and_dequeues_net_balance_at_last_index[fork_Amsterdam-blockchain_test_engine-forward_half]#payload0",
 ];
 
+// Zilkworm computes a different block access list hash for these fixtures and rejects the blocks.
+const ZILKWORM_EXPECTED_BAL_FAILURES: &[&str] = &[
+    "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_withdrawals_and_dequeues_net_balance_at_last_index[fork_Amsterdam-blockchain_test_engine-forward_all]#payload0",
+    "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_withdrawals_and_dequeues_net_balance_at_last_index[fork_Amsterdam-blockchain_test_engine-forward_half]#payload0",
+];
+
 fn expected_failures(
     stateless_validator: StatelessValidatorKind,
     zkvm: zkVMKind,
@@ -41,6 +47,10 @@ fn expected_failures(
         (StatelessValidatorKind::Reth, _) => RETH_EXPECTED_BAL_FAILURES,
         (StatelessValidatorKind::Zesu | StatelessValidatorKind::Nimbus, zkVMKind::Zisk) => &[],
         (StatelessValidatorKind::Zesu | StatelessValidatorKind::Nimbus, _) => {
+            panic!("{stateless_validator}-{zkvm} has no active registry artifacts")
+        }
+        (StatelessValidatorKind::Zilkworm, zkVMKind::SP1) => ZILKWORM_EXPECTED_BAL_FAILURES,
+        (StatelessValidatorKind::Zilkworm, _) => {
             panic!("{stateless_validator}-{zkvm} has no active registry artifacts")
         }
     }

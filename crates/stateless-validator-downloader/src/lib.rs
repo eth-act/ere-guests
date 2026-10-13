@@ -386,6 +386,7 @@ mod tests {
                 zkVMKind::Zisk,
                 "v1.2.0-alpha",
             ),
+            (StatelessValidatorKind::Zilkworm, zkVMKind::SP1, "v6.6.0"),
         ];
         for kind in StatelessValidatorKind::iter() {
             for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {

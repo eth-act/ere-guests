@@ -87,6 +87,20 @@
                     "vk_sha256": "a357992a3371dc23dcb55aef851a6fb659f32545ca6f992020cff37911432143"
                 }
             ]
+        },
+        {
+            "name": "zilkworm",
+            "version": "0.1.0-alpha.4",
+            "artifacts": [
+                {
+                    "zkvm": "sp1",
+                    "zkvm_version": "v6.6.0",
+                    "elf_url": "https://github.com/erigontech/zilkworm/releases/download/v0.1.0-alpha.4/z6m_guest_hypercube.elf",
+                    "elf_sha256": "b3604988c9c399e6aafbdebb1351a2066967c1b58b8e54cbd4016daa7dbb9a38",
+                    "vk_url": "https://github.com/erigontech/zilkworm/releases/download/v0.1.0-alpha.4/z6m_guest_hypercube.vk",
+                    "vk_sha256": "f7cdca957f0955c1b5a00d6aeb7291f33791bd60f88f0363d5b64fcb1c2ff3cb"
+                }
+            ]
         }
     ]
 }
