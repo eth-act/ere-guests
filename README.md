@@ -30,6 +30,7 @@ This repository republishes checksum-verified guest ELFs and program verificatio
 
 Located in `crates/`, these provide reusable functionality for guest programs and host:
 
+- [`stateless-validator-binding`](crates/stateless-validator-binding) - EIP-8025 beacon block binding prologue, binding a payload envelope to the beacon block that committed to it
 - [`stateless-validator-catalog`](crates/stateless-validator-catalog) - Catalog of active validator kinds and registry-derived versions
 - [`stateless-validator-common`](crates/stateless-validator-common) - Canonical `no_std` tests-zkevm v21.0.1 input and output schemas
 - [`stateless-validator-downloader`](crates/stateless-validator-downloader) - Downloads republished ELFs and VKs from releases and workflow artifacts

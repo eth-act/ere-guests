@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "crates/stateless-validator-binding",
     "crates/stateless-validator-catalog",
     "crates/stateless-validator-common",
     "crates/stateless-validator-downloader",
@@ -70,5 +71,6 @@ ere-catalog = { git = "https://github.com/eth-act/ere", tag = "v0.18.1" }
 ere-dockerized = { git = "https://github.com/eth-act/ere", tag = "v0.18.1" }
 
 # local
+stateless-validator-binding = { path = "crates/stateless-validator-binding", default-features = false }
 stateless-validator-catalog = { path = "crates/stateless-validator-catalog" }
 stateless-validator-common = { path = "crates/stateless-validator-common", default-features = false }
