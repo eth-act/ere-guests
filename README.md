@@ -31,13 +31,13 @@ This repository republishes checksum-verified guest ELFs and program verificatio
 Located in `crates/`, these provide reusable functionality for guest programs and host:
 
 - [`stateless-validator-catalog`](crates/stateless-validator-catalog) - Catalog of active validator kinds and registry-derived versions
-- [`stateless-validator-common`](crates/stateless-validator-common) - Canonical `no_std` tests-zkevm v21.0.1 input and output schemas
+- [`stateless-validator-common`](crates/stateless-validator-common) - Canonical `no_std` tests-zkevm v21.0.6 input and output schemas
 - [`stateless-validator-downloader`](crates/stateless-validator-downloader) - Downloads republished ELFs and VKs from releases and workflow artifacts
 - [`stateless-validator-test`](crates/stateless-validator-test) - Runs EEST and rolling devnet inputs against registry artifacts in dockerized zkVMs
 
 ### Guest Artifacts
 
-Ethrex [`29.0.0`](https://github.com/lambdaclass/ethrex/releases/tag/v29.0.0) and Reth [`0.1.0-rc.4`](https://github.com/paradigmxyz/stateless/releases/tag/reth-guest-v0.1.0-rc.4) are registered on OpenVM `v2.1.0-preview`, SP1 `v6.6.0`, and ZisK `v1.2.0-alpha`. Their catalog IDs are `0` and `1`. Zesu [`tests@v21.0.0`](https://github.com/Consensys-Incorporated/zesu-zkvm/releases/tag/tests%40v21.0.0) and Nimbus [`v0.2.1-alpha`](https://github.com/status-im/nimbus-zkvm-guests/releases/tag/v0.2.1-alpha) are registered on ZisK `v1.2.0-alpha`. Their catalog IDs are `2` and `3`. All four target tests-zkevm `v21.0.1` and Ere `v0.18.1`.
+Ethrex [`30.0.0`](https://github.com/lambdaclass/ethrex/releases/tag/v30.0.0) and Reth [`0.1.0-rc.4`](https://github.com/paradigmxyz/stateless/releases/tag/reth-guest-v0.1.0-rc.4) are registered on OpenVM `v2.1.0-preview`, SP1 `v6.6.0`, and ZisK `v1.2.0-alpha`. Their catalog IDs are `0` and `1`. Zesu [`tests@v21.0.0`](https://github.com/Consensys-Incorporated/zesu-zkvm/releases/tag/tests%40v21.0.0) and Nimbus [`v0.2.1-alpha`](https://github.com/status-im/nimbus-zkvm-guests/releases/tag/v0.2.1-alpha) are registered on ZisK `v1.2.0-alpha`. Their catalog IDs are `2` and `3`. All four target tests-zkevm `v21.0.1` and Ere `v0.18.1`. The execution tests run the tests-zkevm `v21.0.6` fixtures, and [`zkvm_execution.rs`](crates/stateless-validator-test/tests/zkvm_execution.rs) lists the ones each guest still fails.
 
 Devnet runs are paused until Sepolia blocks exist in the engine format. The `glamsterdam-devnet-8` blocks use the tests-zkevm `v0.8.4` input layout, which v21 guests reject. Until then, the pinned 10-block pull request test is ignored, and the devnet workflow, which runs the latest 100 blocks from the rolling catalog, runs only on manual dispatch.
 
