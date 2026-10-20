@@ -33,14 +33,14 @@ const ETHREX_EXPECTED_WITNESS_FAILURES: &[&str] = &[
 ];
 
 // Reth rejects this valid block, in which two post-execution system calls create and then fund one
-// contract at the same block access index. The cause is not yet diagnosed.
+// contract at the same block access index. revm's BAL builder drops the contract's nonce and code
+// changes. See bluealloy/revm#3954.
 const RETH_EXPECTED_SAME_INDEX_BAL_FAILURES: &[&str] = &[
     "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_same_index_call_keeps_one_nonce_and_code_change[fork_Amsterdam-blockchain_test_engine]#payload0",
 ];
 
 // Reth rejects valid blocks whose witness leaves out code the block already set: an EIP-7702
-// delegation marker shared with another account, or code that an earlier CREATE deployed. It also
-// accepts one of the two over-long witness trie paths and fails to execute the other.
+// delegation marker shared with another account, or code that an earlier CREATE deployed.
 const RETH_EXPECTED_WITNESS_FAILURES: &[&str] = &[
     "tests/amsterdam/eip8025_optional_proofs/test_witness_7702.py::test_witness_codes_delegation_same_marker_cleared_then_read[fork_Amsterdam-blockchain_test_engine-clear_in_later_tx]#payload0",
     "tests/amsterdam/eip8025_optional_proofs/test_witness_7702.py::test_witness_codes_delegation_same_marker_cleared_then_read[fork_Amsterdam-blockchain_test_engine-clear_in_same_tx]#payload0",
@@ -60,8 +60,6 @@ const RETH_EXPECTED_WITNESS_FAILURES: &[&str] = &[
     "tests/amsterdam/eip8025_optional_proofs/test_witness_bytecodes_contract_creation.py::test_witness_codes_create_same_hash_then_read_same_tx[fork_Amsterdam-blockchain_test_engine-read_op_call]#payload0",
     "tests/amsterdam/eip8025_optional_proofs/test_witness_bytecodes_contract_creation.py::test_witness_codes_create_same_hash_then_read_same_tx[fork_Amsterdam-blockchain_test_engine-read_op_extcodecopy]#payload0",
     "tests/amsterdam/eip8025_optional_proofs/test_witness_bytecodes_contract_creation.py::test_witness_codes_create_same_hash_then_read_same_tx[fork_Amsterdam-blockchain_test_engine-read_op_extcodesize]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-cumulative_path_exceeds_key_length]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-leaf_segment_exceeds_key_length]#payload0",
 ];
 
 // Zesu accepts witness trie paths longer than the 64-nibble hashed key, a block whose witness lacks
