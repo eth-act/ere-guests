@@ -51,6 +51,8 @@ pub enum StatelessValidatorKind {
     Zesu,
     /// Nimbus stateless validator.
     Nimbus,
+    /// Zilkworm stateless validator.
+    Zilkworm,
 }
 
 impl StatelessValidatorKind {
@@ -136,6 +138,7 @@ mod tests {
             (["reth", "Reth"], StatelessValidatorKind::Reth),
             (["zesu", "Zesu"], StatelessValidatorKind::Zesu),
             (["nimbus", "Nimbus"], StatelessValidatorKind::Nimbus),
+            (["zilkworm", "Zilkworm"], StatelessValidatorKind::Zilkworm),
         ] {
             spellings
                 .iter()
@@ -150,7 +153,7 @@ mod tests {
         );
         assert_eq!(
             ParseError::from("xxx").to_string(),
-            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu, nimbus]"
+            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu, nimbus, zilkworm]"
                 .to_string()
         );
     }
@@ -161,6 +164,7 @@ mod tests {
         assert_eq!(StatelessValidatorKind::Reth.as_u8(), 1);
         assert_eq!(StatelessValidatorKind::Zesu.as_u8(), 2);
         assert_eq!(StatelessValidatorKind::Nimbus.as_u8(), 3);
+        assert_eq!(StatelessValidatorKind::Zilkworm.as_u8(), 4);
         assert_eq!(
             StatelessValidatorKind::from_u8(0),
             Some(StatelessValidatorKind::Ethrex)
@@ -177,6 +181,10 @@ mod tests {
             StatelessValidatorKind::from_u8(3),
             Some(StatelessValidatorKind::Nimbus)
         );
+        assert_eq!(
+            StatelessValidatorKind::from_u8(4),
+            Some(StatelessValidatorKind::Zilkworm)
+        );
         assert_eq!(StatelessValidatorKind::Ethrex.version(), Some("30.0.0"));
         assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.5"));
         assert_eq!(
@@ -186,6 +194,10 @@ mod tests {
         assert_eq!(
             StatelessValidatorKind::Nimbus.version(),
             Some("v0.2.1-alpha")
+        );
+        assert_eq!(
+            StatelessValidatorKind::Zilkworm.version(),
+            Some("0.1.0-alpha.6")
         );
     }
 }
