@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.18.2](https://github.com/eth-act/ere-guests/compare/v0.18.1...v0.18.2) (2026-10-24)
+
+
+### Bug Fixes
+
+* bump ere to v0.18.2 ([#104](https://github.com/eth-act/ere-guests/issues/104)) ([7fcc63e](https://github.com/eth-act/ere-guests/commit/7fcc63ef64477cde8cf1109ac0d31b599d85db1a))
+* bump Reth guest to 0.1.0-rc.5 ([#102](https://github.com/eth-act/ere-guests/issues/102)) ([2aeab37](https://github.com/eth-act/ere-guests/commit/2aeab37f64448dbaa48a51d6823a35674ec43a27))
+* download registered guests and verify their sha256 ([#97](https://github.com/eth-act/ere-guests/issues/97)) ([ed0258c](https://github.com/eth-act/ere-guests/commit/ed0258cb300bf58e3e72a86ac093744879075752))
+* upgrade tests-zkevm to v21.0.6 and Ethrex to v30.0.0 ([a5af6f6](https://github.com/eth-act/ere-guests/commit/a5af6f69ff4fe9410664e73345033fdeefe12d4d))
+
 ## [0.18.1](https://github.com/eth-act/ere-guests/compare/v0.18.0...v0.18.1) (2026-10-12)
 
 
