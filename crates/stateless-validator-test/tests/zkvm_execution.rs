@@ -22,16 +22,6 @@ const RETH_EXPECTED_BAL_FAILURES: &[&str] = &[
     "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_withdrawals_and_dequeues_net_balance_at_last_index[fork_Amsterdam-blockchain_test_engine-forward_half]#payload0",
 ];
 
-// Ethrex accepts these invalid blocks on every zkVM: a witness trie path longer than the 64-nibble
-// hashed key, and a zero withdrawal whose target has no proof in the witness.
-const ETHREX_EXPECTED_WITNESS_FAILURES: &[&str] = &[
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-cumulative_path_exceeds_key_length]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-leaf_segment_exceeds_key_length]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_zero_withdrawal-target_kind_absent]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_zero_withdrawal-target_kind_eoa]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_zero_withdrawal-target_kind_system_address]#payload0",
-];
-
 // Reth rejects this valid block, in which two post-execution system calls create and then fund one
 // contract at the same block access index. revm's BAL builder drops the contract's nonce and code
 // changes. See bluealloy/revm#3954.
@@ -106,12 +96,18 @@ const NIMBUS_EXPECTED_WITNESS_FAILURES: &[&str] = &[
     "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_request_queue_read[fork_Amsterdam-request_class_WithdrawalRequest-blockchain_test_engine-missing_storage_root]#payload0",
 ];
 
+// Nethermind accepts witness trie paths longer than the 64-nibble hashed key.
+const NETHERMIND_EXPECTED_WITNESS_FAILURES: &[&str] = &[
+    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-cumulative_path_exceeds_key_length]#payload0",
+    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-leaf_segment_exceeds_key_length]#payload0",
+];
+
 fn expected_failures(
     stateless_validator: StatelessValidatorKind,
     zkvm: zkVMKind,
 ) -> Vec<&'static str> {
     let groups: &[&[&str]] = match (stateless_validator, zkvm) {
-        (StatelessValidatorKind::Ethrex, _) => &[ETHREX_EXPECTED_WITNESS_FAILURES],
+        (StatelessValidatorKind::Ethrex, _) => &[],
         (StatelessValidatorKind::Reth, _) => &[
             RETH_EXPECTED_BAL_FAILURES,
             RETH_EXPECTED_SAME_INDEX_BAL_FAILURES,
@@ -119,7 +115,15 @@ fn expected_failures(
         ],
         (StatelessValidatorKind::Zesu, zkVMKind::Zisk) => &[ZESU_EXPECTED_WITNESS_FAILURES],
         (StatelessValidatorKind::Nimbus, zkVMKind::Zisk) => &[NIMBUS_EXPECTED_WITNESS_FAILURES],
-        (StatelessValidatorKind::Zesu | StatelessValidatorKind::Nimbus, _) => {
+        (StatelessValidatorKind::Nethermind, zkVMKind::Zisk) => {
+            &[NETHERMIND_EXPECTED_WITNESS_FAILURES]
+        }
+        (
+            StatelessValidatorKind::Zesu
+            | StatelessValidatorKind::Nimbus
+            | StatelessValidatorKind::Nethermind,
+            _,
+        ) => {
             panic!("{stateless_validator}-{zkvm} has no active registry artifacts")
         }
     };

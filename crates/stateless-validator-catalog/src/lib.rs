@@ -51,6 +51,8 @@ pub enum StatelessValidatorKind {
     Zesu,
     /// Nimbus stateless validator.
     Nimbus,
+    /// Nethermind stateless validator.
+    Nethermind,
 }
 
 impl StatelessValidatorKind {
@@ -136,6 +138,10 @@ mod tests {
             (["reth", "Reth"], StatelessValidatorKind::Reth),
             (["zesu", "Zesu"], StatelessValidatorKind::Zesu),
             (["nimbus", "Nimbus"], StatelessValidatorKind::Nimbus),
+            (
+                ["nethermind", "Nethermind"],
+                StatelessValidatorKind::Nethermind,
+            ),
         ] {
             spellings
                 .iter()
@@ -150,7 +156,8 @@ mod tests {
         );
         assert_eq!(
             ParseError::from("xxx").to_string(),
-            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu, nimbus]"
+            "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu, nimbus, \
+             nethermind]"
                 .to_string()
         );
     }
@@ -161,6 +168,7 @@ mod tests {
         assert_eq!(StatelessValidatorKind::Reth.as_u8(), 1);
         assert_eq!(StatelessValidatorKind::Zesu.as_u8(), 2);
         assert_eq!(StatelessValidatorKind::Nimbus.as_u8(), 3);
+        assert_eq!(StatelessValidatorKind::Nethermind.as_u8(), 4);
         assert_eq!(
             StatelessValidatorKind::from_u8(0),
             Some(StatelessValidatorKind::Ethrex)
@@ -177,15 +185,18 @@ mod tests {
             StatelessValidatorKind::from_u8(3),
             Some(StatelessValidatorKind::Nimbus)
         );
-        assert_eq!(StatelessValidatorKind::Ethrex.version(), Some("30.0.0"));
-        assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.5"));
         assert_eq!(
-            StatelessValidatorKind::Zesu.version(),
-            Some("tests@v21.0.0")
+            StatelessValidatorKind::from_u8(4),
+            Some(StatelessValidatorKind::Nethermind)
         );
+        assert_eq!(StatelessValidatorKind::Ethrex.version(), Some("30.0.1"));
+        assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.6"));
+        // TODO(ere@v0.19): re-add Zesu and Nimbus as they publish ZisK v1.3 releases.
+        assert_eq!(StatelessValidatorKind::Zesu.version(), None);
+        assert_eq!(StatelessValidatorKind::Nimbus.version(), None);
         assert_eq!(
-            StatelessValidatorKind::Nimbus.version(),
-            Some("v0.2.1-alpha")
+            StatelessValidatorKind::Nethermind.version(),
+            Some("2.3.0-preview+2")
         );
     }
 }

@@ -545,8 +545,8 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "ere-catalog"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 dependencies = [
  "ere-util-build",
  "serde",
@@ -555,21 +555,21 @@ dependencies = [
 
 [[package]]
 name = "ere-codec"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 
 [[package]]
 name = "ere-compiler-core"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "ere-dockerized"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 dependencies = [
  "anyhow",
  "ere-catalog",
@@ -585,8 +585,8 @@ dependencies = [
 
 [[package]]
 name = "ere-prover-core"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 dependencies = [
  "anyhow",
  "auto_impl",
@@ -594,7 +594,11 @@ dependencies = [
  "clap",
  "elf",
  "ere-codec",
+ "ere-compiler-core",
  "ere-verifier-core",
+ "flate2",
+ "prost",
+ "rustc-demangle",
  "serde",
  "strum 0.27.2",
  "thiserror",
@@ -602,8 +606,8 @@ dependencies = [
 
 [[package]]
 name = "ere-server-api"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 dependencies = [
  "prost",
  "serde",
@@ -612,35 +616,36 @@ dependencies = [
 
 [[package]]
 name = "ere-server-client"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 dependencies = [
  "ere-prover-core",
  "ere-server-api",
+ "prost",
  "thiserror",
  "twirp",
 ]
 
 [[package]]
 name = "ere-util-build"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 dependencies = [
  "cargo_metadata",
 ]
 
 [[package]]
 name = "ere-util-tokio"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 dependencies = [
  "tokio",
 ]
 
 [[package]]
 name = "ere-verifier-core"
-version = "0.18.2"
-source = "git+https://github.com/eth-act/ere?tag=v0.18.2#7c5bc337a9d0ae7971f7b9bf45399ccbaf30cce9"
+version = "0.19.5"
+source = "git+https://github.com/eth-act/ere?tag=v0.19.5#fba5601fd907634acdc0ce9f19dc8651aa8c0edd"
 dependencies = [
  "auto_impl",
  "ere-codec",
@@ -1730,6 +1735,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48fd7bd8a6377e15ad9d42a8ec25371b94ddc67abe7c8b9127bec79bebaaae18"
 
 [[package]]
+name = "rustc-demangle"
+version = "0.1.28"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b74b56ffa8bb2830709a538c2cbcae9aa062db0d2a42563bfb09bdaae44020eb"
+
+[[package]]
 name = "rustc_version"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2197,7 +2208,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",

@@ -79,7 +79,7 @@ struct BlockCostEstimation {
 enum BlockOutcome {
     Estimated {
         cost: BTreeMap<String, u64>,
-        peak_heap_bytes: Option<u64>,
+        peak_heap_bytes: u64,
     },
     Failed {
         error: String,
@@ -123,18 +123,19 @@ fn main() -> anyhow::Result<()> {
         .into_par_iter()
         .map(|fixture| {
             let start = Instant::now();
+            // The profile carries the cost of `execute_estimated_cost` and the peak heap.
             let outcome = zkvm
-                .execute_estimated_cost(&Input::new().with_stdin(fixture.stateless_input_bytes))
-                .and_then(|(public_values, estimation)| {
+                .profile(&Input::new().with_stdin(fixture.stateless_input_bytes))
+                .and_then(|(public_values, profile)| {
                     matches_output(public_values.to_vec(), fixture.stateless_output_bytes)?;
-                    Ok(estimation)
+                    Ok(profile)
                 });
             let outcome = match outcome {
-                Ok(estimation) => {
+                Ok(profile) => {
                     debug!("PASS {}: took {:?}", fixture.name, start.elapsed());
                     BlockOutcome::Estimated {
-                        cost: estimation.cost,
-                        peak_heap_bytes: estimation.peak_heap_bytes,
+                        cost: profile.cost_estimation().cost,
+                        peak_heap_bytes: profile.peak_heap_bytes,
                     }
                 }
                 Err(error) => BlockOutcome::Failed {

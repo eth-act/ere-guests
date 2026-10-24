@@ -37,7 +37,7 @@ Located in `crates/`, these provide reusable functionality for guest programs an
 
 ### Guest Artifacts
 
-Ethrex [`30.0.0`](https://github.com/lambdaclass/ethrex/releases/tag/v30.0.0) and Reth [`0.1.0-rc.5`](https://github.com/paradigmxyz/stateless/releases/tag/reth-guest-v0.1.0-rc.5) are registered on OpenVM `v2.1.0-preview`, SP1 `v6.6.0`, and ZisK `v1.2.0-alpha`. Their catalog IDs are `0` and `1`. Zesu [`tests@v21.0.0`](https://github.com/Consensys-Incorporated/zesu-zkvm/releases/tag/tests%40v21.0.0) and Nimbus [`v0.2.1-alpha`](https://github.com/status-im/nimbus-zkvm-guests/releases/tag/v0.2.1-alpha) are registered on ZisK `v1.2.0-alpha`. Their catalog IDs are `2` and `3`. Reth targets tests-zkevm `v21.0.6`, the other three target `v21.0.1`, and all four target Ere `v0.18.2`. The execution tests run the tests-zkevm `v21.0.6` fixtures, and [`zkvm_execution.rs`](crates/stateless-validator-test/tests/zkvm_execution.rs) lists the ones each guest still fails.
+Ethrex [`30.0.1`](https://github.com/lambdaclass/ethrex/releases/tag/v30.0.1) and Reth [`0.1.0-rc.6`](https://github.com/paradigmxyz/stateless/releases/tag/reth-guest-v0.1.0-rc.6) are registered on OpenVM `v2.1.0-preview`, SP1 `v6.9.0`, and ZisK `v1.3.2-alpha`. Their catalog IDs are `0` and `1`. Nethermind [`2.3.0-preview+2`](https://github.com/NethermindEth/nethermind/releases/tag/zkvm-guests-2.3.0-preview%2B2) is registered on ZisK `v1.3.2-alpha`, with catalog ID `4`. Zesu and Nimbus don't publish ZisK `v1.3.2-alpha` ELFs yet, so they stay unregistered and keep their catalog IDs `2` and `3`. Ethrex and Reth target tests-zkevm `v21.0.6` and Ere `v0.19.5`. Nethermind targets tests-zkevm `v21.0.1` and generated its VK with Ere `v0.19.3`, whose ZisK matches `v0.19.5`. The execution tests run the tests-zkevm `v21.0.6` fixtures, and [`zkvm_execution.rs`](crates/stateless-validator-test/tests/zkvm_execution.rs) lists the ones each guest still fails.
 
 Devnet runs are paused until Sepolia blocks exist in the engine format. The `glamsterdam-devnet-8` blocks use the tests-zkevm `v0.8.4` input layout, which v21 guests reject. Until then, the pinned 10-block pull request test is ignored, and the devnet workflow, which runs the latest 100 blocks from the rolling catalog, runs only on manual dispatch.
 
@@ -52,7 +52,7 @@ To measure one ELF locally, pick a `batchEndBlock` from the [batch index](https:
 ```bash
 ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere \
   cargo run --release --package stateless-validator-test --bin zkvm_cost_estimation -- \
-    --stateless-validator ethrex --zkvm zisk --zkvm-version v1.2.0-alpha \
+    --stateless-validator ethrex --zkvm openvm --zkvm-version v2.1.0-preview \
     --elf-url <url> --elf-sha256 <sha256> \
     --batch-end-block <block> --blocks 100 --output cost.json
 ```
