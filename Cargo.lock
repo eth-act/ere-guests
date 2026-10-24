@@ -2000,6 +2000,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
+name = "stateless-validator-binding"
+version = "0.18.1"
+dependencies = [
+ "const-hex",
+ "libssz",
+ "libssz-derive",
+ "libssz-merkle",
+ "libssz-types",
+ "stateless-validator-common",
+]
+
+[[package]]
 name = "stateless-validator-catalog"
 version = "0.18.1"
 dependencies = [
