@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.0](https://github.com/eth-act/ere-guests/compare/v0.18.2...v0.19.0) (2026-10-26)
+
+
+### Features
+
+* upgrade Ere to v0.19.5 ([#103](https://github.com/eth-act/ere-guests/issues/103)) ([572ba74](https://github.com/eth-act/ere-guests/commit/572ba74acebf1c1f10230b011299b2bf6f2fdda4))
+
 ## [0.18.2](https://github.com/eth-act/ere-guests/compare/v0.18.1...v0.18.2) (2026-10-24)
 
 
