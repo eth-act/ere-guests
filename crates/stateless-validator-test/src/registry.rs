@@ -186,6 +186,11 @@ mod tests {
                 "2.3.0-preview+3",
                 &[zkVMKind::SP1, zkVMKind::Zisk],
             ),
+            (
+                StatelessValidatorKind::Zilkworm,
+                "0.1.0-alpha.7",
+                &[zkVMKind::SP1],
+            ),
         ];
         assert_eq!(registry.stateless_validators.len(), registered.len());
 

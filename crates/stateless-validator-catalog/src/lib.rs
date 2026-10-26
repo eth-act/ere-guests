@@ -53,6 +53,8 @@ pub enum StatelessValidatorKind {
     Nimbus,
     /// Nethermind stateless validator.
     Nethermind,
+    /// Zilkworm stateless validator.
+    Zilkworm,
 }
 
 impl StatelessValidatorKind {
@@ -142,6 +144,7 @@ mod tests {
                 ["nethermind", "Nethermind"],
                 StatelessValidatorKind::Nethermind,
             ),
+            (["zilkworm", "Zilkworm"], StatelessValidatorKind::Zilkworm),
         ] {
             spellings
                 .iter()
@@ -157,7 +160,7 @@ mod tests {
         assert_eq!(
             ParseError::from("xxx").to_string(),
             "Unsupported stateless validator kind `xxx`, expect one of [ethrex, reth, zesu, nimbus, \
-             nethermind]"
+             nethermind, zilkworm]"
                 .to_string()
         );
     }
@@ -169,6 +172,7 @@ mod tests {
         assert_eq!(StatelessValidatorKind::Zesu.as_u8(), 2);
         assert_eq!(StatelessValidatorKind::Nimbus.as_u8(), 3);
         assert_eq!(StatelessValidatorKind::Nethermind.as_u8(), 4);
+        assert_eq!(StatelessValidatorKind::Zilkworm.as_u8(), 5);
         assert_eq!(
             StatelessValidatorKind::from_u8(0),
             Some(StatelessValidatorKind::Ethrex)
@@ -189,6 +193,10 @@ mod tests {
             StatelessValidatorKind::from_u8(4),
             Some(StatelessValidatorKind::Nethermind)
         );
+        assert_eq!(
+            StatelessValidatorKind::from_u8(5),
+            Some(StatelessValidatorKind::Zilkworm)
+        );
         assert_eq!(StatelessValidatorKind::Ethrex.version(), Some("30.0.1"));
         assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.6"));
         // TODO(ere@v0.19): re-add Zesu as it publishes a ZisK v1.3 release.
@@ -200,6 +208,10 @@ mod tests {
         assert_eq!(
             StatelessValidatorKind::Nethermind.version(),
             Some("2.3.0-preview+3")
+        );
+        assert_eq!(
+            StatelessValidatorKind::Zilkworm.version(),
+            Some("0.1.0-alpha.7")
         );
     }
 }

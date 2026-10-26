@@ -103,6 +103,20 @@
                     "vk_sha256": "9223053b558bb369ab3c5cbf8dcb97dd342d0b92116c06a71e64d1fcbab7e92a"
                 }
             ]
+        },
+        {
+            "name": "zilkworm",
+            "version": "0.1.0-alpha.7",
+            "artifacts": [
+                {
+                    "zkvm": "sp1",
+                    "zkvm_version": "v6.9.0",
+                    "elf_url": "https://github.com/erigontech/zilkworm/releases/download/v0.1.0-alpha.7/stateless-validator-zilkworm-sp1-v6.9.0.elf",
+                    "elf_sha256": "baf4e3405cf9ae2df48f36f677d92d5c13d931234e299d29f4d83a17c7a71fb9",
+                    "vk_url": "https://github.com/erigontech/zilkworm/releases/download/v0.1.0-alpha.7/stateless-validator-zilkworm-sp1-v6.9.0.vk",
+                    "vk_sha256": "2913960e4eace6bb93c8c9f28b1730406b9916d62d2bb7cdb0c8e330cd455c89"
+                }
+            ]
         }
     ]
 }
