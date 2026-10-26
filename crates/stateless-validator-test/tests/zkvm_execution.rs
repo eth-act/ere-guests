@@ -88,7 +88,7 @@ fn expected_failures(
         ],
         (StatelessValidatorKind::Zesu, zkVMKind::Zisk) => &[ZESU_EXPECTED_WITNESS_FAILURES],
         (StatelessValidatorKind::Nimbus, zkVMKind::SP1 | zkVMKind::Zisk) => &[],
-        (StatelessValidatorKind::Nethermind, zkVMKind::Zisk) => {
+        (StatelessValidatorKind::Nethermind, zkVMKind::SP1 | zkVMKind::Zisk) => {
             &[NETHERMIND_EXPECTED_WITNESS_FAILURES]
         }
         (

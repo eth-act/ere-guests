@@ -199,7 +199,7 @@ mod tests {
         );
         assert_eq!(
             StatelessValidatorKind::Nethermind.version(),
-            Some("2.3.0-preview+2")
+            Some("2.3.0-preview+3")
         );
     }
 }

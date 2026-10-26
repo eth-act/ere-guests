@@ -84,15 +84,23 @@
         },
         {
             "name": "nethermind",
-            "version": "2.3.0-preview+2",
+            "version": "2.3.0-preview+3",
             "artifacts": [
+                {
+                    "zkvm": "sp1",
+                    "zkvm_version": "v6.9.0",
+                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B3/stateless-validator-nethermind-sp1-v6.9.0.elf",
+                    "elf_sha256": "9251e6af8d436ce70425c84614ea697a2af6aa1e8a1409b0dab888bc0cdef905",
+                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B3/stateless-validator-nethermind-sp1-v6.9.0.vk",
+                    "vk_sha256": "bf7086f529767878f61b768c475f193d55b588da3c8663aaf1cc03ec876f59d2"
+                },
                 {
                     "zkvm": "zisk",
                     "zkvm_version": "v1.3.2-alpha",
-                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B2/nethermind-guest-2.3.0-preview-7aa16072-zisk-1.3.2-alpha.elf",
-                    "elf_sha256": "bf0eed7fda86865b0757d40e1633f2c38ff361314eafd69aed15837c9d1d5796",
-                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B2/nethermind-guest-2.3.0-preview-7aa16072-zisk-1.3.2-alpha.vk",
-                    "vk_sha256": "cef9a5d84730957dca61315e1c1c5eb9fce02ee5fc481a1c94bab73014cb1012"
+                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B3/stateless-validator-nethermind-zisk-v1.3.2-alpha.elf",
+                    "elf_sha256": "fd31c5afdb66c64da48afcab76a52915b2b2e5745bc93b17a462fb73b2eac41a",
+                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B3/stateless-validator-nethermind-zisk-v1.3.2-alpha.vk",
+                    "vk_sha256": "9223053b558bb369ab3c5cbf8dcb97dd342d0b92116c06a71e64d1fcbab7e92a"
                 }
             ]
         }

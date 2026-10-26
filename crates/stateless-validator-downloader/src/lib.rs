@@ -142,6 +142,7 @@ mod tests {
                 zkVMKind::Zisk,
                 "v1.3.2-alpha",
             ),
+            (StatelessValidatorKind::Nethermind, zkVMKind::SP1, "v6.9.0"),
             (
                 StatelessValidatorKind::Nethermind,
                 zkVMKind::Zisk,
