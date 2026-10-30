@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.1](https://github.com/eth-act/ere-guests/compare/v0.19.0...v0.19.1) (2026-10-30)
+
+
+### Bug Fixes
+
+* re-add zesu stateless validator guest (openvm, sp1, zisk) ([#107](https://github.com/eth-act/ere-guests/issues/107)) ([360922e](https://github.com/eth-act/ere-guests/commit/360922e1ddaa78344e92ff8b9139f0616412f2b1))
+
 ## [0.19.0](https://github.com/eth-act/ere-guests/compare/v0.18.2...v0.19.0) (2026-10-26)
 
 
