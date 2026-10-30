@@ -52,23 +52,6 @@ const RETH_EXPECTED_WITNESS_FAILURES: &[&str] = &[
     "tests/amsterdam/eip8025_optional_proofs/test_witness_bytecodes_contract_creation.py::test_witness_codes_create_same_hash_then_read_same_tx[fork_Amsterdam-blockchain_test_engine-read_op_extcodesize]#payload0",
 ];
 
-// Zesu accepts witness trie paths longer than the 64-nibble hashed key, a block whose witness lacks
-// the `SYSTEM_ADDRESS` proof, and one that lacks a delegation target's code. It rejects valid zero
-// withdrawals to `SYSTEM_ADDRESS`.
-const ZESU_EXPECTED_WITNESS_FAILURES: &[&str] = &[
-    "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_eip4895.py::test_bal_withdrawal_to_system_address[fork_Amsterdam-blockchain_test_engine-zero]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-cumulative_path_exceeds_key_length]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-leaf_segment_exceeds_key_length]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_codes.py::test_validation_codes_missing_7702_delegation_code[fork_Amsterdam-blockchain_test_engine-delegated_target_code]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-complete_witness-access_zero_withdrawal-target_kind_system_address]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_balance-target_kind_system_address]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_extcodehash-target_kind_system_address]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_extcodesize-target_kind_system_address]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_fee_recipient_without_tip-target_kind_system_address]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_selfdestruct_zero_balance-target_kind_system_address]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_zero_value_transfer-target_kind_system_address]#payload0",
-];
-
 // Nethermind accepts witness trie paths longer than the 64-nibble hashed key.
 const NETHERMIND_EXPECTED_WITNESS_FAILURES: &[&str] = &[
     "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-cumulative_path_exceeds_key_length]#payload0",
@@ -86,7 +69,7 @@ fn expected_failures(
             RETH_EXPECTED_SAME_INDEX_BAL_FAILURES,
             RETH_EXPECTED_WITNESS_FAILURES,
         ],
-        (StatelessValidatorKind::Zesu, zkVMKind::Zisk) => &[ZESU_EXPECTED_WITNESS_FAILURES],
+        (StatelessValidatorKind::Zesu, zkVMKind::OpenVM | zkVMKind::SP1 | zkVMKind::Zisk) => &[],
         (StatelessValidatorKind::Nimbus, zkVMKind::SP1 | zkVMKind::Zisk) => &[],
         (StatelessValidatorKind::Nethermind, zkVMKind::SP1 | zkVMKind::Zisk) => {
             &[NETHERMIND_EXPECTED_WITNESS_FAILURES]

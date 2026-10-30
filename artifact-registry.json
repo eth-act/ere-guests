@@ -61,6 +61,36 @@
             ]
         },
         {
+            "name": "zesu",
+            "version": "tests@v21.0.5",
+            "artifacts": [
+                {
+                    "zkvm": "openvm",
+                    "zkvm_version": "v2.1.0-preview",
+                    "elf_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-openvm-ALPHA.elf",
+                    "elf_sha256": "c237487cacada7c3f2ca728c87dfa357433eb766aa267777f2f95c266b13348c",
+                    "vk_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-openvm-ALPHA.vk",
+                    "vk_sha256": "62c80f2ae9fab55d0522c5395b0b8917258be55bc25b0ba874a0e768c63fd067"
+                },
+                {
+                    "zkvm": "sp1",
+                    "zkvm_version": "v6.9.0",
+                    "elf_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-sp1-6.9.0.elf",
+                    "elf_sha256": "ab5dc69591f211b5ea0b8e0e8b9f91303fe8aab693fdde8203aed2811859a53d",
+                    "vk_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-sp1-6.9.0.vk",
+                    "vk_sha256": "60aac2834e43024e54a05cfa46faa1470949ca92a8c1460b2a214048db566a29"
+                },
+                {
+                    "zkvm": "zisk",
+                    "zkvm_version": "v1.3.2-alpha",
+                    "elf_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-zisk-1.3.2-alpha.elf",
+                    "elf_sha256": "4616dc4d463b785f01d4f1747a3002c5938231fbd7f52f13c101e76420593d75",
+                    "vk_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-zisk-1.3.2-alpha.vk",
+                    "vk_sha256": "b0a524962ae183c1a29f09ab3f408f895324f09e5cc96ebeb4e8d6cbb004788f"
+                }
+            ]
+        },
+        {
             "name": "nimbus",
             "version": "v0.3.1-alpha",
             "artifacts": [
