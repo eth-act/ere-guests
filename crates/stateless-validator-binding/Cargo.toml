@@ -1,0 +1,28 @@
+[package]
+name = "stateless-validator-binding"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+stateless-validator-common.workspace = true
+
+# ssz
+libssz.workspace = true
+libssz-derive.workspace = true
+libssz-merkle.workspace = true
+libssz-types.workspace = true
+
+[features]
+# guest
+default = ["std"]
+std = ["stateless-validator-common/std"]
+# Host-side construction of the beacon state witness.
+host = ["std"]
+
+[dev-dependencies]
+const-hex = { workspace = true, features = ["alloc"] }
