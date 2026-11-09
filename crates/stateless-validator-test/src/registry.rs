@@ -164,31 +164,32 @@ mod tests {
     fn parses_active_registry() {
         let registry = ArtifactRegistry::load().unwrap();
 
+        // TODO(ere@v0.20): re-add ZisK as guests publish ZisK v1.4 releases.
         let registered: &[(StatelessValidatorKind, &str, &[zkVMKind])] = &[
             (
                 StatelessValidatorKind::Ethrex,
                 "30.0.1",
-                &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
+                &[zkVMKind::OpenVM, zkVMKind::SP1],
             ),
             (
                 StatelessValidatorKind::Reth,
                 "0.1.0-rc.6",
-                &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
+                &[zkVMKind::OpenVM, zkVMKind::SP1],
             ),
             (
                 StatelessValidatorKind::Zesu,
                 "tests@v21.0.5",
-                &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
+                &[zkVMKind::OpenVM, zkVMKind::SP1],
             ),
             (
                 StatelessValidatorKind::Nimbus,
                 "v0.3.1-alpha",
-                &[zkVMKind::SP1, zkVMKind::Zisk],
+                &[zkVMKind::SP1],
             ),
             (
                 StatelessValidatorKind::Nethermind,
                 "2.3.0-preview+3",
-                &[zkVMKind::SP1, zkVMKind::Zisk],
+                &[zkVMKind::SP1],
             ),
             (
                 StatelessValidatorKind::Zilkworm,
