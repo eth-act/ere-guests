@@ -198,7 +198,7 @@ mod tests {
             Some(StatelessValidatorKind::Zilkworm)
         );
         assert_eq!(StatelessValidatorKind::Ethrex.version(), Some("30.0.1"));
-        assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.6"));
+        assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.7"));
         assert_eq!(
             StatelessValidatorKind::Zesu.version(),
             Some("tests@v21.0.5")
