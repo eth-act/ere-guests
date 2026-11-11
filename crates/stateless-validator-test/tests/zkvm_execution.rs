@@ -1,4 +1,4 @@
-//! `tests-zkevm@v21.0.6` execution tests for release-backed guests.
+//! `tests-zkevm@v21.0.7` execution tests for release-backed guests.
 //!
 //! Set `STATELESS_VALIDATOR` and `ZKVM` to one pair from `artifact-registry.json`.
 //! Run with `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use pre-built Ere images.
