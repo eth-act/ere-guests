@@ -15,9 +15,9 @@ use tar::Archive;
 use tracing::info;
 use walkdir::{DirEntry, WalkDir};
 
-const EEST_FIXTURES_URL: &str = "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v21.0.6/fixtures_zkevm.tar.gz";
+const EEST_FIXTURES_URL: &str = "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v21.0.7/fixtures_zkevm.tar.gz";
 const EEST_FIXTURES_SHA256: &str =
-    "3a1051fb20272e4aaad58d8f78204123e281e4e0e935ddc8f71364535cae5b73";
+    "240685d8c50a0b8efbe9f911cd78c34552101124d99fb7add475deb6397a0e56";
 const DEVNET_PRESET_BATCH: &str = "93350-93359";
 const DEVNET_PRESET_ARTIFACT_COUNT: usize = 10;
 const DEVNET_PRESET_SHA256: &str =
@@ -40,10 +40,10 @@ pub struct StatelessValidatorFixture {
     pub stateless_output_bytes: Vec<u8>,
 }
 
-/// Returns all `tests-zkevm@v21.0.6` engine fixtures, downloading them on first use.
+/// Returns all `tests-zkevm@v21.0.7` engine fixtures, downloading them on first use.
 pub fn eest_fixtures() -> Vec<StatelessValidatorFixture> {
     archive_fixtures(
-        "eest-tests-zkevm-v21.0.6",
+        "eest-tests-zkevm-v21.0.7",
         EEST_FIXTURES_URL,
         "fixtures/blockchain_tests_engine",
         Some(EEST_FIXTURES_SHA256),

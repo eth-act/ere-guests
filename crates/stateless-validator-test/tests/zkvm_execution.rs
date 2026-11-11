@@ -1,4 +1,4 @@
-//! `tests-zkevm@v21.0.6` execution tests for release-backed guests.
+//! `tests-zkevm@v21.0.7` execution tests for release-backed guests.
 //!
 //! Set `STATELESS_VALIDATOR` and `ZKVM` to one pair from `artifact-registry.json`.
 //! Run with `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use pre-built Ere images.
@@ -20,6 +20,19 @@ const RETH_EXPECTED_BAL_FAILURES: &[&str] = &[
     "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_post_execution_calls_net_storage_at_last_index[fork_Amsterdam-blockchain_test_engine]#payload0",
     "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_withdrawals_and_dequeues_net_balance_at_last_index[fork_Amsterdam-blockchain_test_engine-forward_all]#payload0",
     "tests/amsterdam/eip7928_block_level_access_lists/test_block_access_lists_cross_index.py::test_bal_withdrawals_and_dequeues_net_balance_at_last_index[fork_Amsterdam-blockchain_test_engine-forward_half]#payload0",
+];
+
+// Reth fails these fixtures because alloy-evm runs the request system calls before it credits
+// withdrawals, the reverse of EELS `apply_body`. See paradigmxyz/stateless#61.
+const RETH_EXPECTED_REQUEST_FAILURES: &[&str] = &[
+    "tests/prague/eip7685_general_purpose_el_requests/test_multi_type_requests.py::test_withdrawals_credited_before_request_system_call[fork_Amsterdam-request_class_BuilderDepositRequest-blockchain_test_engine-forward_all]#payload0",
+    "tests/prague/eip7685_general_purpose_el_requests/test_multi_type_requests.py::test_withdrawals_credited_before_request_system_call[fork_Amsterdam-request_class_BuilderDepositRequest-blockchain_test_engine-forward_half]#payload0",
+    "tests/prague/eip7685_general_purpose_el_requests/test_multi_type_requests.py::test_withdrawals_credited_before_request_system_call[fork_Amsterdam-request_class_BuilderExitRequest-blockchain_test_engine-forward_all]#payload0",
+    "tests/prague/eip7685_general_purpose_el_requests/test_multi_type_requests.py::test_withdrawals_credited_before_request_system_call[fork_Amsterdam-request_class_BuilderExitRequest-blockchain_test_engine-forward_half]#payload0",
+    "tests/prague/eip7685_general_purpose_el_requests/test_multi_type_requests.py::test_withdrawals_credited_before_request_system_call[fork_Amsterdam-request_class_ConsolidationRequest-blockchain_test_engine-forward_all]#payload0",
+    "tests/prague/eip7685_general_purpose_el_requests/test_multi_type_requests.py::test_withdrawals_credited_before_request_system_call[fork_Amsterdam-request_class_ConsolidationRequest-blockchain_test_engine-forward_half]#payload0",
+    "tests/prague/eip7685_general_purpose_el_requests/test_multi_type_requests.py::test_withdrawals_credited_before_request_system_call[fork_Amsterdam-request_class_WithdrawalRequest-blockchain_test_engine-forward_all]#payload0",
+    "tests/prague/eip7685_general_purpose_el_requests/test_multi_type_requests.py::test_withdrawals_credited_before_request_system_call[fork_Amsterdam-request_class_WithdrawalRequest-blockchain_test_engine-forward_half]#payload0",
 ];
 
 // Reth rejects this valid block, in which two post-execution system calls create and then fund one
@@ -66,6 +79,7 @@ fn expected_failures(
         (StatelessValidatorKind::Ethrex, _) => &[],
         (StatelessValidatorKind::Reth, _) => &[
             RETH_EXPECTED_BAL_FAILURES,
+            RETH_EXPECTED_REQUEST_FAILURES,
             RETH_EXPECTED_SAME_INDEX_BAL_FAILURES,
             RETH_EXPECTED_WITNESS_FAILURES,
         ],

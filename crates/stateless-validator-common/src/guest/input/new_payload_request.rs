@@ -5,9 +5,9 @@
 //! execution-apis, because a multi-fork crate needs distinct names while each execution-specs
 //! fork module defines a single `ExecutionPayload` shape.
 //!
-//! [`types.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v21.0.6/src/ethereum/forks/amsterdam/execution_engine/types.py
-//! [`requests.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v21.0.6/src/ethereum/forks/amsterdam/execution_engine/requests.py
-//! [`blocks.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v21.0.6/src/ethereum/forks/amsterdam/blocks.py
+//! [`types.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v21.0.7/src/ethereum/forks/amsterdam/execution_engine/types.py
+//! [`requests.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v21.0.7/src/ethereum/forks/amsterdam/execution_engine/requests.py
+//! [`blocks.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v21.0.7/src/ethereum/forks/amsterdam/blocks.py
 
 #![allow(missing_docs)]
 
@@ -30,13 +30,16 @@ pub type ExtraData = SszList<u8, MAX_EXTRA_DATA_BYTES>;
 
 /// SSZ list bounds retained by the Amsterdam stateless schema.
 pub const MAX_EXTRA_DATA_BYTES: usize = 32;
+/// Maximum number of versioned hashes in a new payload request, matching the consensus-layer
+/// `VersionedHashes` limit.
+pub const MAX_BLOB_COMMITMENTS_PER_BLOCK: usize = 4096;
 
 /// Composite types from the Amsterdam stateless schema.
 pub type BlockAccessList = ProgressiveList<u8>;
 pub type Transaction = ProgressiveList<u8>;
 pub type Transactions = ProgressiveList<Transaction>;
 pub type Withdrawals = ProgressiveList<Withdrawal>;
-pub type VersionedHashes = ProgressiveList<VersionedHash>;
+pub type VersionedHashes = SszList<VersionedHash, MAX_BLOB_COMMITMENTS_PER_BLOCK>;
 pub type DepositRequests = ProgressiveList<DepositRequest>;
 pub type WithdrawalRequests = ProgressiveList<WithdrawalRequest>;
 pub type ConsolidationRequests = ProgressiveList<ConsolidationRequest>;
@@ -209,16 +212,19 @@ pub struct ExecutionPayloadV4 {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+#[ssz(progressive_container)]
 pub struct NewPayloadRequestBellatrix {
     pub execution_payload: ExecutionPayloadV1,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+#[ssz(progressive_container)]
 pub struct NewPayloadRequestCapella {
     pub execution_payload: ExecutionPayloadV2,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+#[ssz(progressive_container)]
 pub struct NewPayloadRequestDeneb {
     pub execution_payload: ExecutionPayloadV3,
     pub versioned_hashes: VersionedHashes,
@@ -226,6 +232,7 @@ pub struct NewPayloadRequestDeneb {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+#[ssz(progressive_container)]
 pub struct NewPayloadRequestElectraFulu {
     pub execution_payload: ExecutionPayloadV3,
     pub versioned_hashes: VersionedHashes,
@@ -234,6 +241,7 @@ pub struct NewPayloadRequestElectraFulu {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+#[ssz(progressive_container)]
 pub struct NewPayloadRequestGloas {
     pub execution_payload: ExecutionPayloadV4,
     pub versioned_hashes: VersionedHashes,
@@ -603,6 +611,26 @@ mod tests {
                 execution_requests_gloas().hash_tree_root(&hasher),
                 "0304da3c1bcc50b26b9d6408ea98648962bde84bc81f5d50d645f2b3dcc0e9b0",
             ),
+            (
+                bellatrix().hash_tree_root(&hasher),
+                "93865654d75f729c9d20deeee3d745fa29e6ec7fdcb99011a0377525f9e453e8",
+            ),
+            (
+                capella().hash_tree_root(&hasher),
+                "ac30ba2c669bd26955369b7c5dd74cdc6721b66d0a236a94771406ba66711196",
+            ),
+            (
+                deneb().hash_tree_root(&hasher),
+                "24efdd5269b94c1d8460a9742ec31d6202a81bbada97d837fbdfe2bf31007e37",
+            ),
+            (
+                electra_fulu().hash_tree_root(&hasher),
+                "6702e13f5227b1bfb251a458e88b8390147c37e221dc875a4cc39b8ba237826c",
+            ),
+            (
+                gloas().hash_tree_root(&hasher),
+                "6a01e66b56a81b3fb0877a573151ba4a01159547dd96bc67f165e2ece858ea90",
+            ),
         ] {
             assert_eq!(const_hex::encode(root), expected);
         }
@@ -623,11 +651,6 @@ mod tests {
         let bounded_withdrawals: SszList<Withdrawal, 8> =
             withdrawals.clone().into_inner().try_into().unwrap();
         assert_eq!(withdrawals.to_ssz(), bounded_withdrawals.to_ssz());
-
-        let versioned_hashes = versioned_hashes();
-        let bounded_versioned_hashes: SszList<VersionedHash, 8> =
-            versioned_hashes.clone().into_inner().try_into().unwrap();
-        assert_eq!(versioned_hashes.to_ssz(), bounded_versioned_hashes.to_ssz());
 
         let deposits = deposit_requests();
         let bounded_deposits: SszList<DepositRequest, 8> =
