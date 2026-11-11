@@ -173,7 +173,7 @@ mod tests {
             ),
             (
                 StatelessValidatorKind::Reth,
-                "0.1.0-rc.7",
+                "0.1.0-rc.8",
                 &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (
