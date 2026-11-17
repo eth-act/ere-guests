@@ -138,6 +138,11 @@ mod tests {
             ),
             (StatelessValidatorKind::Zesu, zkVMKind::SP1, "v6.9.0"),
             (StatelessValidatorKind::Nimbus, zkVMKind::SP1, "v6.9.0"),
+            (
+                StatelessValidatorKind::Nimbus,
+                zkVMKind::Zisk,
+                "v1.4.0-alpha",
+            ),
             (StatelessValidatorKind::Nethermind, zkVMKind::SP1, "v6.9.0"),
             (StatelessValidatorKind::Zilkworm, zkVMKind::SP1, "v6.9.0"),
         ];

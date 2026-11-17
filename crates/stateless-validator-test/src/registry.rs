@@ -183,8 +183,8 @@ mod tests {
             ),
             (
                 StatelessValidatorKind::Nimbus,
-                "v0.3.1-alpha",
-                &[zkVMKind::SP1],
+                "v0.4.0-alpha",
+                &[zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (
                 StatelessValidatorKind::Nethermind,

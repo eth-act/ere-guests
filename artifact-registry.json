@@ -76,15 +76,23 @@
         },
         {
             "name": "nimbus",
-            "version": "v0.3.1-alpha",
+            "version": "v0.4.0-alpha",
             "artifacts": [
                 {
                     "zkvm": "sp1",
                     "zkvm_version": "v6.9.0",
-                    "elf_url": "https://github.com/status-im/nimbus-zkvm-guests/releases/download/v0.3.1-alpha/stateless-validator-nimbus-sp1-v6.9.0.elf",
-                    "elf_sha256": "0c0767570b013776205e674697a71c6e7ee20e28e7164d65a8c69b59cffa7547",
-                    "vk_url": "https://github.com/status-im/nimbus-zkvm-guests/releases/download/v0.3.1-alpha/stateless-validator-nimbus-sp1-v6.9.0.vk",
-                    "vk_sha256": "58067528361fac6b5969c2b765547a3b2e20e1bfb92e996698b3a063c83c41e2"
+                    "elf_url": "https://github.com/status-im/nimbus-zkvm-guests/releases/download/v0.4.0-alpha/stateless-validator-nimbus-sp1-v6.9.0.elf",
+                    "elf_sha256": "d827b07672bd0dd26615dbefb5eedf1e2b67cee23e2e607e80a8ec69d68f4a41",
+                    "vk_url": "https://github.com/status-im/nimbus-zkvm-guests/releases/download/v0.4.0-alpha/stateless-validator-nimbus-sp1-v6.9.0.vk",
+                    "vk_sha256": "03db2d3100e2dab649c240544987a98bd14232dea5ab2e55853303d9b94722b7"
+                },
+                {
+                    "zkvm": "zisk",
+                    "zkvm_version": "v1.4.0-alpha",
+                    "elf_url": "https://github.com/status-im/nimbus-zkvm-guests/releases/download/v0.4.0-alpha/stateless-validator-nimbus-zisk-v1.4.0-alpha.elf",
+                    "elf_sha256": "4a283b8ba041722586bd131dc398480ed6f3c849e9deb761bd504dd0dd4f5f93",
+                    "vk_url": "https://github.com/status-im/nimbus-zkvm-guests/releases/download/v0.4.0-alpha/stateless-validator-nimbus-zisk-v1.4.0-alpha.vk",
+                    "vk_sha256": "dec5b43de4d2d6838c5a45e0e2af891fffa048714f5868b27e4a4cae7f490e16"
                 }
             ]
         },
