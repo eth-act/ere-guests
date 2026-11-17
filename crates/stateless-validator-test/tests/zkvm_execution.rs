@@ -65,10 +65,49 @@ const RETH_EXPECTED_WITNESS_FAILURES: &[&str] = &[
     "tests/amsterdam/eip8025_optional_proofs/test_witness_bytecodes_contract_creation.py::test_witness_codes_create_same_hash_then_read_same_tx[fork_Amsterdam-blockchain_test_engine-read_op_extcodesize]#payload0",
 ];
 
-// Nethermind accepts witness trie paths longer than the 64-nibble hashed key.
-const NETHERMIND_EXPECTED_WITNESS_FAILURES: &[&str] = &[
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-cumulative_path_exceeds_key_length]#payload0",
-    "tests/amsterdam/eip8025_optional_proofs/test_witness_state_overlength.py::test_witness_state_rejects_overlength_secured_trie_path[fork_Amsterdam-blockchain_test_engine-leaf_segment_exceeds_key_length]#payload0",
+// Nethermind's ZisK guest exits with a non-zero code on these invalid blocks instead of reporting a
+// failed validation, so the emulator fails. The blocks are invalid because of a malformed deposit
+// event, a request system contract that is empty or whose call fails, or a witness without the fee
+// recipient's leaf. The SP1 guest reports all of them as invalid.
+const NETHERMIND_ZISK_EXPECTED_EXIT_FAILURES: &[&str] = &[
+    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_fee_recipient_without_tip-target_kind_absent]#payload0",
+    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_fee_recipient_without_tip-target_kind_eoa]#payload0",
+    "tests/amsterdam/eip8025_optional_proofs/test_witness_validation_state.py::test_validation_state_unchanged_account_read[fork_Amsterdam-blockchain_test_engine-missing_proof_leaf-access_fee_recipient_without_tip-target_kind_system_address]#payload0",
+    "tests/amsterdam/eip8037_state_creation_gas_cost_increase/test_state_gas_system_calls.py::test_system_call_execution_boundary[fork_Amsterdam-blockchain_test_engine-builder_deposit-one_over]#payload0",
+    "tests/amsterdam/eip8037_state_creation_gas_cost_increase/test_state_gas_system_calls.py::test_system_call_execution_boundary[fork_Amsterdam-blockchain_test_engine-consolidations-one_over]#payload0",
+    "tests/amsterdam/eip8037_state_creation_gas_cost_increase/test_state_gas_system_calls.py::test_system_call_execution_boundary[fork_Amsterdam-blockchain_test_engine-withdrawals-one_over]#payload0",
+    "tests/amsterdam/eip8282_builder_execution_requests/test_contract_deployment.py::test_builder_deposit_contract_deployment[fork_BPO2ToAmsterdamAtTime15k-blockchain_test_engine-deploy_after_fork-nonzero_balance]#payload0",
+    "tests/amsterdam/eip8282_builder_execution_requests/test_contract_deployment.py::test_builder_deposit_contract_deployment[fork_BPO2ToAmsterdamAtTime15k-blockchain_test_engine-deploy_after_fork-zero_balance]#payload0",
+    "tests/amsterdam/eip8282_builder_execution_requests/test_contract_deployment.py::test_builder_exit_contract_deployment[fork_BPO2ToAmsterdamAtTime15k-blockchain_test_engine-deploy_after_fork-nonzero_balance]#payload0",
+    "tests/amsterdam/eip8282_builder_execution_requests/test_modified_builder_contract.py::test_system_contract_errors[fork_Amsterdam-blockchain_test_engine-system_contract_reverts-builder_deposit_contract]#payload0",
+    "tests/amsterdam/eip8282_builder_execution_requests/test_modified_builder_contract.py::test_system_contract_errors[fork_Amsterdam-blockchain_test_engine-system_contract_throws-builder_deposit_contract]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_amount_offset-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_amount_offset-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_amount_size-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_amount_size-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_index_offset-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_index_offset-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_index_size-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_index_size-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_pubkey_offset-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_pubkey_offset-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_pubkey_size-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_pubkey_size-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_signature_offset-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_signature_offset-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_signature_size-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_signature_size-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_withdrawal_credentials_offset-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_withdrawal_credentials_offset-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_withdrawal_credentials_size-value_max_uint256]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout[fork_Amsterdam-blockchain_test_engine-log_argument_withdrawal_credentials_size-value_zero]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_layout_with_swapped_decodable_offsets[fork_Amsterdam-blockchain_test_engine]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_log_length[fork_Amsterdam-blockchain_test_engine-slice_bytes_False]#payload0",
+    "tests/prague/eip6110_deposits/test_modified_contract.py::test_invalid_log_length[fork_Amsterdam-blockchain_test_engine-slice_bytes_True]#payload0",
+    "tests/prague/eip7002_el_triggerable_withdrawals/test_modified_withdrawal_contract.py::test_system_contract_errors[fork_Amsterdam-blockchain_test_engine-system_contract_reverts-system_contract_0x00000961ef480eb55e80d19ad83579a64c007002]#payload0",
+    "tests/prague/eip7002_el_triggerable_withdrawals/test_modified_withdrawal_contract.py::test_system_contract_errors[fork_Amsterdam-blockchain_test_engine-system_contract_throws-system_contract_0x00000961ef480eb55e80d19ad83579a64c007002]#payload0",
+    "tests/prague/eip7251_consolidations/test_modified_consolidation_contract.py::test_system_contract_errors[fork_Amsterdam-blockchain_test_engine-system_contract_reverts-system_contract_0x0000bbddc7ce488642fb579f8b00f3a590007251]#payload0",
+    "tests/prague/eip7251_consolidations/test_modified_consolidation_contract.py::test_system_contract_errors[fork_Amsterdam-blockchain_test_engine-system_contract_throws-system_contract_0x0000bbddc7ce488642fb579f8b00f3a590007251]#payload0",
 ];
 
 fn expected_failures(
@@ -85,8 +124,9 @@ fn expected_failures(
         ],
         (StatelessValidatorKind::Zesu, zkVMKind::OpenVM | zkVMKind::SP1 | zkVMKind::Zisk) => &[],
         (StatelessValidatorKind::Nimbus, zkVMKind::SP1 | zkVMKind::Zisk) => &[],
-        (StatelessValidatorKind::Nethermind, zkVMKind::SP1 | zkVMKind::Zisk) => {
-            &[NETHERMIND_EXPECTED_WITNESS_FAILURES]
+        (StatelessValidatorKind::Nethermind, zkVMKind::SP1) => &[],
+        (StatelessValidatorKind::Nethermind, zkVMKind::Zisk) => {
+            &[NETHERMIND_ZISK_EXPECTED_EXIT_FAILURES]
         }
         (StatelessValidatorKind::Zilkworm, zkVMKind::SP1) => &[],
         (

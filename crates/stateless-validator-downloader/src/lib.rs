@@ -144,6 +144,11 @@ mod tests {
                 "v1.4.0-alpha",
             ),
             (StatelessValidatorKind::Nethermind, zkVMKind::SP1, "v6.9.0"),
+            (
+                StatelessValidatorKind::Nethermind,
+                zkVMKind::Zisk,
+                "v1.4.0-alpha",
+            ),
             (StatelessValidatorKind::Zilkworm, zkVMKind::SP1, "v6.9.0"),
         ];
         for kind in StatelessValidatorKind::iter() {

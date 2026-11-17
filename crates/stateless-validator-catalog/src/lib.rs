@@ -209,7 +209,7 @@ mod tests {
         );
         assert_eq!(
             StatelessValidatorKind::Nethermind.version(),
-            Some("2.3.0-preview+3")
+            Some("2.3.0-preview+4")
         );
         assert_eq!(
             StatelessValidatorKind::Zilkworm.version(),

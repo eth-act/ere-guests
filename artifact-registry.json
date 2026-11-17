@@ -98,15 +98,23 @@
         },
         {
             "name": "nethermind",
-            "version": "2.3.0-preview+3",
+            "version": "2.3.0-preview+4",
             "artifacts": [
                 {
                     "zkvm": "sp1",
                     "zkvm_version": "v6.9.0",
-                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B3/stateless-validator-nethermind-sp1-v6.9.0.elf",
-                    "elf_sha256": "9251e6af8d436ce70425c84614ea697a2af6aa1e8a1409b0dab888bc0cdef905",
-                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B3/stateless-validator-nethermind-sp1-v6.9.0.vk",
-                    "vk_sha256": "bf7086f529767878f61b768c475f193d55b588da3c8663aaf1cc03ec876f59d2"
+                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B4/stateless-validator-nethermind-sp1-v6.9.0.elf",
+                    "elf_sha256": "4ed67d5a9e1d834ae1fba3f7b4462f7204eebccf0fed01de13060f7c06cb43fc",
+                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B4/stateless-validator-nethermind-sp1-v6.9.0.vk",
+                    "vk_sha256": "f5edf827db2830565ae3e1c885a532835749fbc4e813937c432227bd00737d40"
+                },
+                {
+                    "zkvm": "zisk",
+                    "zkvm_version": "v1.4.0-alpha",
+                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B4/stateless-validator-nethermind-zisk-v1.4.0-alpha.elf",
+                    "elf_sha256": "4990268711ae2030d9452e71989f3ed02ff6ea487c3e38c18b57ad34af6fd68e",
+                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B4/stateless-validator-nethermind-zisk-v1.4.0-alpha.vk",
+                    "vk_sha256": "24973f12b099c27fdf138cc8a63f1356dbda83070587df6263342a982131ab7b"
                 }
             ]
         },

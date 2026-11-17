@@ -188,8 +188,8 @@ mod tests {
             ),
             (
                 StatelessValidatorKind::Nethermind,
-                "2.3.0-preview+3",
-                &[zkVMKind::SP1],
+                "2.3.0-preview+4",
+                &[zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (
                 StatelessValidatorKind::Zilkworm,
