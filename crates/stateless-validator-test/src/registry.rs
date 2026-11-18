@@ -173,8 +173,13 @@ mod tests {
             ),
             (
                 StatelessValidatorKind::Reth,
-                "0.1.0-rc.8",
-                &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
+                "0.1.0-rc.9",
+                &[
+                    zkVMKind::OpenVM,
+                    zkVMKind::Pico,
+                    zkVMKind::SP1,
+                    zkVMKind::Zisk,
+                ],
             ),
             (
                 StatelessValidatorKind::Zesu,
@@ -215,7 +220,12 @@ mod tests {
                 assert_eq!(validator.artifacts.len(), expected_zkvms.len());
             }
 
-            for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+            for zkvm in [
+                zkVMKind::OpenVM,
+                zkVMKind::Pico,
+                zkVMKind::SP1,
+                zkVMKind::Zisk,
+            ] {
                 let expected = entry.is_some_and(|(_, _, zkvms)| zkvms.contains(&zkvm));
                 assert_eq!(registry.artifact(kind, zkvm).is_some(), expected);
             }

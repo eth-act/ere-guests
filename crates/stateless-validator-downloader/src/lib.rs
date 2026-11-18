@@ -129,6 +129,7 @@ mod tests {
                 zkVMKind::OpenVM,
                 "v2.1.0-preview",
             ),
+            (StatelessValidatorKind::Reth, zkVMKind::Pico, "v3.1.4"),
             (StatelessValidatorKind::Reth, zkVMKind::SP1, "v6.9.0"),
             (StatelessValidatorKind::Reth, zkVMKind::Zisk, "v1.4.0-alpha"),
             (
@@ -152,7 +153,12 @@ mod tests {
             (StatelessValidatorKind::Zilkworm, zkVMKind::SP1, "v6.9.0"),
         ];
         for kind in StatelessValidatorKind::iter() {
-            for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+            for zkvm_kind in [
+                zkVMKind::OpenVM,
+                zkVMKind::Pico,
+                zkVMKind::SP1,
+                zkVMKind::Zisk,
+            ] {
                 match registered
                     .iter()
                     .find(|&&(registered_kind, registered_zkvm, _)| {
