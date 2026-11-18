@@ -106,23 +106,23 @@
         },
         {
             "name": "nethermind",
-            "version": "2.3.0-preview+4",
+            "version": "2.3.0-preview+6",
             "artifacts": [
                 {
                     "zkvm": "sp1",
                     "zkvm_version": "v6.9.0",
-                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B4/stateless-validator-nethermind-sp1-v6.9.0.elf",
-                    "elf_sha256": "4ed67d5a9e1d834ae1fba3f7b4462f7204eebccf0fed01de13060f7c06cb43fc",
-                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B4/stateless-validator-nethermind-sp1-v6.9.0.vk",
-                    "vk_sha256": "f5edf827db2830565ae3e1c885a532835749fbc4e813937c432227bd00737d40"
+                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B6/stateless-validator-nethermind-sp1-v6.9.0.elf",
+                    "elf_sha256": "e2cf14035727a02518b6893b245d540d92bf1380f19760913d1e5ee5ab659be4",
+                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B6/stateless-validator-nethermind-sp1-v6.9.0.vk",
+                    "vk_sha256": "63cfa8c2d2e766c4928cbf8e2e464058c4ba2093bdc9f140c0756b02831ae450"
                 },
                 {
                     "zkvm": "zisk",
                     "zkvm_version": "v1.4.0-alpha",
-                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B4/stateless-validator-nethermind-zisk-v1.4.0-alpha.elf",
-                    "elf_sha256": "4990268711ae2030d9452e71989f3ed02ff6ea487c3e38c18b57ad34af6fd68e",
-                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B4/stateless-validator-nethermind-zisk-v1.4.0-alpha.vk",
-                    "vk_sha256": "24973f12b099c27fdf138cc8a63f1356dbda83070587df6263342a982131ab7b"
+                    "elf_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B6/stateless-validator-nethermind-zisk-v1.4.0-alpha.elf",
+                    "elf_sha256": "95990982432ba5fce9e4888407a2c156e3a8a3e1f477d9287fe6638222f049d7",
+                    "vk_url": "https://github.com/NethermindEth/nethermind/releases/download/zkvm-guests-2.3.0-preview%2B6/stateless-validator-nethermind-zisk-v1.4.0-alpha.vk",
+                    "vk_sha256": "07aafe3b7a978340767c98122bb180d595286edb3ca7c7ea0b8c4e279c4a572a"
                 }
             ]
         },
