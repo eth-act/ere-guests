@@ -197,23 +197,26 @@ mod tests {
             StatelessValidatorKind::from_u8(5),
             Some(StatelessValidatorKind::Zilkworm)
         );
-        assert_eq!(StatelessValidatorKind::Ethrex.version(), Some("30.0.1"));
-        assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.6"));
+        assert_eq!(
+            StatelessValidatorKind::Ethrex.version(),
+            Some("32.0.0-rc.1")
+        );
+        assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.9"));
         assert_eq!(
             StatelessValidatorKind::Zesu.version(),
             Some("tests@v21.0.5")
         );
         assert_eq!(
             StatelessValidatorKind::Nimbus.version(),
-            Some("v0.3.1-alpha")
+            Some("v0.4.0-alpha")
         );
         assert_eq!(
             StatelessValidatorKind::Nethermind.version(),
-            Some("2.3.0-preview+3")
+            Some("2.3.0-preview+6")
         );
         assert_eq!(
             StatelessValidatorKind::Zilkworm.version(),
-            Some("0.1.0-alpha.7")
+            Some("0.1.0-alpha.8")
         );
     }
 }

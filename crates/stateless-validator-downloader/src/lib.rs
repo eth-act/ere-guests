@@ -116,6 +116,7 @@ mod tests {
 
     #[test]
     fn resolves_artifact_version_from_registry() -> anyhow::Result<()> {
+        // TODO(ere@v0.20): re-add ZisK as guests publish ZisK v1.4 releases.
         let registered = [
             (
                 StatelessValidatorKind::Ethrex,
@@ -126,38 +127,43 @@ mod tests {
             (
                 StatelessValidatorKind::Ethrex,
                 zkVMKind::Zisk,
-                "v1.3.2-alpha",
+                "v1.4.0-alpha",
             ),
             (
                 StatelessValidatorKind::Reth,
                 zkVMKind::OpenVM,
                 "v2.1.0-preview",
             ),
+            (StatelessValidatorKind::Reth, zkVMKind::Pico, "v3.1.4"),
             (StatelessValidatorKind::Reth, zkVMKind::SP1, "v6.9.0"),
-            (StatelessValidatorKind::Reth, zkVMKind::Zisk, "v1.3.2-alpha"),
+            (StatelessValidatorKind::Reth, zkVMKind::Zisk, "v1.4.0-alpha"),
             (
                 StatelessValidatorKind::Zesu,
                 zkVMKind::OpenVM,
                 "v2.1.0-preview",
             ),
             (StatelessValidatorKind::Zesu, zkVMKind::SP1, "v6.9.0"),
-            (StatelessValidatorKind::Zesu, zkVMKind::Zisk, "v1.3.2-alpha"),
             (StatelessValidatorKind::Nimbus, zkVMKind::SP1, "v6.9.0"),
             (
                 StatelessValidatorKind::Nimbus,
                 zkVMKind::Zisk,
-                "v1.3.2-alpha",
+                "v1.4.0-alpha",
             ),
             (StatelessValidatorKind::Nethermind, zkVMKind::SP1, "v6.9.0"),
             (
                 StatelessValidatorKind::Nethermind,
                 zkVMKind::Zisk,
-                "v1.3.2-alpha",
+                "v1.4.0-alpha",
             ),
             (StatelessValidatorKind::Zilkworm, zkVMKind::SP1, "v6.9.0"),
         ];
         for kind in StatelessValidatorKind::iter() {
-            for zkvm_kind in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+            for zkvm_kind in [
+                zkVMKind::OpenVM,
+                zkVMKind::Pico,
+                zkVMKind::SP1,
+                zkVMKind::Zisk,
+            ] {
                 match registered
                     .iter()
                     .find(|&&(registered_kind, registered_zkvm, _)| {

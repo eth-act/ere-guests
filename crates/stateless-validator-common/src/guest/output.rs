@@ -3,17 +3,21 @@
 //! The types mirror `StatelessValidationResult` and its SSZ schema in [`stateless.py`].
 //! The serialized form is the plain SSZ encoding without a schema prefix.
 //!
-//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v21.0.6/src/ethereum/forks/amsterdam/stateless.py
+//! [`stateless.py`]: https://github.com/ethereum/execution-specs/blob/tests-zkevm@v21.0.7/src/ethereum/forks/amsterdam/stateless.py
 
 use alloc::vec::Vec;
 
-use libssz_derive::{SszDecode, SszEncode};
+use libssz_derive::{HashTreeRoot, SszDecode, SszEncode};
 
 /// Canonical result returned by stateless validation.
 ///
+/// It is a progressive container, so its hash tree root matches the consensus-layer
+/// `PublicInput`.
+///
 /// A zero `schema_id` means the guest could not decode the input or produce a validation result.
 /// The other fields then hold their zero defaults, so the whole result equals [`Default`].
-#[derive(Debug, Clone, Default, PartialEq, Eq, SszEncode, SszDecode)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, HashTreeRoot, SszEncode, SszDecode)]
+#[ssz(progressive_container)]
 pub struct StatelessValidationResult {
     /// The SSZ hash tree root of the validated payload request.
     pub new_payload_request_root: [u8; 32],
@@ -28,17 +32,22 @@ pub struct StatelessValidationResult {
 #[cfg(test)]
 mod tests {
     use libssz::{SszDecode as _, SszEncode as _};
+    use libssz_merkle::{HashTreeRoot as _, Sha2Hasher};
 
     use super::*;
 
-    #[test]
-    fn validation_result_has_fixed_v08_layout() {
-        let result = StatelessValidationResult {
+    fn validation_result() -> StatelessValidationResult {
+        StatelessValidationResult {
             new_payload_request_root: [0xaa; 32],
             successful_validation: true,
             chain_id: 0x0102_0304_0506_0708,
             schema_id: 0x1501,
-        };
+        }
+    }
+
+    #[test]
+    fn validation_result_has_fixed_v08_layout() {
+        let result = validation_result();
         let encoded = result.to_ssz();
 
         assert_eq!(encoded.len(), 43);
@@ -59,6 +68,25 @@ mod tests {
             StatelessValidationResult::from_ssz_bytes(&[0; 43]).unwrap(),
             StatelessValidationResult::default()
         );
+    }
+
+    #[test]
+    fn progressive_container_roots_match_reference_vectors() {
+        for (result, expected) in [
+            (
+                validation_result(),
+                "82aa1c81acf82a5b4033775fe90b5365348b23acf9d1d8ba9e8f55aace5a8dbd",
+            ),
+            (
+                StatelessValidationResult::default(),
+                "ef9da2c4e49e0acc0933a072ab744573e1c1e20806904bf0dd4b7eef0a9da836",
+            ),
+        ] {
+            assert_eq!(
+                const_hex::encode(result.hash_tree_root(&Sha2Hasher)),
+                expected
+            );
+        }
     }
 
     #[test]
