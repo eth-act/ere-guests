@@ -168,8 +168,8 @@ mod tests {
         let registered: &[(StatelessValidatorKind, &str, &[zkVMKind])] = &[
             (
                 StatelessValidatorKind::Ethrex,
-                "30.0.1",
-                &[zkVMKind::OpenVM, zkVMKind::SP1],
+                "32.0.0-rc.1",
+                &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (
                 StatelessValidatorKind::Reth,

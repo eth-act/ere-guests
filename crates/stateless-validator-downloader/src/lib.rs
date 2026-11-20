@@ -125,6 +125,11 @@ mod tests {
             ),
             (StatelessValidatorKind::Ethrex, zkVMKind::SP1, "v6.9.0"),
             (
+                StatelessValidatorKind::Ethrex,
+                zkVMKind::Zisk,
+                "v1.4.0-alpha",
+            ),
+            (
                 StatelessValidatorKind::Reth,
                 zkVMKind::OpenVM,
                 "v2.1.0-preview",
