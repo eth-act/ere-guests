@@ -136,15 +136,15 @@
         },
         {
             "name": "zilkworm",
-            "version": "0.1.0-alpha.7",
+            "version": "0.1.0-alpha.8",
             "artifacts": [
                 {
                     "zkvm": "sp1",
                     "zkvm_version": "v6.9.0",
-                    "elf_url": "https://github.com/erigontech/zilkworm/releases/download/v0.1.0-alpha.7/stateless-validator-zilkworm-sp1-v6.9.0.elf",
-                    "elf_sha256": "baf4e3405cf9ae2df48f36f677d92d5c13d931234e299d29f4d83a17c7a71fb9",
-                    "vk_url": "https://github.com/erigontech/zilkworm/releases/download/v0.1.0-alpha.7/stateless-validator-zilkworm-sp1-v6.9.0.vk",
-                    "vk_sha256": "2913960e4eace6bb93c8c9f28b1730406b9916d62d2bb7cdb0c8e330cd455c89"
+                    "elf_url": "https://github.com/erigontech/zilkworm/releases/download/v0.1.0-alpha.8/stateless-validator-zilkworm-sp1-v6.9.0.elf",
+                    "elf_sha256": "fe4edbcbbeb652095c7fcc2dcaf6b2a23d8b73660485902468f28cd072f4257f",
+                    "vk_url": "https://github.com/erigontech/zilkworm/releases/download/v0.1.0-alpha.8/stateless-validator-zilkworm-sp1-v6.9.0.vk",
+                    "vk_sha256": "6eaba6cf3c7bc1ab700ad22b59d45aa9f0e49be31cbad401715d4f5d2ab35834"
                 }
             ]
         }

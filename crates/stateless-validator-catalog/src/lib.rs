@@ -216,7 +216,7 @@ mod tests {
         );
         assert_eq!(
             StatelessValidatorKind::Zilkworm.version(),
-            Some("0.1.0-alpha.7")
+            Some("0.1.0-alpha.8")
         );
     }
 }
