@@ -143,6 +143,7 @@ mod tests {
                 "v2.1.0-preview",
             ),
             (StatelessValidatorKind::Zesu, zkVMKind::SP1, "v6.9.0"),
+            (StatelessValidatorKind::Zesu, zkVMKind::Zisk, "v1.4.0-alpha"),
             (StatelessValidatorKind::Nimbus, zkVMKind::SP1, "v6.9.0"),
             (
                 StatelessValidatorKind::Nimbus,

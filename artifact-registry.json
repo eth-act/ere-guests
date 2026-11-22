@@ -70,23 +70,31 @@
         },
         {
             "name": "zesu",
-            "version": "tests@v21.0.5",
+            "version": "tests@v21.0.7",
             "artifacts": [
                 {
                     "zkvm": "openvm",
                     "zkvm_version": "v2.1.0-preview",
-                    "elf_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-openvm-ALPHA.elf",
-                    "elf_sha256": "c237487cacada7c3f2ca728c87dfa357433eb766aa267777f2f95c266b13348c",
-                    "vk_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-openvm-ALPHA.vk",
-                    "vk_sha256": "62c80f2ae9fab55d0522c5395b0b8917258be55bc25b0ba874a0e768c63fd067"
+                    "elf_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.7/stateless-validator-zesu-openvm-ALPHA.elf",
+                    "elf_sha256": "2ce5d4640827fdf77929cd3e75f3446296e09cadb1dbfa8987d23194eef1bb79",
+                    "vk_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.7/stateless-validator-zesu-openvm-ALPHA.vk",
+                    "vk_sha256": "76e1bdf0174cc996b1beb2bc8d1731414834910e5f94b8bfaa42c4cd9bfa4267"
                 },
                 {
                     "zkvm": "sp1",
                     "zkvm_version": "v6.9.0",
-                    "elf_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-sp1-6.9.0.elf",
-                    "elf_sha256": "ab5dc69591f211b5ea0b8e0e8b9f91303fe8aab693fdde8203aed2811859a53d",
-                    "vk_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.5/stateless-validator-zesu-sp1-6.9.0.vk",
-                    "vk_sha256": "60aac2834e43024e54a05cfa46faa1470949ca92a8c1460b2a214048db566a29"
+                    "elf_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.7/stateless-validator-zesu-sp1-6.9.0.elf",
+                    "elf_sha256": "df16024a79f759c357500b6c6f5817144027da6489deba9ffb9c3b45aaf8f19d",
+                    "vk_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.7/stateless-validator-zesu-sp1-6.9.0.vk",
+                    "vk_sha256": "f0c87bfd597ec003f7028a7fa4ece842a78381bc8883d0cd1b1d026c207c6eff"
+                },
+                {
+                    "zkvm": "zisk",
+                    "zkvm_version": "v1.4.0-alpha",
+                    "elf_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.7/stateless-validator-zesu-zisk-1.4.0-alpha.elf",
+                    "elf_sha256": "6e67bf396612e8b6c553937668423650d0a6de0bd90fcb4c1071edd9480c3ccd",
+                    "vk_url": "https://github.com/Consensys-Incorporated/zesu-zkvm/releases/download/tests%40v21.0.7/stateless-validator-zesu-zisk-1.4.0-alpha.vk",
+                    "vk_sha256": "8b9b06deb152c61b3e4a3f6ab795b1d4263b8778266e8f6e9557db260ee34709"
                 }
             ]
         },

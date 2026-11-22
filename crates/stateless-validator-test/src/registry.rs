@@ -183,8 +183,8 @@ mod tests {
             ),
             (
                 StatelessValidatorKind::Zesu,
-                "tests@v21.0.5",
-                &[zkVMKind::OpenVM, zkVMKind::SP1],
+                "tests@v21.0.7",
+                &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (
                 StatelessValidatorKind::Nimbus,

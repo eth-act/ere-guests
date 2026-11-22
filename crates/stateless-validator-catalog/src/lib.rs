@@ -204,7 +204,7 @@ mod tests {
         assert_eq!(StatelessValidatorKind::Reth.version(), Some("0.1.0-rc.9"));
         assert_eq!(
             StatelessValidatorKind::Zesu.version(),
-            Some("tests@v21.0.5")
+            Some("tests@v21.0.7")
         );
         assert_eq!(
             StatelessValidatorKind::Nimbus.version(),
