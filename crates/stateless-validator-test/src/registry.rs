@@ -164,35 +164,41 @@ mod tests {
     fn parses_active_registry() {
         let registry = ArtifactRegistry::load().unwrap();
 
+        // TODO(ere@v0.20): re-add ZisK as guests publish ZisK v1.4 releases.
         let registered: &[(StatelessValidatorKind, &str, &[zkVMKind])] = &[
             (
                 StatelessValidatorKind::Ethrex,
-                "30.0.1",
+                "32.0.0-rc.1",
                 &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (
                 StatelessValidatorKind::Reth,
-                "0.1.0-rc.6",
-                &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
+                "0.1.0-rc.9",
+                &[
+                    zkVMKind::OpenVM,
+                    zkVMKind::Pico,
+                    zkVMKind::SP1,
+                    zkVMKind::Zisk,
+                ],
             ),
             (
                 StatelessValidatorKind::Zesu,
-                "tests@v21.0.5",
+                "tests@v21.0.7",
                 &[zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (
                 StatelessValidatorKind::Nimbus,
-                "v0.3.1-alpha",
+                "v0.4.0-alpha",
                 &[zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (
                 StatelessValidatorKind::Nethermind,
-                "2.3.0-preview+3",
+                "2.3.0-preview+6",
                 &[zkVMKind::SP1, zkVMKind::Zisk],
             ),
             (
                 StatelessValidatorKind::Zilkworm,
-                "0.1.0-alpha.7",
+                "0.1.0-alpha.8",
                 &[zkVMKind::SP1],
             ),
         ];
@@ -214,7 +220,12 @@ mod tests {
                 assert_eq!(validator.artifacts.len(), expected_zkvms.len());
             }
 
-            for zkvm in [zkVMKind::OpenVM, zkVMKind::SP1, zkVMKind::Zisk] {
+            for zkvm in [
+                zkVMKind::OpenVM,
+                zkVMKind::Pico,
+                zkVMKind::SP1,
+                zkVMKind::Zisk,
+            ] {
                 let expected = entry.is_some_and(|(_, _, zkvms)| zkvms.contains(&zkvm));
                 assert_eq!(registry.artifact(kind, zkvm).is_some(), expected);
             }
