@@ -147,6 +147,12 @@ pub fn run_zkvm_execution(
     })
 }
 
+/// Resolves the guest and preprocesses it for the prover on `zkvm_kind`.
+pub fn run_zkvm_preprocess(stateless_validator_kind: StatelessValidatorKind, zkvm_kind: zkVMKind) {
+    let guest = resolve_guest(stateless_validator_kind, zkvm_kind);
+    init_zkvm(zkvm_kind, guest.elf).preprocess().unwrap();
+}
+
 #[cfg(test)]
 mod tests {
     use ere_dockerized::zkVMKind;

@@ -9,7 +9,7 @@ use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
     execution::{
         ExecutionFailures, init_tracing,
-        zkvm::{is_guest_compatible, run_zkvm_execution},
+        zkvm::{is_guest_compatible, run_zkvm_execution, run_zkvm_preprocess},
     },
     fixture::{StatelessValidatorFixture, eest_fixtures, sepolia_preset_fixtures},
 };
@@ -173,4 +173,11 @@ fn executes_registered_guest_sepolia_preset() {
         sepolia_preset_fixtures(),
         expected_sepolia_preset_failures(stateless_validator),
     );
+}
+
+#[test]
+fn preprocesses_registered_guest() {
+    init_tracing();
+    let (stateless_validator, zkvm) = registered_pair();
+    run_zkvm_preprocess(stateless_validator, zkvm);
 }
