@@ -14,15 +14,11 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  DEVNET_FIXTURES_BASE_URL: https://pub-760ad8b3dd9547539f829c1ea30f18b5.r2.dev/devnets/glamsterdam-devnet-8
+  SEPOLIA_FIXTURES_BASE_URL: https://pub-afa6b160acfb4919bda1d0e2a00b5b77.r2.dev/testnets/sepolia
 
 jobs:
   registry-matrix:
     name: Resolve changed guest matrix
-    # TODO(tests-zkevm@v21): remove this `if` once Sepolia blocks exist in the engine format. It
-    # pauses this job and every job that depends on it, because the benchmark measures devnet-8
-    # blocks, which use the tests-zkevm@v0.8.4 input layout that v21 guests reject.
-    if: false
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
@@ -44,10 +40,10 @@ jobs:
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
           echo "Matrix: ${MATRIX}"
 
-      - name: Pin the newest devnet batch
+      - name: Pin the newest Sepolia batch
         id: batch
         run: |
-          BATCH_END_BLOCK=$(curl -fsSL "${DEVNET_FIXTURES_BASE_URL}/batches.jsonl" | jq -rs '.[-1].batchEndBlock')
+          BATCH_END_BLOCK=$(curl -fsSL "${SEPOLIA_FIXTURES_BASE_URL}/batches.jsonl" | jq -rs '.[-1].batchEndBlock')
           echo "batch_end_block=${BATCH_END_BLOCK}" >> "$GITHUB_OUTPUT"
           echo "Batch end block: ${BATCH_END_BLOCK}"
 
@@ -89,9 +85,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-registry-
 
+      # Profiling four Sepolia blocks at a time on SP1 peaks near 15 GiB, too close to a standard
+      # runner's 16 GB, while two at a time peaks near 11 GiB. 20 blocks take 7 to 11 minutes.
       - name: Estimate guest cost
         env:
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
+          RAYON_NUM_THREADS: 2
           RUST_LOG: info,ere_server=error
           STATELESS_VALIDATOR: ${{ matrix.stateless_validator }}
           ZKVM: ${{ matrix.zkvm }}
@@ -108,7 +107,7 @@ jobs:
             --elf-url "${ELF_URL}" \
             --elf-sha256 "${ELF_SHA256}" \
             --batch-end-block "${BATCH_END_BLOCK}" \
-            --blocks 100 \
+            --blocks 20 \
             --output "${STATELESS_VALIDATOR}-${ZKVM}-${SIDE}.json"
 
       - name: Upload the cost report

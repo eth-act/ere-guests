@@ -43,9 +43,7 @@ The execution tests also run Sepolia batch `12049600-12049699` from the [Sepolia
 
 ### Estimated Guest Cost
 
-The benchmark workflow is paused until it moves to Sepolia blocks.
-
-When active, a pull request that changes an `elf_sha256` in [`artifact-registry.json`](artifact-registry.json) triggers the `Cost estimation benchmark` workflow. The workflow measures the old ELF and the new ELF over the same 100 Sepolia blocks. It writes the difference to the job summary and, for a branch of this repository, to a pull request comment. The report is advisory and never fails the pull request. Cost units differ per zkVM.
+A pull request that changes an `elf_sha256` in [`artifact-registry.json`](artifact-registry.json) triggers the `Cost estimation benchmark` workflow. The workflow measures the old ELF and the new ELF over the same 20 Sepolia blocks, the last ones of the newest batch. It writes the difference to the job summary and, for a branch of this repository, to a pull request comment. The report is advisory and never fails the pull request. Cost units differ per zkVM.
 
 To measure one ELF locally, pick a `batchEndBlock` from the [batch index](https://pub-afa6b160acfb4919bda1d0e2a00b5b77.r2.dev/testnets/sepolia/batches.jsonl) and run:
 
@@ -54,7 +52,7 @@ ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere \
   cargo run --release --package stateless-validator-test --bin zkvm_cost_estimation -- \
     --stateless-validator ethrex --zkvm openvm --zkvm-version v2.1.0-preview \
     --elf-url <url> --elf-sha256 <sha256> \
-    --batch-end-block <block> --blocks 100 --output cost.json
+    --batch-end-block <block> --blocks 20 --output cost.json
 ```
 
 ## Development
