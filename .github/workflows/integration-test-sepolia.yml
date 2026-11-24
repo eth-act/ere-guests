@@ -1,9 +1,8 @@
-name: Integration test devnet-8
+name: Integration test Sepolia
 
 on:
-  # TODO(tests-zkevm@v21): restore `schedule: [{ cron: "0 0 * * *" }]` once Sepolia blocks exist
-  # in the engine format. The daily run is paused because devnet-8 blocks use the
-  # tests-zkevm@v0.8.4 input layout, which v21 guests reject.
+  schedule:
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -30,7 +29,7 @@ jobs:
           echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
           echo "Matrix: ${MATRIX}"
 
-  test-zkvm-execution-devnet:
+  test-zkvm-execution-sepolia:
     name: ${{ matrix.stateless_validator }} on ${{ matrix.zkvm }}
     needs: registry-matrix
     runs-on: ubuntu-latest
@@ -69,12 +68,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-registry-
 
-      - name: Run latest devnet-8 blocks
+      - name: Run the newest Sepolia batch
         env:
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
           RUST_LOG: info,ere_server=error
         run: |
-          cargo run --release --package stateless-validator-test --bin zkvm_execution_devnet -- \
+          cargo run --release --package stateless-validator-test --bin zkvm_execution_sepolia -- \
             --zkvm ${{ matrix.zkvm }} \
             --stateless-validator ${{ matrix.stateless_validator }} \
             --blocks 100 \
