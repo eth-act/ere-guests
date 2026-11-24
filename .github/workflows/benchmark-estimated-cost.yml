@@ -86,7 +86,7 @@ jobs:
             ${{ runner.os }}-cargo-registry-
 
       # Profiling four Sepolia blocks at a time on SP1 peaks near 15 GiB, too close to a standard
-      # runner's 16 GB, while two at a time peaks near 11 GiB. 20 blocks take 7 to 11 minutes.
+      # runner's 16 GB, while two at a time peaks near 11 GiB. 20 blocks take 7 to 12 minutes.
       - name: Estimate guest cost
         env:
           ERE_IMAGE_REGISTRY: ghcr.io/eth-act/ere
