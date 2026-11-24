@@ -8,7 +8,7 @@ use stateless_validator_catalog::StatelessValidatorKind;
 use stateless_validator_test::{
     execution::{
         ExecutionFailures, init_tracing,
-        zkvm::{is_guest_compatible, run_zkvm_execution},
+        zkvm::{is_guest_compatible, run_zkvm_execution, run_zkvm_preprocess},
     },
     fixture::{StatelessValidatorFixture, devnet_preset_fixtures, eest_fixtures},
 };
@@ -152,4 +152,11 @@ fn executes_registered_guest_devnet_preset() {
     init_tracing();
     let (stateless_validator, zkvm) = registered_pair();
     assert_execution(stateless_validator, zkvm, devnet_preset_fixtures(), &[]);
+}
+
+#[test]
+fn preprocesses_registered_guest() {
+    init_tracing();
+    let (stateless_validator, zkvm) = registered_pair();
+    run_zkvm_preprocess(stateless_validator, zkvm);
 }
