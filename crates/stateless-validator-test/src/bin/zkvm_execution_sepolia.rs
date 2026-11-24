@@ -21,7 +21,7 @@ use tracing::info;
 /// CLI options for the Sepolia zkVM execution runner.
 #[derive(Debug, Clone, PartialEq, Eq, Parser)]
 #[command(
-    name = "zkvm_execution_devnet",
+    name = "zkvm_execution_sepolia",
     about = "Run the latest Sepolia blocks through a release-backed stateless validator guest.",
     long_about = None,
     arg_required_else_help = true
