@@ -1,4 +1,4 @@
-//! Estimates the proving cost of one published guest ELF over a pinned slice of devnet blocks
+//! Estimates the proving cost of one published guest ELF over a pinned slice of Sepolia blocks
 //! and writes the per-block estimates as JSON.
 //!
 //! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built image as the
@@ -17,7 +17,9 @@ use stateless_validator_test::{
         init_tracing, matches_output,
         zkvm::{download_artifact, init_zkvm, matches_up_to_patch},
     },
-    fixture::{DEVNET_NAME, DevnetBatch, devnet_batches, devnet_fixtures, fetch_devnet_batches},
+    fixture::{
+        SEPOLIA_NAME, SepoliaBatch, fetch_sepolia_batches, sepolia_batches, sepolia_fixtures,
+    },
 };
 use tracing::{debug, info};
 
@@ -25,7 +27,7 @@ use tracing::{debug, info};
 #[derive(Debug, Clone, PartialEq, Eq, Parser)]
 #[command(
     name = "zkvm_cost_estimation",
-    about = "Estimate the proving cost of one published guest ELF over pinned devnet blocks.",
+    about = "Estimate the proving cost of one published guest ELF over pinned Sepolia blocks.",
     long_about = None,
     arg_required_else_help = true
 )]
@@ -45,7 +47,7 @@ struct Cli {
     /// SHA-256 of the guest ELF.
     #[arg(long)]
     elf_sha256: String,
-    /// Last block of the newest devnet batch to run.
+    /// Last block of the newest Sepolia batch to run.
     #[arg(long)]
     batch_end_block: u64,
     /// Number of published block artifacts to run, ending with `batch_end_block`.
@@ -106,14 +108,14 @@ fn main() -> anyhow::Result<()> {
         Elf(download_artifact(&cli.elf_url, &cli.elf_sha256)),
     );
     let fixtures = {
-        let batches = devnet_batches(&fetch_devnet_batches()?)?;
+        let batches = sepolia_batches(&fetch_sepolia_batches()?)?;
         let selected = selected_batches(&batches, cli.batch_end_block, cli.blocks)?;
-        let mut fixtures = devnet_fixtures(selected);
+        let mut fixtures = sepolia_fixtures(selected);
         fixtures.drain(..fixtures.len().saturating_sub(cli.blocks.get()));
         fixtures
     };
     info!(
-        "Estimating cost of {} {DEVNET_NAME} blocks from {} to {}",
+        "Estimating cost of {} {SEPOLIA_NAME} blocks from {} to {}",
         fixtures.len(),
         fixtures.first().unwrap().name,
         fixtures.last().unwrap().name,
@@ -161,7 +163,7 @@ fn main() -> anyhow::Result<()> {
         zkvm: cli.zkvm,
         zkvm_version: cli.zkvm_version,
         elf_sha256: cli.elf_sha256,
-        fixture_set: DEVNET_NAME,
+        fixture_set: SEPOLIA_NAME,
         fixture_end_block: cli.batch_end_block,
         blocks,
     };
@@ -171,14 +173,14 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn selected_batches(
-    batches: &[DevnetBatch],
+    batches: &[SepoliaBatch],
     end_block: u64,
     count: NonZeroUsize,
-) -> anyhow::Result<&[DevnetBatch]> {
+) -> anyhow::Result<&[SepoliaBatch]> {
     let end = batches
         .iter()
         .position(|batch| batch.batch_end_block == end_block)
-        .with_context(|| format!("no devnet batch ends at block {end_block}"))?
+        .with_context(|| format!("no Sepolia batch ends at block {end_block}"))?
         + 1;
     let mut start = end;
     let mut blocks = 0;

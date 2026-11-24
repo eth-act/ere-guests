@@ -1,7 +1,8 @@
 //! `tests-zkevm@v21.0.7` schema conformance of `stateless-validator-common`.
 //!
-//! Decodes every fixture input on the host and checks it against the expected guest output. This
-//! needs no Docker or zkVM, so it checks the common crate against the spec without any guest.
+//! Decodes every EEST and Sepolia preset fixture input on the host and checks it against the
+//! expected guest output. This needs no Docker or zkVM, so it checks the common crate against the
+//! spec without any guest.
 
 use rayon::prelude::*;
 use stateless_validator_common::{
@@ -10,7 +11,7 @@ use stateless_validator_common::{
 };
 use stateless_validator_test::{
     execution::init_tracing,
-    fixture::{StatelessValidatorFixture, eest_fixtures},
+    fixture::{StatelessValidatorFixture, eest_fixtures, sepolia_preset_fixtures},
 };
 
 /// Checks that `fixture` decodes exactly when its expected output is not the all-zero sentinel,
@@ -38,17 +39,8 @@ fn check_fixture(fixture: &StatelessValidatorFixture) -> Result<(), String> {
     }
 }
 
-#[test]
-fn decodes_eest_inputs_to_expected_outputs() {
-    init_tracing();
-    let fixtures = eest_fixtures();
-    assert!(
-        fixtures
-            .iter()
-            .any(|fixture| fixture.stateless_input_bytes.is_empty()),
-        "the empty-input rejection fixture must be loaded"
-    );
-
+/// Asserts that every fixture conforms, listing the ones that don't.
+fn assert_conformance(fixtures: &[StatelessValidatorFixture]) {
     let mut failures = fixtures
         .par_iter()
         .filter_map(|fixture| {
@@ -65,4 +57,23 @@ fn decodes_eest_inputs_to_expected_outputs() {
         fixtures.len(),
         failures.join("\n"),
     );
+}
+
+#[test]
+fn decodes_eest_inputs_to_expected_outputs() {
+    init_tracing();
+    let fixtures = eest_fixtures();
+    assert!(
+        fixtures
+            .iter()
+            .any(|fixture| fixture.stateless_input_bytes.is_empty()),
+        "the empty-input rejection fixture must be loaded"
+    );
+    assert_conformance(&fixtures);
+}
+
+#[test]
+fn decodes_sepolia_preset_inputs_to_expected_outputs() {
+    init_tracing();
+    assert_conformance(&sepolia_preset_fixtures());
 }
