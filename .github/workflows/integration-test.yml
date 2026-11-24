@@ -80,9 +80,9 @@ jobs:
       - name: Show sccache statistics
         run: ${SCCACHE_PATH} --show-stats
 
-  # Checks the common crate's SSZ schema against the spec: each EEST input must decode, or be
-  # rejected, as its fixture expects, with the same root, chain ID and schema ID. It runs no
-  # guest, but downloads the EEST fixture archive, so it lives here instead of the unit tests.
+  # Checks the common crate's SSZ schema against the spec: each EEST and Sepolia preset input must
+  # decode, or be rejected, as its fixture expects, with the same root, chain ID and schema ID. It
+  # runs no guest, but downloads both fixture archives, so it lives here instead of the unit tests.
   test-schema-conformance:
     name: Common schema conformance
     runs-on: ubuntu-latest
@@ -112,7 +112,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-registry-
 
-      - name: Test common schema against EEST fixtures
+      - name: Test common schema against EEST and Sepolia fixtures
         env:
           RUST_LOG: info
         run: cargo test --release --package stateless-validator-test --test schema_conformance

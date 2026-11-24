@@ -18,16 +18,18 @@ use walkdir::{DirEntry, WalkDir};
 const EEST_FIXTURES_URL: &str = "https://github.com/ethereum/execution-specs/releases/download/tests-zkevm@v21.0.7/fixtures_zkevm.tar.gz";
 const EEST_FIXTURES_SHA256: &str =
     "240685d8c50a0b8efbe9f911cd78c34552101124d99fb7add475deb6397a0e56";
-const DEVNET_PRESET_BATCH: &str = "93350-93359";
-const DEVNET_PRESET_ARTIFACT_COUNT: usize = 10;
-const DEVNET_PRESET_SHA256: &str =
-    "dfcfc4520b59404e2ad6baa621d1b0b8626cd726904ca84c536c235ee6098811";
+const SEPOLIA_PRESET_BATCH: &str = "12049600-12049699";
+const SEPOLIA_PRESET_ARTIFACT_COUNT: usize = 100;
+const SEPOLIA_PRESET_SHA256: &str =
+    "f9b472079de19fd8e123fbb60048aaf090893e35d5a58cc43470fcc3edfe2be7";
+/// Directory that holds the block fixtures inside every Sepolia batch archive.
+const SEPOLIA_ARCHIVE_DIR: &str = "blockchain_tests_engine";
 
-/// Name of the rolling execution-layer devnet fixture set.
-pub const DEVNET_NAME: &str = "glamsterdam-devnet-8";
-/// R2 bucket that hosts the devnet-8 fixtures and batch index.
-pub const DEVNET_FIXTURES_BASE_URL: &str =
-    "https://pub-760ad8b3dd9547539f829c1ea30f18b5.r2.dev/devnets/glamsterdam-devnet-8";
+/// Name of the Sepolia block fixture set.
+pub const SEPOLIA_NAME: &str = "sepolia";
+/// R2 bucket that hosts the Sepolia block fixtures and batch index.
+pub const SEPOLIA_FIXTURES_BASE_URL: &str =
+    "https://pub-afa6b160acfb4919bda1d0e2a00b5b77.r2.dev/testnets/sepolia";
 
 /// A fixture normalized to canonical schema-prefixed SSZ input and fixed-size output bytes.
 #[derive(Debug, Clone)]
@@ -50,43 +52,44 @@ pub fn eest_fixtures() -> Vec<StatelessValidatorFixture> {
     )
 }
 
-/// Returns the pinned 10-block devnet-8 fixture set used by pull request tests.
-pub fn devnet_preset_fixtures() -> Vec<StatelessValidatorFixture> {
+/// Returns the pinned 100-block Sepolia batch used by pull request tests. It has the highest mean
+/// gas used in the catalog, and its median block uses 187M of the 200M gas limit.
+pub fn sepolia_preset_fixtures() -> Vec<StatelessValidatorFixture> {
     let fixtures = archive_fixtures(
-        &format!("rpc-{DEVNET_NAME}/{DEVNET_PRESET_BATCH}"),
-        &format!("{DEVNET_FIXTURES_BASE_URL}/exports/batches/{DEVNET_PRESET_BATCH}.tar.zst"),
-        "blockchain_tests",
-        Some(DEVNET_PRESET_SHA256),
+        &format!("{SEPOLIA_NAME}/{SEPOLIA_PRESET_BATCH}"),
+        &format!("{SEPOLIA_FIXTURES_BASE_URL}/exports/batches/{SEPOLIA_PRESET_BATCH}.tar.zst"),
+        SEPOLIA_ARCHIVE_DIR,
+        Some(SEPOLIA_PRESET_SHA256),
     );
     assert_eq!(
         fixtures.len(),
-        DEVNET_PRESET_ARTIFACT_COUNT,
-        "devnet preset {DEVNET_PRESET_BATCH} must contain {DEVNET_PRESET_ARTIFACT_COUNT} fixtures"
+        SEPOLIA_PRESET_ARTIFACT_COUNT,
+        "Sepolia preset {SEPOLIA_PRESET_BATCH} must contain {SEPOLIA_PRESET_ARTIFACT_COUNT} fixtures"
     );
     fixtures
 }
 
-/// Returns the latest `count` devnet-8 block fixtures from the rolling batch catalog.
-pub fn latest_devnet_fixtures(count: usize) -> Vec<StatelessValidatorFixture> {
-    assert!(count > 0, "devnet fixture count must be positive");
-    let batches = latest_devnet_batches(&fetch_devnet_batches().unwrap(), count).unwrap();
-    let mut fixtures = devnet_fixtures(&batches);
+/// Returns the latest `count` Sepolia block fixtures from the batch catalog.
+pub fn latest_sepolia_fixtures(count: usize) -> Vec<StatelessValidatorFixture> {
+    assert!(count > 0, "Sepolia fixture count must be positive");
+    let batches = latest_sepolia_batches(&fetch_sepolia_batches().unwrap(), count).unwrap();
+    let mut fixtures = sepolia_fixtures(&batches);
     fixtures.drain(..fixtures.len().saturating_sub(count));
     fixtures
 }
 
-/// Returns the devnet-8 block fixtures from the selected batches.
-pub fn devnet_fixtures(batches: &[DevnetBatch]) -> Vec<StatelessValidatorFixture> {
+/// Returns the Sepolia block fixtures from the selected batches.
+pub fn sepolia_fixtures(batches: &[SepoliaBatch]) -> Vec<StatelessValidatorFixture> {
     batches
         .iter()
         .flat_map(|batch| {
             archive_fixtures(
                 &format!(
-                    "rpc-{DEVNET_NAME}/{}-{}",
+                    "{SEPOLIA_NAME}/{}-{}",
                     batch.batch_start_block, batch.batch_end_block
                 ),
-                &format!("{DEVNET_FIXTURES_BASE_URL}/{}", batch.path),
-                "blockchain_tests",
+                &format!("{SEPOLIA_FIXTURES_BASE_URL}/{}", batch.path),
+                SEPOLIA_ARCHIVE_DIR,
                 Some(batch.sha256.trim_start_matches("0x")),
             )
         })
@@ -193,16 +196,16 @@ fn download_and_unpack(url: &str, archive_dir: &str, dir: &Path, sha256: Option<
     fs::rename(tempdir.path().join(archive_dir), dir).unwrap();
 }
 
-/// Downloads the devnet batch index, which lists every published block batch.
-pub fn fetch_devnet_batches() -> anyhow::Result<String> {
-    let url = format!("{DEVNET_FIXTURES_BASE_URL}/batches.jsonl");
-    info!("Downloading devnet batch index {url}");
+/// Downloads the Sepolia batch index, which lists every published block batch.
+pub fn fetch_sepolia_batches() -> anyhow::Result<String> {
+    let url = format!("{SEPOLIA_FIXTURES_BASE_URL}/batches.jsonl");
+    info!("Downloading Sepolia batch index {url}");
     Ok(reqwest::blocking::get(&url)?.error_for_status()?.text()?)
 }
 
-fn latest_devnet_batches(index: &str, count: usize) -> anyhow::Result<Vec<DevnetBatch>> {
-    anyhow::ensure!(count > 0, "devnet fixture count must be positive");
-    let mut batches = devnet_batches(index)?;
+fn latest_sepolia_batches(index: &str, count: usize) -> anyhow::Result<Vec<SepoliaBatch>> {
+    anyhow::ensure!(count > 0, "Sepolia fixture count must be positive");
+    let mut batches = sepolia_batches(index)?;
     let take = (batches
         .iter()
         .rev()
@@ -218,13 +221,13 @@ fn latest_devnet_batches(index: &str, count: usize) -> anyhow::Result<Vec<Devnet
 }
 
 /// Parses the batch index in the order it lists, from the oldest batch to the newest.
-pub fn devnet_batches(index: &str) -> anyhow::Result<Vec<DevnetBatch>> {
+pub fn sepolia_batches(index: &str) -> anyhow::Result<Vec<SepoliaBatch>> {
     let batches = index
         .lines()
         .filter(|line| !line.trim().is_empty())
-        .map(serde_json::from_str::<DevnetBatch>)
+        .map(serde_json::from_str::<SepoliaBatch>)
         .collect::<Result<Vec<_>, _>>()?;
-    anyhow::ensure!(!batches.is_empty(), "devnet batch index is empty");
+    anyhow::ensure!(!batches.is_empty(), "Sepolia batch index is empty");
     Ok(batches)
 }
 
@@ -243,10 +246,10 @@ struct EestNewPayload {
     stateless_output_bytes: Option<Bytes>,
 }
 
-/// One published archive of consecutive devnet blocks.
+/// One published archive of consecutive Sepolia blocks.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct DevnetBatch {
+pub struct SepoliaBatch {
     /// First block in the archive.
     pub batch_start_block: u64,
     /// Last block in the archive.
@@ -261,7 +264,7 @@ pub struct DevnetBatch {
 
 #[cfg(test)]
 mod tests {
-    use super::latest_devnet_batches;
+    use super::latest_sepolia_batches;
 
     const INDEX: &str = r#"
 {"batchStartBlock":1,"batchEndBlock":10,"artifactCount":10,"sha256":"0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","path":"1-10.tar.zst"}
@@ -274,7 +277,7 @@ mod tests {
 
     #[test]
     fn selects_latest_batches_covering_requested_count() {
-        let batches = latest_devnet_batches(INDEX, 15).unwrap();
+        let batches = latest_sepolia_batches(INDEX, 15).unwrap();
         assert_eq!(batches.len(), 2);
         assert_eq!(batches[0].batch_start_block, 41);
         assert_eq!(batches[1].batch_end_block, 60);
@@ -282,7 +285,7 @@ mod tests {
 
     #[test]
     fn selects_all_available_batches_when_request_exceeds_catalog() {
-        let batches = latest_devnet_batches(INDEX, 100).unwrap();
+        let batches = latest_sepolia_batches(INDEX, 100).unwrap();
         assert_eq!(batches.len(), 6);
         assert_eq!(
             batches
@@ -297,8 +300,8 @@ mod tests {
 
     #[test]
     fn rejects_empty_or_malformed_batch_index() {
-        assert!(latest_devnet_batches("", 1).is_err());
-        assert!(latest_devnet_batches("not-json", 1).is_err());
-        assert!(latest_devnet_batches(INDEX, 0).is_err());
+        assert!(latest_sepolia_batches("", 1).is_err());
+        assert!(latest_sepolia_batches("not-json", 1).is_err());
+        assert!(latest_sepolia_batches(INDEX, 0).is_err());
     }
 }

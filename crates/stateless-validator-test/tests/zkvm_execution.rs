@@ -1,4 +1,5 @@
-//! `tests-zkevm@v21.0.7` execution tests for release-backed guests.
+//! `tests-zkevm@v21.0.7` execution tests for release-backed guests, over the EEST fixtures and a
+//! pinned Sepolia batch.
 //!
 //! Set `STATELESS_VALIDATOR` and `ZKVM` to one pair from `artifact-registry.json`.
 //! Run with `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use pre-built Ere images.
@@ -10,7 +11,7 @@ use stateless_validator_test::{
         ExecutionFailures, init_tracing,
         zkvm::{is_guest_compatible, run_zkvm_execution},
     },
-    fixture::{StatelessValidatorFixture, devnet_preset_fixtures, eest_fixtures},
+    fixture::{StatelessValidatorFixture, eest_fixtures, sepolia_preset_fixtures},
 };
 
 // Reth computes a different block access list hash for these fixtures. alloy-evm runs the
@@ -65,6 +66,12 @@ const RETH_EXPECTED_WITNESS_FAILURES: &[&str] = &[
     "tests/amsterdam/eip8025_optional_proofs/test_witness_bytecodes_contract_creation.py::test_witness_codes_create_same_hash_then_read_same_tx[fork_Amsterdam-blockchain_test_engine-read_op_extcodesize]#payload0",
 ];
 
+// Reth rejects these valid Sepolia blocks from the preset batch, and its guest reports no reason.
+const RETH_EXPECTED_SEPOLIA_PRESET_FAILURES: &[&str] = &[
+    "witness-generator-spec-cli::block_12049665_1dbbb95849fab60b230769a1b6c01084e553afa0ca6dd97e0048c46aaad59942#payload0",
+    "witness-generator-spec-cli::block_12049671_90849d41fd2846b54b190cde8c3de2b17f9cc4bb727515f4200aed6e739020b6#payload0",
+];
+
 fn expected_failures(
     stateless_validator: StatelessValidatorKind,
     zkvm: zkVMKind,
@@ -95,6 +102,16 @@ fn expected_failures(
     let mut failures = groups.concat();
     failures.sort_unstable();
     failures
+}
+
+// The Sepolia preset failures are the same on every zkVM, and listed in name order.
+fn expected_sepolia_preset_failures(
+    stateless_validator: StatelessValidatorKind,
+) -> &'static [&'static str] {
+    match stateless_validator {
+        StatelessValidatorKind::Reth => RETH_EXPECTED_SEPOLIA_PRESET_FAILURES,
+        _ => &[],
+    }
 }
 
 fn registered_pair() -> (StatelessValidatorKind, zkVMKind) {
@@ -147,9 +164,13 @@ fn executes_registered_guest() {
 }
 
 #[test]
-#[ignore = "TODO(tests-zkevm@v21): waiting for Sepolia blocks in the engine format; devnet-8 blocks use the tests-zkevm@v0.8.4 input layout"]
-fn executes_registered_guest_devnet_preset() {
+fn executes_registered_guest_sepolia_preset() {
     init_tracing();
     let (stateless_validator, zkvm) = registered_pair();
-    assert_execution(stateless_validator, zkvm, devnet_preset_fixtures(), &[]);
+    assert_execution(
+        stateless_validator,
+        zkvm,
+        sepolia_preset_fixtures(),
+        expected_sepolia_preset_failures(stateless_validator),
+    );
 }

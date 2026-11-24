@@ -1,4 +1,4 @@
-//! Runs the latest blocks published in the devnet catalog through a
+//! Runs the latest blocks published in the Sepolia catalog through a
 //! release-backed stateless validator guest in a zkVM, reporting failures.
 //!
 //! Run with env `ERE_IMAGE_REGISTRY=ghcr.io/eth-act/ere` to use the pre-built
@@ -14,15 +14,15 @@ use stateless_validator_test::{
         ExecutionFailures, init_tracing,
         zkvm::{is_guest_compatible, run_zkvm_execution},
     },
-    fixture::{DEVNET_NAME, latest_devnet_fixtures},
+    fixture::{SEPOLIA_NAME, latest_sepolia_fixtures},
 };
 use tracing::info;
 
-/// CLI options for the devnet zkVM execution runner.
+/// CLI options for the Sepolia zkVM execution runner.
 #[derive(Debug, Clone, PartialEq, Eq, Parser)]
 #[command(
     name = "zkvm_execution_devnet",
-    about = "Run the latest devnet blocks through a release-backed stateless validator guest.",
+    about = "Run the latest Sepolia blocks through a release-backed stateless validator guest.",
     long_about = None,
     arg_required_else_help = true
 )]
@@ -55,9 +55,9 @@ fn main() {
         return;
     }
 
-    let fixtures = latest_devnet_fixtures(cli.blocks);
+    let fixtures = latest_sepolia_fixtures(cli.blocks);
     info!(
-        "Running {} {DEVNET_NAME} blocks from {} to {}",
+        "Running {} {SEPOLIA_NAME} blocks from {} to {}",
         fixtures.len(),
         fixtures.first().unwrap().name,
         fixtures.last().unwrap().name,
